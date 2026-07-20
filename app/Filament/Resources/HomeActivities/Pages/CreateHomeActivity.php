@@ -13,8 +13,9 @@ class CreateHomeActivity extends CreateRecord
     {
         $user = auth()->user();
 
-        abort_unless($user?->can('manage home activities'), 403);
-        $student = $user->accessibleStudents()->findOrFail((int) $data['student_id']);
+        abort_unless(HomeActivityResource::canCreate(), 403);
+        $students = $user?->hasRole('guru') ? $user->managedStudents() : $user?->accessibleStudents();
+        $student = $students?->findOrFail((int) $data['student_id']);
         abort_unless($student->parent_id, 403);
 
         $data['parent_id'] = $student->parent_id;

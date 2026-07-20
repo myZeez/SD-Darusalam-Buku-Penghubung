@@ -107,6 +107,9 @@ class RoleBoundaryTest extends TestCase
             'manage schedules',
             'view school activities',
             'manage school activities',
+            'view reports',
+            'export reports',
+            'manage students',
             'view home activities',
             'view comments',
             'manage comments',
@@ -250,7 +253,7 @@ class RoleBoundaryTest extends TestCase
             ->assertHeader('content-type', 'application/pdf');
     }
 
-    public function test_teacher_cannot_open_admin_parent_or_student_management_pages(): void
+    public function test_teacher_cannot_open_admin_or_parent_management_pages(): void
     {
         $guru = User::role('guru')->firstOrFail();
 
@@ -266,7 +269,7 @@ class RoleBoundaryTest extends TestCase
         $this->get('/admin/lesson-periods')->assertForbidden();
         $this->get('/admin/lesson-schedules')->assertOk();
         $this->get('/admin/lesson-schedules/create')->assertForbidden();
-        $this->get('/admin/students/create')->assertForbidden();
+        $this->get('/admin/students/create')->assertOk();
         $this->get('/admin/home-activities/create')->assertForbidden();
         $this->get('/admin/school-activities/create')->assertOk();
         $this->get('/admin/activity-comments/create')->assertOk();

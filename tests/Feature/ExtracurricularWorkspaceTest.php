@@ -145,7 +145,7 @@ class ExtracurricularWorkspaceTest extends TestCase
         ]);
     }
 
-    public function test_teacher_report_page_is_removed_while_dashboard_attendance_remains_available(): void
+    public function test_teacher_report_page_and_dashboard_attendance_are_available(): void
     {
         $teacherUser = User::role('guru')->firstOrFail();
         $studentUser = User::role('siswa')->firstOrFail();
@@ -159,9 +159,9 @@ class ExtracurricularWorkspaceTest extends TestCase
         ]);
 
         $this->actingAs($teacherUser);
-        $this->assertFalse(ActivityReports::canAccess());
+        $this->assertTrue(ActivityReports::canAccess());
         $this->get(ActivityReports::getUrl())
-            ->assertForbidden();
+            ->assertOk();
         $this->actingAs($teacherUser);
         $teacherStats = $this->dashboardStats();
         $this->assertSame('1 / 1', $teacherStats->get('Presensi Kelas Hari Ini'));

@@ -32,7 +32,7 @@ class HomeActivitiesTable
                     ->hidden(fn (): bool => auth()->user()?->hasAnyRole(['orang_tua', 'siswa']) ?? false)
                     ->searchable(),
                 TextColumn::make('activity_date')
-                    ->label('Tanggal Aktivitas')
+                    ->label('Tanggal Pelaksanaan')
                     ->date()
                     ->sortable(),
                 TextColumn::make('activity_category_summary')
@@ -102,7 +102,9 @@ class HomeActivitiesTable
                         ->visible(fn (): bool => HomeActivityResource::canDeleteAny()),
                 ]),
             ])
-            ->emptyStateHeading('Belum ada laporan rumah')
-            ->emptyStateDescription('Aktivitas yang dicatat orang tua akan muncul di sini.');
+            ->emptyStateHeading('Belum ada aktivitas rumah')
+            ->emptyStateDescription(auth()->user()?->hasRole('orang_tua')
+                ? 'Aktivitas yang diberikan guru untuk anak Anda akan muncul di sini.'
+                : 'Buat aktivitas rumah untuk siswa agar orang tua dapat melengkapi checklist-nya.');
     }
 }

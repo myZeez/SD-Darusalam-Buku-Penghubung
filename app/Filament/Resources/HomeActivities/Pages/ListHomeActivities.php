@@ -12,7 +12,9 @@ class ListHomeActivities extends ListRecords
 
     public function getSubheading(): ?string
     {
-        return 'Catatan orang tua tentang ibadah, belajar, tugas, istirahat, dan kebiasaan siswa di rumah.';
+        return auth()->user()?->hasRole('orang_tua')
+            ? 'Centang aktivitas rumah yang telah dilakukan, lalu tambahkan catatan bila diperlukan.'
+            : 'Buat daftar aktivitas rumah yang perlu dilakukan siswa. Orang tua akan melengkapi checklist-nya.';
     }
 
     protected function getHeaderActions(): array

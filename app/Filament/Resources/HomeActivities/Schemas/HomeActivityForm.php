@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\HomeActivities\Schemas;
 
 use App\Filament\Forms\ActivityGroupsField;
-use App\Filament\Forms\CompressedImageUpload;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -19,9 +18,9 @@ class HomeActivityForm
         return $schema
             ->components([
                 Section::make('Informasi Aktivitas')
-                    ->description(fn (): string => self::singleLinkedStudentId()
-                        ? 'Siswa dan orang tua diambil otomatis dari hubungan keluarga.'
-                        : 'Pilih anak yang akan dilaporkan. Orang tua diambil otomatis dari hubungan keluarga siswa.')
+                    ->description(fn (): string => self::isParent()
+                        ? 'Siswa dan tanggal aktivitas ditentukan oleh guru.'
+                        : 'Pilih siswa dan tanggal, lalu susun aktivitas rumah yang perlu dilakukan.')
                     ->icon(Heroicon::OutlinedHome)
                     ->columnSpanFull()
                     ->columns([
@@ -37,41 +36,50 @@ class HomeActivityForm
 
                                     return $user
                                         ? $query
-                                            ->whereIn('students.id', $user->accessibleStudents()->select('students.id'))
+                                            ->whereIn('students.id', ($user->hasRole('guru')
+                                                ? $user->managedStudents()
+                                                : $user->accessibleStudents())->select('students.id'))
                                             ->whereNotNull('parent_id')
                                         : $query->whereRaw('1 = 0');
                                 },
                             )
                             ->default(fn (): ?int => self::singleLinkedStudentId())
-                            ->disabled(fn (string $operation): bool => $operation === 'create' && filled(self::singleLinkedStudentId()))
+                            ->disabled(fn (string $operation): bool => self::isParent() || ($operation === 'create' && filled(self::singleLinkedStudentId())))
                             ->dehydrated()
                             ->searchable()
                             ->preload()
                             ->required()
                             ->label('Siswa'),
                         DatePicker::make('activity_date')
-                            ->label('Tanggal Aktivitas')
+                            ->label('Tanggal Pelaksanaan')
                             ->default(now())
+                            ->disabled(fn (): bool => self::isParent())
+                            ->dehydrated()
                             ->required(),
                     ]),
-                Section::make('Isi Aktivitas')
-                    ->description('Sesuaikan kategori dan jenis isian dengan kegiatan anak di rumah.')
+                Section::make(fn (): string => self::isParent() ? 'Checklist Aktivitas' : 'Daftar Aktivitas untuk Siswa')
+                    ->description(fn (): string => self::isParent()
+                        ? 'Centang hanya aktivitas yang telah dilakukan oleh siswa.'
+                        : 'Aktivitas ini akan muncul sebagai checklist pada akun orang tua.')
                     ->icon(Heroicon::OutlinedListBullet)
                     ->columnSpanFull()
                     ->schema([
-                        ActivityGroupsField::make(self::defaultActivityGroups()),
+                        ActivityGroupsField::make(
+                            defaults: self::defaultActivityGroups(),
+                            checklistItemsOnly: true,
+                            parentChecklistOnly: self::isParent(),
+                        ),
                     ]),
-                Section::make('Catatan dan Dokumentasi')
-                    ->icon(Heroicon::OutlinedPhoto)
+                Section::make('Catatan Orang Tua')
+                    ->description('Gunakan bagian ini untuk tambahan informasi yang tidak ada pada daftar aktivitas.')
+                    ->icon(Heroicon::OutlinedPencilSquare)
                     ->columnSpanFull()
-                    ->columns([
-                        'lg' => 2,
-                    ])
                     ->schema([
                         Textarea::make('note')
-                            ->label('Catatan Orang Tua')
-                            ->rows(6),
-                        CompressedImageUpload::make('photo', 'Foto Aktivitas', 'home-activities'),
+                            ->label('Catatan Tambahan')
+                            ->rows(6)
+                            ->disabled(fn (): bool => ! self::isParent())
+                            ->dehydrated(),
                     ]),
             ]);
     }
@@ -90,6 +98,11 @@ class HomeActivityForm
             ->pluck('students.id');
 
         return $studentIds->count() === 1 ? (int) $studentIds->first() : null;
+    }
+
+    private static function isParent(): bool
+    {
+        return auth()->user()?->hasRole('orang_tua') ?? false;
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -111,12 +124,6 @@ class HomeActivityForm
                     ['label' => 'Mengerjakan PR', 'type' => 'checklist', 'checked' => false],
                     ['label' => 'Tidur Tepat Waktu', 'type' => 'checklist', 'checked' => false],
                     ['label' => 'Makan Teratur', 'type' => 'checklist', 'checked' => false],
-                ],
-            ],
-            [
-                'category' => 'Aspek Perkembangan',
-                'items' => [
-                    ['label' => 'Catatan Perkembangan', 'type' => 'text', 'text' => ''],
                 ],
             ],
         ];

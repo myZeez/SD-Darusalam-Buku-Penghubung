@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\HomeActivities\Schemas;
 
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Section;
@@ -31,8 +30,8 @@ class HomeActivityInfolist
                             ->label('Tanggal Aktivitas')
                             ->date('d M Y'),
                     ]),
-                Section::make('Aktivitas Siswa')
-                    ->description('Aktivitas dikelompokkan berdasarkan kategori yang dicatat orang tua.')
+                Section::make('Aktivitas Rumah')
+                    ->description('Daftar aktivitas dibuat oleh guru dan dilengkapi checklist oleh orang tua.')
                     ->icon(Heroicon::OutlinedListBullet)
                     ->columnSpanFull()
                     ->schema([
@@ -41,20 +40,13 @@ class HomeActivityInfolist
                             ->getStateUsing(fn ($record): array => $record->resolvedActivityGroups())
                             ->view('filament.infolists.entries.activity-groups'),
                     ]),
-                Section::make('Catatan dan Dokumentasi')
-                    ->icon(Heroicon::OutlinedPhoto)
+                Section::make('Catatan Orang Tua')
+                    ->icon(Heroicon::OutlinedPencilSquare)
                     ->columnSpanFull()
-                    ->columns([
-                        'lg' => 2,
-                    ])
                     ->schema([
                         TextEntry::make('note')
                             ->label('Catatan Orang Tua')
                             ->placeholder('Belum ada catatan'),
-                        ImageEntry::make('photo')
-                            ->label('Foto Aktivitas')
-                            ->imageSize(160)
-                            ->square(),
                     ]),
                 Section::make('Informasi Sistem')
                     ->icon(Heroicon::OutlinedClock)

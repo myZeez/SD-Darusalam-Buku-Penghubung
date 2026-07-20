@@ -21,11 +21,11 @@ class HomeActivityResource extends Resource
 {
     protected static ?string $model = HomeActivity::class;
 
-    protected static ?string $modelLabel = 'Laporan Harian Rumah';
+    protected static ?string $modelLabel = 'Aktivitas Rumah';
 
-    protected static ?string $pluralModelLabel = 'Laporan Harian Rumah';
+    protected static ?string $pluralModelLabel = 'Aktivitas Rumah';
 
-    protected static ?string $navigationLabel = 'Laporan Rumah';
+    protected static ?string $navigationLabel = 'Aktivitas Rumah';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Buku Penghubung';
 
@@ -70,23 +70,26 @@ class HomeActivityResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('manage home activities') ?? false;
+        $user = auth()->user();
+
+        return ($user?->isAdmin() ?? false) || ($user?->hasRole('guru') ?? false);
     }
 
     public static function canEdit(Model $record): bool
     {
         $user = auth()->user();
 
-        if (! ($user?->can('manage home activities') ?? false)) {
-            return false;
-        }
-
-        return $user->isAdmin() || $record->student?->parent?->user_id === $user->id;
+        return ($user?->isAdmin() ?? false)
+            || ($user?->hasRole('guru') && $user->managedStudents()->whereKey($record->student_id)->exists())
+            || ($user?->hasRole('orang_tua') && $record->student?->parent?->user_id === $user->id);
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::canEdit($record);
+        $user = auth()->user();
+
+        return ($user?->isAdmin() ?? false)
+            || ($user?->hasRole('guru') && $user->managedStudents()->whereKey($record->student_id)->exists());
     }
 
     public static function canDeleteAny(): bool
