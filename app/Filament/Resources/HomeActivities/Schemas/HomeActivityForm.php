@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\HomeActivities\Schemas;
 
 use App\Filament\Forms\ActivityGroupsField;
+use App\Models\SchoolClass;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -20,13 +21,29 @@ class HomeActivityForm
                 Section::make('Informasi Aktivitas')
                     ->description(fn (): string => self::isParent()
                         ? 'Siswa dan tanggal aktivitas ditentukan oleh guru.'
-                        : 'Pilih siswa dan tanggal, lalu susun aktivitas rumah yang perlu dilakukan.')
+                        : 'Pilih kelas dan tanggal, lalu susun aktivitas rumah yang perlu dilakukan seluruh siswa.')
                     ->icon(Heroicon::OutlinedHome)
                     ->columnSpanFull()
                     ->columns([
                         'md' => 2,
                     ])
                     ->schema([
+                        Select::make('class_id')
+                            ->label('Kelas Tujuan')
+                            ->options(fn (): array => self::availableClasses()
+                                ->withCount('students')
+                                ->orderBy('grade_level')
+                                ->orderBy('name')
+                                ->get()
+                                ->mapWithKeys(fn (SchoolClass $class): array => [
+                                    $class->id => "{$class->name} · {$class->students_count} siswa",
+                                ])
+                                ->all())
+                            ->visible(fn (string $operation): bool => $operation === 'create' && ! self::isParent())
+                            ->required(fn (string $operation): bool => $operation === 'create' && ! self::isParent())
+                            ->dehydrated(fn (string $operation): bool => $operation === 'create' && ! self::isParent())
+                            ->searchable()
+                            ->preload(),
                         Select::make('student_id')
                             ->relationship(
                                 name: 'student',
@@ -43,9 +60,10 @@ class HomeActivityForm
                                         : $query->whereRaw('1 = 0');
                                 },
                             )
-                            ->default(fn (): ?int => self::singleLinkedStudentId())
-                            ->disabled(fn (string $operation): bool => self::isParent() || ($operation === 'create' && filled(self::singleLinkedStudentId())))
-                            ->dehydrated()
+                            ->visible(fn (string $operation): bool => $operation !== 'create')
+                            ->required(fn (string $operation): bool => $operation !== 'create')
+                            ->disabled(fn (): bool => self::isParent())
+                            ->dehydrated(fn (string $operation): bool => $operation !== 'create')
                             ->searchable()
                             ->preload()
                             ->required()
@@ -84,25 +102,18 @@ class HomeActivityForm
             ]);
     }
 
-    private static function singleLinkedStudentId(): ?int
-    {
-        $user = auth()->user();
-
-        if (! $user?->hasRole('orang_tua')) {
-            return null;
-        }
-
-        $studentIds = $user->accessibleStudents()
-            ->whereNotNull('parent_id')
-            ->limit(2)
-            ->pluck('students.id');
-
-        return $studentIds->count() === 1 ? (int) $studentIds->first() : null;
-    }
-
     private static function isParent(): bool
     {
         return auth()->user()?->hasRole('orang_tua') ?? false;
+    }
+
+    private static function availableClasses()
+    {
+        $user = auth()->user();
+
+        return $user?->hasRole('guru')
+            ? $user->managedClasses()
+            : ($user?->accessibleClasses() ?? SchoolClass::query()->whereRaw('1 = 0'));
     }
 
     /** @return array<int, array<string, mixed>> */

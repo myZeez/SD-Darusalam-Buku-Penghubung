@@ -14,7 +14,7 @@ class ListHomeActivities extends ListRecords
     {
         return auth()->user()?->hasRole('orang_tua')
             ? 'Centang aktivitas rumah yang telah dilakukan, lalu tambahkan catatan bila diperlukan.'
-            : 'Buat daftar aktivitas rumah yang perlu dilakukan siswa. Orang tua akan melengkapi checklist-nya.';
+            : 'Buat satu daftar aktivitas untuk seluruh siswa dalam kelas. Orang tua akan melengkapi checklist anaknya masing-masing.';
     }
 
     protected function getHeaderActions(): array
