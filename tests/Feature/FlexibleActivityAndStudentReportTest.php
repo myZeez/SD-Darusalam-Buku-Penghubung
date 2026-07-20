@@ -11,6 +11,7 @@ use App\Models\AttendanceRecord;
 use App\Models\HomeActivity;
 use App\Models\SchoolActivity;
 use App\Models\SchoolSetting;
+use App\Models\Student;
 use App\Models\StudentArrival;
 use App\Models\User;
 use App\Services\StudentReportService;
@@ -165,6 +166,40 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         ]))
             ->assertOk()
             ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_teacher_can_view_and_export_reports_only_for_accessible_students(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $accessibleStudent = $teacher->accessibleStudents()->firstOrFail();
+        $otherStudent = Student::create([
+            'nis' => 'SDD-LAPORAN-RAHASIA-001',
+            'name' => 'Siswa di Luar Kelas Guru',
+            'status' => 'active',
+        ]);
+
+        $this->actingAs($teacher);
+
+        $this->assertTrue(ActivityReports::canAccess());
+
+        $this->get(ActivityReports::getUrl())
+            ->assertOk()
+            ->assertSee($accessibleStudent->name)
+            ->assertDontSee($otherStudent->name);
+
+        $this->get(route('reports.activity-summary', [
+            'from' => today()->toDateString(),
+            'to' => today()->toDateString(),
+            'student_id' => $accessibleStudent->id,
+        ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->get(route('reports.activity-summary', [
+            'from' => today()->toDateString(),
+            'to' => today()->toDateString(),
+            'student_id' => $otherStudent->id,
+        ]))->assertForbidden();
     }
 
     /** @return array<int, array<string, mixed>> */

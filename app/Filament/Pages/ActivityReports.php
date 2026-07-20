@@ -40,7 +40,7 @@ class ActivityReports extends Page
         $user = auth()->user();
 
         return ($user?->can('view reports') ?? false)
-            && (($user?->isAdmin() ?? false) || ($user?->hasRole('orang_tua') ?? false));
+            && (($user?->isAdmin() ?? false) || $user?->hasAnyRole(['guru', 'orang_tua']));
     }
 
     public static function getNavigationLabel(): string

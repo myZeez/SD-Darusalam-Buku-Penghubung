@@ -13,6 +13,7 @@ class UserNotification extends Model
         'created_by',
         'title',
         'message',
+        'action_url',
         'is_read',
     ];
 

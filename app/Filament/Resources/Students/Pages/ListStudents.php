@@ -17,6 +17,7 @@ class ListStudents extends ListRecords
         return match (true) {
             $user?->hasRole('orang_tua') => 'Anak Saya',
             $user?->hasRole('siswa') => 'Profil Saya',
+            $user?->hasRole('guru') => 'Siswa Kelas Saya',
             default => 'Siswa',
         };
     }
@@ -28,6 +29,7 @@ class ListStudents extends ListRecords
         return match (true) {
             $user?->hasRole('orang_tua') => 'Ringkasan anak, kelas, dan wali kelas yang terhubung dengan akun keluarga Anda.',
             $user?->hasRole('siswa') => 'Ringkasan identitas, kelas, dan wali kelas Anda.',
+            $user?->hasRole('guru') => 'Kelola siswa pada kelas wali atau kelas pendamping yang Anda tangani.',
             default => null,
         };
     }

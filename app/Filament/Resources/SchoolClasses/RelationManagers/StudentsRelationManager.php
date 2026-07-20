@@ -44,7 +44,19 @@ class StudentsRelationManager extends RelationManager
                     ->color(fn (string $state): string => $state === 'active' ? 'success' : 'danger')
                     ->formatStateUsing(fn (string $state): string => $state === 'active' ? 'Aktif' : 'Tidak Aktif'),
             ])
-            ->headerActions([])
+            ->headerActions([
+                Action::make('createStudent')
+                    ->label('Tambah Siswa')
+                    ->icon('gmdi-person-add-o')
+                    ->url(fn (): string => StudentResource::getUrl('create', ['class_id' => $this->getOwnerRecord()->id]))
+                    ->visible(fn (): bool => StudentResource::canManageClass($this->getOwnerRecord()->id)),
+                Action::make('manageStudents')
+                    ->label('Kelola dan Impor')
+                    ->icon('gmdi-group-o')
+                    ->color('gray')
+                    ->url(StudentResource::getUrl())
+                    ->visible(fn (): bool => StudentResource::canCreate()),
+            ])
             ->recordActions([
                 Action::make('viewStudent')
                     ->label('Lihat Detail')

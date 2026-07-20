@@ -23,7 +23,7 @@ class EditStudent extends EditRecord
                 ->label('Ubah Data Orang Tua')
                 ->icon('heroicon-o-user-group')
                 ->url(fn (): string => ParentProfileResource::getUrl('edit', ['record' => $this->record->parent_id]))
-                ->visible(fn (): bool => filled($this->record->parent_id)),
+                ->visible(fn (): bool => (auth()->user()?->isAdmin() ?? false) && filled($this->record->parent_id)),
             DeleteAction::make()
                 ->visible(fn (): bool => StudentResource::canDelete($this->record)),
         ];
@@ -43,6 +43,12 @@ class EditStudent extends EditRecord
 
     protected function handleRecordUpdate(Model $record, array $data): Model
     {
-        return app(SaveStudentWithFamily::class)->update($record, $data);
+        abort_unless(StudentResource::canManageClass((int) $data['class_id']), 403);
+
+        return app(SaveStudentWithFamily::class)->update(
+            $record,
+            $data,
+            allowClassFallback: auth()->user()?->isAdmin() ?? false,
+        );
     }
 }

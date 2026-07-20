@@ -383,6 +383,221 @@
     color: var(--gray-300);
 }
 
+.pending-school-reports {
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    background: white;
+}
+
+.dark .pending-school-reports {
+    border-color: rgb(255 255 255 / 0.1);
+    background: var(--gray-900);
+}
+
+.pending-school-reports__header,
+.pending-school-reports__heading,
+.pending-school-reports__list li,
+.pending-school-reports__empty {
+    display: flex;
+    align-items: center;
+}
+
+.pending-school-reports__header {
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--warning-50);
+}
+
+.dark .pending-school-reports__header {
+    border-bottom-color: rgb(255 255 255 / 0.1);
+    background: rgb(234 179 8 / 0.08);
+}
+
+.pending-school-reports__heading {
+    min-width: 0;
+    gap: 0.75rem;
+}
+
+.pending-school-reports__icon,
+.pending-school-reports__avatar {
+    display: grid;
+    flex: none;
+    place-items: center;
+}
+
+.pending-school-reports__icon {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    color: var(--warning-800);
+    background: var(--warning-100);
+}
+
+.pending-school-reports__icon svg {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+.pending-school-reports__heading p,
+.pending-school-reports__heading span,
+.pending-school-reports__list li > div > span,
+.pending-school-reports__empty span {
+    display: block;
+    color: var(--gray-600);
+}
+
+.pending-school-reports__heading p {
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.pending-school-reports__heading h2,
+.pending-school-reports__list strong,
+.pending-school-reports__empty strong {
+    margin: 0;
+    color: var(--gray-950);
+}
+
+.pending-school-reports__heading h2 {
+    margin-top: 0.125rem;
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+}
+
+.pending-school-reports__heading span {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+}
+
+.pending-school-reports__list {
+    display: grid;
+}
+
+.pending-school-reports__list li {
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.875rem 1.25rem;
+}
+
+.pending-school-reports__list li + li {
+    border-top: 1px solid var(--gray-100);
+}
+
+.dark .pending-school-reports__list li + li {
+    border-top-color: rgb(255 255 255 / 0.08);
+}
+
+.pending-school-reports__avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    color: var(--primary-800);
+    background: var(--primary-100);
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+.pending-school-reports__list li > div {
+    min-width: 0;
+}
+
+.pending-school-reports__list strong {
+    display: block;
+    overflow-wrap: anywhere;
+    font-size: 0.8125rem;
+    line-height: 1.125rem;
+}
+
+.pending-school-reports__list li > div > span {
+    margin-top: 0.125rem;
+    overflow-wrap: anywhere;
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.pending-school-reports__list .fi-btn {
+    margin-left: auto;
+    flex: none;
+}
+
+.pending-school-reports__empty {
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 7rem;
+    padding: 1.25rem;
+    text-align: left;
+}
+
+.pending-school-reports__empty > svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    flex: none;
+    color: var(--success-600);
+}
+
+.pending-school-reports__empty strong {
+    display: block;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.pending-school-reports__empty span {
+    margin-top: 0.125rem;
+    font-size: 0.75rem;
+    line-height: 1.125rem;
+}
+
+.dark .pending-school-reports__heading p,
+.dark .pending-school-reports__heading span,
+.dark .pending-school-reports__list li > div > span,
+.dark .pending-school-reports__empty span {
+    color: var(--gray-300);
+}
+
+.dark .pending-school-reports__heading h2,
+.dark .pending-school-reports__list strong,
+.dark .pending-school-reports__empty strong {
+    color: white;
+}
+
+.dark .pending-school-reports__avatar {
+    color: var(--primary-200);
+    background: rgb(245 158 11 / 0.16);
+}
+
+@media (max-width: 40rem) {
+    .pending-school-reports__header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .pending-school-reports__header .fi-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .pending-school-reports__list li {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+
+    .pending-school-reports__list li > div {
+        flex: 1;
+    }
+
+    .pending-school-reports__list .fi-btn {
+        width: 100%;
+        margin-left: 2.75rem;
+    }
+}
+
 @media (max-width: 40rem) {
     .current-lesson__header {
         align-items: flex-start;

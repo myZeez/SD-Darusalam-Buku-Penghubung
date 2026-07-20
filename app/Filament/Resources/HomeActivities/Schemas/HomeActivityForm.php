@@ -3,8 +3,8 @@
 namespace App\Filament\Resources\HomeActivities\Schemas;
 
 use App\Filament\Forms\ActivityGroupsField;
+use App\Filament\Forms\CompressedImageUpload;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
@@ -71,12 +71,7 @@ class HomeActivityForm
                         Textarea::make('note')
                             ->label('Catatan Orang Tua')
                             ->rows(6),
-                        FileUpload::make('photo')
-                            ->label('Foto Aktivitas')
-                            ->image()
-                            ->imageEditor()
-                            ->maxSize(5120)
-                            ->directory('home-activities'),
+                        CompressedImageUpload::make('photo', 'Foto Aktivitas', 'home-activities'),
                     ]),
             ]);
     }

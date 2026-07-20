@@ -35,7 +35,7 @@ class StudentResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return ! (auth()->user()?->hasRole('guru') ?? false);
+        return ! (auth()->user()?->hasRole('siswa') ?? false);
     }
 
     public static function getNavigationLabel(): string
@@ -69,9 +69,13 @@ class StudentResource extends Resource
     {
         $user = auth()->user();
 
-        return $user
-            ? $user->accessibleStudents()
-            : parent::getEloquentQuery()->whereRaw('1 = 0');
+        if (! $user) {
+            return parent::getEloquentQuery()->whereRaw('1 = 0');
+        }
+
+        return $user->hasRole('guru')
+            ? $user->managedStudents()
+            : $user->accessibleStudents();
     }
 
     public static function canViewAny(): bool
@@ -83,27 +87,47 @@ class StudentResource extends Resource
     {
         $user = auth()->user();
 
-        return ($user?->can('view students') ?? false) && $user->canAccessStudent($record);
+        if (! ($user?->can('view students') ?? false)) {
+            return false;
+        }
+
+        return $user->hasRole('guru')
+            ? $user->managedStudents()->whereKey($record)->exists()
+            : $user->canAccessStudent($record);
     }
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('manage students') ?? false;
+        $user = auth()->user();
+
+        return ($user?->can('manage students') ?? false)
+            && (($user?->isAdmin() ?? false) || ($user?->hasRole('guru') ?? false));
     }
 
     public static function canEdit(Model $record): bool
     {
-        return auth()->user()?->can('manage students') ?? false;
+        $user = auth()->user();
+
+        return static::canCreate()
+            && ($user?->isAdmin() || $user?->managedStudents()->whereKey($record)->exists());
     }
 
     public static function canDelete(Model $record): bool
     {
-        return auth()->user()?->can('manage students') ?? false;
+        return auth()->user()?->isAdmin() ?? false;
     }
 
     public static function canDeleteAny(): bool
     {
-        return auth()->user()?->can('manage students') ?? false;
+        return auth()->user()?->isAdmin() ?? false;
+    }
+
+    public static function canManageClass(int $classId): bool
+    {
+        $user = auth()->user();
+
+        return static::canCreate()
+            && ($user?->isAdmin() || $user?->managedClasses()->whereKey($classId)->exists());
     }
 
     public static function form(Schema $schema): Schema

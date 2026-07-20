@@ -15,12 +15,12 @@ class SaveStudentWithFamily
     /**
      * @param  array<string, mixed>  $data
      */
-    public function create(array $data): Student
+    public function create(array $data, bool $allowClassFallback = true): Student
     {
-        return DB::transaction(function () use ($data): Student {
+        return DB::transaction(function () use ($data, $allowClassFallback): Student {
             $studentUser = $this->createStudentUser($data);
             $parent = $this->resolveParent($data);
-            $classId = $this->resolveClassId($data);
+            $classId = $this->resolveClassId($data, allowClassFallback: $allowClassFallback);
 
             return Student::create([
                 ...$this->studentData($data),
@@ -34,9 +34,9 @@ class SaveStudentWithFamily
     /**
      * @param  array<string, mixed>  $data
      */
-    public function update(Student $student, array $data): Student
+    public function update(Student $student, array $data, bool $allowClassFallback = true): Student
     {
-        return DB::transaction(function () use ($student, $data): Student {
+        return DB::transaction(function () use ($student, $data, $allowClassFallback): Student {
             $studentUser = $student->user ?: new User;
             $studentUser->fill([
                 'name' => $data['name'],
@@ -53,7 +53,7 @@ class SaveStudentWithFamily
             $studentUser->syncRoles(['siswa']);
 
             $parent = $this->resolveParent($data);
-            $classId = $this->resolveClassId($data, $student->id);
+            $classId = $this->resolveClassId($data, $student->id, $allowClassFallback);
 
             $student->update([
                 ...$this->studentData($data),
@@ -130,7 +130,7 @@ class SaveStudentWithFamily
     /**
      * @param  array<string, mixed>  $data
      */
-    private function resolveClassId(array $data, ?int $studentId = null): int
+    private function resolveClassId(array $data, ?int $studentId = null, bool $allowClassFallback = true): int
     {
         if (filled($data['class_id'] ?? null)) {
             $preferredClass = SchoolClass::query()
@@ -139,6 +139,12 @@ class SaveStudentWithFamily
 
             if ($this->classHasSpace($preferredClass, $studentId)) {
                 return $preferredClass->id;
+            }
+
+            if (! $allowClassFallback) {
+                throw ValidationException::withMessages([
+                    'data.class_id' => 'Kelas yang dipilih sudah penuh. Hubungi admin untuk penempatan siswa.',
+                ]);
             }
 
             $gradeLevel = $preferredClass->grade_level;

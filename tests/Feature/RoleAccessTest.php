@@ -59,7 +59,7 @@ class RoleAccessTest extends TestCase
         $this->assertFalse(UserResource::canViewAny());
         $this->assertTrue(TeacherResource::canViewAny());
         $this->assertTrue(SchoolClassResource::canViewAny());
-        $this->assertFalse(StudentResource::canCreate());
+        $this->assertTrue(StudentResource::canCreate());
         $this->assertTrue(SchoolActivityResource::canCreate());
         $this->assertFalse(HomeActivityResource::canCreate());
         $this->assertTrue(ActivityCommentResource::canCreate());
@@ -187,7 +187,8 @@ class RoleAccessTest extends TestCase
 
         $this->actingAs($guru)
             ->get('/reports/activity-summary')
-            ->assertForbidden();
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
     }
 
     public function test_parent_can_open_only_their_own_parent_profile(): void
@@ -272,12 +273,12 @@ class RoleAccessTest extends TestCase
             ->assertSee('/admin/school-activities', false)
             ->assertSee('/admin/home-activities', false)
             ->assertSee('/admin/activity-comments', false)
-            ->assertDontSee('/admin/laporan-aktivitas', false)
+            ->assertSee('/admin/laporan-aktivitas', false)
             ->assertDontSee('/admin/student-arrivals', false)
             ->assertDontSee('/admin/extracurriculars', false)
             ->assertDontSee('/admin/keamanan-akun', false)
             ->assertDontSee('/admin/users', false)
-            ->assertDontSee('/admin/students', false)
+            ->assertSee('/admin/students', false)
             ->assertDontSee('/admin/parent-profiles', false);
     }
 

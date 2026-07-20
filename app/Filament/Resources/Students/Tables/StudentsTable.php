@@ -83,7 +83,7 @@ class StudentsTable
             ->headerActions([
                 Action::make('import')
                     ->label('Impor Excel')
-                    ->visible(fn (): bool => auth()->user()?->can('manage students') ?? false)
+                    ->visible(fn (): bool => StudentResource::canCreate())
                     ->form([
                         FileUpload::make('file')
                             ->label('Berkas Excel')
@@ -96,10 +96,10 @@ class StudentsTable
                             ])
                             ->required(),
                     ])
-                    ->action(fn (array $data) => Excel::import(new StudentsImport, Storage::disk('local')->path($data['file']))),
+                    ->action(fn (array $data) => Excel::import(new StudentsImport(auth()->user()), Storage::disk('local')->path($data['file']))),
                 Action::make('export')
                     ->label('Ekspor Excel')
-                    ->visible(fn (): bool => auth()->user()?->can('manage students') ?? false)
+                    ->visible(fn (): bool => StudentResource::canCreate())
                     ->action(fn () => Excel::download(new StudentsExport, 'data-siswa.xlsx')),
             ])
             ->recordActions([

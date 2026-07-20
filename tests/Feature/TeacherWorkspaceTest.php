@@ -102,7 +102,7 @@ class TeacherWorkspaceTest extends TestCase
 
         $this->actingAs($guru);
 
-        $this->assertFalse(StudentResource::shouldRegisterNavigation());
+        $this->assertTrue(StudentResource::shouldRegisterNavigation());
         $this->assertFalse(SchoolClassResource::canCreate());
         $this->assertTrue(SchoolClassResource::canEdit($class));
         $this->assertFalse(SchoolClassResource::canView($otherClass));
@@ -111,7 +111,7 @@ class TeacherWorkspaceTest extends TestCase
         $this->get('/admin')
             ->assertOk()
             ->assertSee('Kelas dan Siswa')
-            ->assertDontSee('/admin/students', false);
+            ->assertSee('/admin/students', false);
 
         $this->get(SchoolClassResource::getUrl())
             ->assertOk()

@@ -18,7 +18,7 @@ class ReportController extends Controller
 
         abort_unless(
             ($user?->can('export reports') ?? false)
-            && (($user?->isAdmin() ?? false) || ($user?->hasRole('orang_tua') ?? false)),
+            && (($user?->isAdmin() ?? false) || $user?->hasAnyRole(['guru', 'orang_tua'])),
             403,
         );
 

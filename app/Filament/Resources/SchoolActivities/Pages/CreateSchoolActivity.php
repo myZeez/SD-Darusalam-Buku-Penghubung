@@ -13,6 +13,22 @@ class CreateSchoolActivity extends CreateRecord
 {
     protected static string $resource = SchoolActivityResource::class;
 
+    public function mount(): void
+    {
+        parent::mount();
+
+        $studentId = request()->integer('student_id');
+        $user = auth()->user();
+
+        if ($studentId < 1 || ! $user?->canAccessStudent($studentId)) {
+            return;
+        }
+
+        $this->form->fillPartially([
+            'student_id' => $studentId,
+        ], ['student_id']);
+    }
+
     protected function handleRecordCreation(array $data): Model
     {
         try {

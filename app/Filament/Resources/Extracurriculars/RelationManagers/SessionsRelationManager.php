@@ -2,13 +2,13 @@
 
 namespace App\Filament\Resources\Extracurriculars\RelationManagers;
 
+use App\Filament\Forms\CompressedImageUpload;
 use App\Filament\Resources\Extracurriculars\ExtracurricularResource;
 use App\Models\ExtracurricularSession;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -124,12 +124,7 @@ class SessionsRelationManager extends RelationManager
                 ->label('Catatan Kegiatan')
                 ->rows(3)
                 ->columnSpanFull(),
-            FileUpload::make('photo')
-                ->label('Foto Kegiatan')
-                ->image()
-                ->imageEditor()
-                ->maxSize(5120)
-                ->directory('extracurriculars')
+            CompressedImageUpload::make('photo', 'Foto Kegiatan', 'extracurriculars')
                 ->columnSpanFull(),
         ];
 

@@ -2,12 +2,12 @@
 
 namespace App\Filament\Resources\Students\Schemas;
 
+use App\Filament\Forms\CompressedImageUpload;
 use App\Models\ParentProfile;
 use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -49,9 +49,16 @@ class StudentForm
                                     ->relationship(
                                         name: 'class',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Builder $query): Builder => $query->withCount([
-                                            'students' => fn (Builder $query): Builder => $query->where('status', 'active'),
-                                        ]),
+                                        modifyQueryUsing: function (Builder $query): Builder {
+                                            $user = auth()->user();
+
+                                            return $query
+                                                ->when($user?->hasRole('guru'), fn (Builder $query): Builder => $query
+                                                    ->whereIn('classes.id', $user->managedClasses()->select('classes.id')))
+                                                ->withCount([
+                                                    'students' => fn (Builder $query): Builder => $query->where('status', 'active'),
+                                                ]);
+                                        },
                                     )
                                     ->getOptionLabelFromRecordUsing(fn (SchoolClass $record): string => sprintf(
                                         '%s - Tingkat %s (%d/%d siswa)',
@@ -64,7 +71,9 @@ class StudentForm
                                     ->preload()
                                     ->required()
                                     ->label('Kelas Tujuan')
-                                    ->helperText('Admin memilih kelas tujuan. Jika penuh, sistem memindahkan siswa ke kelas lain pada tingkat yang sama.'),
+                                    ->helperText(fn (): string => auth()->user()?->hasRole('guru')
+                                        ? 'Guru hanya dapat memilih kelas yang dikelolanya. Jika kelas penuh, hubungi admin untuk penempatan siswa.'
+                                        : 'Jika kelas penuh, sistem memindahkan siswa ke kelas lain pada tingkat yang sama.'),
                                 Select::make('gender')
                                     ->label('Jenis Kelamin')
                                     ->options([
@@ -82,10 +91,7 @@ class StudentForm
                                     ])
                                     ->required()
                                     ->default('active'),
-                                FileUpload::make('photo')
-                                    ->label('Foto Siswa')
-                                    ->image()
-                                    ->directory('students')
+                                CompressedImageUpload::make('photo', 'Foto Siswa', 'students', 1000)
                                     ->columnSpanFull(),
                             ]),
                         Section::make('Akun Siswa')
@@ -149,7 +155,7 @@ class StudentForm
                             ->columnSpanFull(),
                         Select::make('parent_id')
                             ->label('Akun Orang Tua')
-                            ->options(fn (): array => ParentProfile::query()
+                            ->options(fn (): array => self::parentQuery()
                                 ->with('user')
                                 ->get()
                                 ->mapWithKeys(fn (ParentProfile $parent): array => [
@@ -215,5 +221,15 @@ class StudentForm
                             ->columnSpanFull(),
                     ]),
             ]);
+    }
+
+    private static function parentQuery(): Builder
+    {
+        $user = auth()->user();
+
+        return ParentProfile::query()
+            ->when($user?->hasRole('guru'), fn (Builder $query): Builder => $query
+                ->whereHas('students', fn (Builder $studentQuery): Builder => $studentQuery
+                    ->whereIn('class_id', $user->managedClasses()->select('classes.id'))));
     }
 }

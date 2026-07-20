@@ -120,7 +120,7 @@ class RolePageAccessAuditTest extends TestCase
         $teacher = User::role('guru')->firstOrFail();
         $this->actingAs($teacher);
         $this->assertTrue(TeacherAttendance::canAccess());
-        $this->assertFalse(ActivityReports::canAccess());
+        $this->assertTrue(ActivityReports::canAccess());
         $this->assertFalse(AccountSecurity::shouldRegisterNavigation());
         $this->assertFalse(StudentResource::shouldRegisterNavigation());
 

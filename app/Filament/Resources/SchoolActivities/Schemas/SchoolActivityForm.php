@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\SchoolActivities\Schemas;
 
 use App\Filament\Forms\ActivityGroupsField;
+use App\Filament\Forms\CompressedImageUpload;
 use App\Models\SchoolActivity;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
@@ -80,11 +80,13 @@ class SchoolActivityForm
                             ->default('present'),
                     ]),
                 Section::make('Isi Aktivitas')
-                    ->description('Sesuaikan kategori dan jenis isian dengan kegiatan siswa pada hari ini.')
+                    ->description('Gunakan template observasi harian agar laporan setiap siswa mudah dibandingkan. Tambahkan kategori hanya bila diperlukan.')
                     ->icon(Heroicon::OutlinedListBullet)
                     ->columnSpanFull()
                     ->schema([
-                        ActivityGroupsField::make(self::defaultActivityGroups()),
+                        ActivityGroupsField::make(self::defaultActivityGroups())
+                            ->label('Template Observasi Harian')
+                            ->helperText('Isi kondisi kedatangan, kegiatan inti, aspek perkembangan, dan kebiasaan siswa pada hari ini.'),
                     ]),
                 Section::make('Catatan dan Dokumentasi')
                     ->icon(Heroicon::OutlinedPhoto)
@@ -96,12 +98,7 @@ class SchoolActivityForm
                         Textarea::make('note')
                             ->label('Catatan Guru')
                             ->rows(6),
-                        FileUpload::make('photo')
-                            ->label('Foto Aktivitas')
-                            ->image()
-                            ->imageEditor()
-                            ->maxSize(5120)
-                            ->directory('school-activities'),
+                        CompressedImageUpload::make('photo', 'Foto Aktivitas', 'school-activities'),
                     ]),
             ]);
     }
@@ -111,23 +108,28 @@ class SchoolActivityForm
     {
         return [
             [
-                'category' => 'Kegiatan Ibadah',
+                'category' => 'Rutinitas Pagi',
                 'items' => [
-                    ['label' => 'Berdoa', 'type' => 'checklist', 'checked' => false],
-                    ['label' => 'Salat', 'type' => 'checklist', 'checked' => false],
-                    ['label' => 'Mengaji', 'type' => 'checklist', 'checked' => false],
+                    ['label' => 'Kondisi Kedatangan', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Morning Circle', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Doa dan Ikrar', 'type' => 'checklist', 'checked' => false],
+                    ['label' => 'Kegiatan Jasmani/Motorik', 'type' => 'text', 'text' => ''],
                 ],
             ],
             [
-                'category' => 'Kegiatan Pembelajaran',
+                'category' => 'Pembelajaran dan Perkembangan',
                 'items' => [
-                    ['label' => 'Catatan Pembelajaran', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Kegiatan Pembelajaran', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Kedisiplinan', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Kemandirian', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Ibadah', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Sosial', 'type' => 'text', 'text' => ''],
                 ],
             ],
             [
-                'category' => 'Aspek Perkembangan',
+                'category' => 'Kebiasaan Harian',
                 'items' => [
-                    ['label' => 'Catatan Perkembangan', 'type' => 'text', 'text' => ''],
+                    ['label' => 'Istirahat', 'type' => 'text', 'text' => ''],
                 ],
             ],
         ];
