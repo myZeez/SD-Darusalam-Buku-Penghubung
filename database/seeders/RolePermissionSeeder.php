@@ -72,6 +72,7 @@ class RolePermissionSeeder extends Seeder
         Role::findOrCreate('guru')->syncPermissions([
             'view teachers',
             'view students',
+            'manage students',
             'view classes',
             'view teaching assignments',
             'view lesson schedules',
@@ -80,6 +81,8 @@ class RolePermissionSeeder extends Seeder
             'view school activities',
             'manage school activities',
             'view home activities',
+            'view reports',
+            'export reports',
             'view comments',
             'manage comments',
             'view notifications',
