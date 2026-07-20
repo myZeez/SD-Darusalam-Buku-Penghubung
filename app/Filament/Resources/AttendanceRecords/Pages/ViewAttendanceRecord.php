@@ -1,0 +1,20 @@
+<?php
+
+namespace App\Filament\Resources\AttendanceRecords\Pages;
+
+use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ViewRecord;
+
+class ViewAttendanceRecord extends ViewRecord
+{
+    protected static string $resource = AttendanceRecordResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make()
+                ->visible(fn (): bool => AttendanceRecordResource::canEdit($this->record)),
+        ];
+    }
+}
