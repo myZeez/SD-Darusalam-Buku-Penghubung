@@ -5,7 +5,7 @@ namespace Tests\Feature;
 use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
 use App\Filament\Resources\ParentSubmissions\ParentSubmissionResource;
 use App\Filament\Resources\SchoolSettings\SchoolSettingResource;
-use App\Filament\Resources\StudentArrivals\Pages\CreateStudentArrival;
+use App\Filament\Resources\StudentArrivals\Pages\LoketArrival;
 use App\Filament\Resources\StudentArrivals\StudentArrivalResource;
 use App\Filament\Resources\Students\StudentResource;
 use App\Models\AttendanceRecord;
@@ -161,24 +161,16 @@ class AdminAttendanceFoundationTest extends TestCase
         $this->get('/admin')
             ->assertOk()
             ->assertSee('Catat Kedatangan')
-            ->assertSee(StudentArrivalResource::getUrl(), false)
+            ->assertSee(StudentArrivalResource::getUrl('desk'), false)
             ->assertDontSee('/admin/students', false)
             ->assertDontSee('/admin/school-classes', false)
             ->assertDontSee('/admin/attendance-records', false)
             ->assertDontSee('/admin/parent-submissions', false)
             ->assertDontSee('/admin/users', false);
 
-        Livewire::test(CreateStudentArrival::class)
-            ->assertSee('Catat Kedatangan Siswa')
-            ->assertFormFieldDisabled('arrival_date')
-            ->fillForm([
-                'student_id' => $student->id,
-                'arrival_date' => today()->subDay()->toDateString(),
-                'arrival_time' => '07:10:00',
-                'notes' => 'Datang melalui loket utama.',
-            ])
-            ->call('create')
-            ->assertHasNoFormErrors();
+        Livewire::test(LoketArrival::class)
+            ->assertSee($student->name)
+            ->call('markPresent', $student->id);
 
         $arrival = StudentArrival::query()->latest('id')->firstOrFail();
 
@@ -186,7 +178,7 @@ class AdminAttendanceFoundationTest extends TestCase
         $this->assertSame($student->class_id, $arrival->class_id);
         $this->assertSame($gate->id, $arrival->recorded_by);
         $this->assertTrue($arrival->arrival_date->isToday());
-        $this->assertSame('late', $arrival->status);
+        $this->assertContains($arrival->status, ['on_time', 'late']);
         $this->assertTrue(StudentArrivalResource::canEdit($arrival));
 
         $otherOfficerArrival = $arrival->replicate();

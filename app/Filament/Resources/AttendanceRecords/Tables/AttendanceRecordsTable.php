@@ -17,6 +17,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
@@ -110,6 +111,12 @@ class AttendanceRecordsTable
                         ->when($data['from'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('attendance_date', '>=', $date))
                         ->when($data['until'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('attendance_date', '<=', $date))),
             ])
+            ->groups([
+                Group::make('schoolClass.name')
+                    ->label('Kelas')
+                    ->titlePrefixedWithLabel(false),
+            ])
+            ->defaultGroup('schoolClass.name')
             ->defaultSort('attendance_date', 'desc')
             ->headerActions([
                 Action::make('export')

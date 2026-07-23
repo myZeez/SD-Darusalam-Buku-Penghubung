@@ -73,8 +73,8 @@ class PasswordResetRequestsTable
                     ->icon('gmdi-lock-reset-o')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalHeading('Buat Password Sementara')
-                    ->modalDescription('Password akun akan diganti dan dikirim ke wali kelas melalui notifikasi.')
+                    ->modalHeading('Reset ke Password Default')
+                    ->modalDescription(fn (): string => 'Password akun akan direset ke password default: '.config('school.default_login_password').'. Password ini dikirim ke wali kelas melalui notifikasi.')
                     ->visible(fn (PasswordResetRequest $record): bool => $record->status === 'pending'
                         && PasswordResetRequestResource::canProcess())
                     ->action(function (PasswordResetRequest $record): void {
@@ -91,8 +91,8 @@ class PasswordResetRequestsTable
                         }
 
                         Notification::make()
-                            ->title('Password sementara sudah dikirim')
-                            ->body('Wali kelas menerima email login dan password sementara melalui notifikasi.')
+                            ->title('Password berhasil direset')
+                            ->body('Akun telah memakai password default. Wali kelas menerima informasi login melalui notifikasi.')
                             ->success()
                             ->send();
                     }),

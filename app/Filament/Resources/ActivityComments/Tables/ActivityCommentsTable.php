@@ -20,6 +20,7 @@ class ActivityCommentsTable
                     'activity.student.parent.user',
                     'latestReply.user',
                     'user',
+                    'closedBy',
                 ])
                 ->withCount('replies'))
             ->columns([
@@ -50,8 +51,8 @@ class ActivityCommentsTable
             ->recordActions([])
             ->toolbarActions([])
             ->defaultSort('updated_at', 'desc')
-            ->emptyStateHeading('Belum ada percakapan')
-            ->emptyStateDescription('Mulai pesan baru untuk membahas perkembangan murid bersama orang tua.')
+            ->emptyStateHeading('Belum ada topik diskusi')
+            ->emptyStateDescription('Buat topik baru agar pembahasan dengan orang tua atau guru tetap terarah.')
             ->emptyStateIcon('gmdi-forum-o');
     }
 }

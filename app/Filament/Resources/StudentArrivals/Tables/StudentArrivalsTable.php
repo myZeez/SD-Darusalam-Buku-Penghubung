@@ -16,6 +16,7 @@ use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Facades\Excel;
@@ -84,6 +85,12 @@ class StudentArrivalsTable
                     ->query(fn (Builder $query, array $data): Builder => $query
                         ->when($data['date'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('arrival_date', $date))),
             ])
+            ->groups([
+                Group::make('schoolClass.name')
+                    ->label('Kelas')
+                    ->titlePrefixedWithLabel(false),
+            ])
+            ->defaultGroup('schoolClass.name')
             ->defaultSort('arrival_date', 'desc')
             ->headerActions([
                 Action::make('export')

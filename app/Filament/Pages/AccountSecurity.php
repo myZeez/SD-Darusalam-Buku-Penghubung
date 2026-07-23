@@ -39,7 +39,7 @@ class AccountSecurity extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return ! (auth()->user()?->hasAnyRole(['guru', 'orang_tua', 'siswa']) ?? false);
+        return ! (auth()->user()?->hasAnyRole(['guru', 'orang_tua', 'siswa', 'loket']) ?? false);
     }
 
     public static function getNavigationBadge(): ?string

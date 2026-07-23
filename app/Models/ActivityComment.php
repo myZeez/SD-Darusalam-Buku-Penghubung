@@ -14,7 +14,12 @@ class ActivityComment extends Model
         'activity_type',
         'activity_id',
         'user_id',
+        'category',
+        'topic',
         'comment',
+        'status',
+        'closed_at',
+        'closed_by',
     ];
 
     protected static function booted(): void
@@ -47,6 +52,16 @@ class ActivityComment extends Model
     public function latestReply()
     {
         return $this->hasOne(self::class, 'parent_id')->latestOfMany();
+    }
+
+    public function closedBy()
+    {
+        return $this->belongsTo(User::class, 'closed_by');
+    }
+
+    public function isClosed(): bool
+    {
+        return $this->threadRoot()->status === 'closed';
     }
 
     public function threadRoot(): self

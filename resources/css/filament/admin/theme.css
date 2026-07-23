@@ -598,6 +598,243 @@
     }
 }
 
+/* Topik diskusi: pembahasan berbasis kategori, bukan tampilan chat. */
+.discussion-topic {
+    overflow: hidden;
+    border: 1px solid var(--gray-200);
+    border-radius: 12px;
+    background: white;
+}
+
+.discussion-topic__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--gray-200);
+    background: var(--gray-50);
+}
+
+.discussion-topic__category,
+.discussion-topic__status-badge {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.5rem;
+    padding: 0.125rem 0.5rem;
+    border-radius: 6px;
+    color: var(--primary-800);
+    background: var(--primary-100);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.discussion-topic h2,
+.discussion-topic__history h3,
+.discussion-entry strong {
+    margin: 0;
+    color: var(--gray-950);
+}
+
+.discussion-topic h2 {
+    margin-top: 0.5rem;
+    font-size: 1.25rem;
+    line-height: 1.625rem;
+    text-wrap: balance;
+}
+
+.discussion-topic__header p,
+.discussion-entry header span,
+.discussion-entry time,
+.discussion-topic__status small {
+    margin: 0.25rem 0 0;
+    color: var(--gray-600);
+    font-size: 0.8125rem;
+    line-height: 1.25rem;
+}
+
+.discussion-topic__status {
+    display: grid;
+    justify-items: end;
+    gap: 0.5rem;
+    text-align: right;
+}
+
+.discussion-topic__status-badge--closed {
+    color: var(--gray-700);
+    background: var(--gray-200);
+}
+
+.discussion-topic__status button,
+.discussion-topic__reply button {
+    min-height: 2.25rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    color: var(--primary-800);
+    background: white;
+    font-size: 0.8125rem;
+    font-weight: 700;
+}
+
+.discussion-topic__status button:hover,
+.discussion-topic__reply button:hover {
+    background: var(--primary-50);
+}
+
+.discussion-topic__history {
+    padding: 1.25rem;
+}
+
+.discussion-topic__history h3 {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.discussion-entry {
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.discussion-entry__marker {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--primary-800);
+    background: var(--primary-100);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.discussion-entry__content {
+    min-width: 0;
+    padding: 0.875rem 1rem;
+    border-radius: 8px;
+    background: var(--gray-50);
+}
+
+.discussion-entry header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.discussion-entry header span {
+    display: block;
+    margin-top: 0.125rem;
+}
+
+.discussion-entry time {
+    flex: none;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.discussion-entry__body {
+    margin-top: 0.75rem;
+    color: var(--gray-800);
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    overflow-wrap: anywhere;
+}
+
+.discussion-entry__edit {
+    margin-top: 0.75rem;
+    color: var(--primary-700);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.discussion-topic__reply {
+    display: grid;
+    gap: 0.625rem;
+    padding: 1.25rem;
+    border-top: 1px solid var(--gray-200);
+}
+
+.discussion-topic__reply label {
+    color: var(--gray-900);
+    font-size: 0.875rem;
+    font-weight: 700;
+}
+
+.discussion-topic__reply textarea {
+    width: 100%;
+    min-height: 6rem;
+    resize: vertical;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    padding: 0.75rem;
+    color: var(--gray-900);
+    background: white;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+}
+
+.discussion-topic__reply textarea:focus {
+    border-color: var(--primary-500);
+    outline: 2px solid var(--primary-200);
+    outline-offset: 1px;
+}
+
+.discussion-topic__reply button {
+    color: white;
+    background: var(--primary-600);
+}
+
+.discussion-topic__reply button:hover { background: var(--primary-700); }
+.discussion-topic__error { margin: 0; color: var(--danger-700); font-size: 0.75rem; }
+.discussion-topic__closed-note { margin: 0; padding: 1rem 1.25rem; color: var(--gray-700); background: var(--gray-50); font-size: 0.875rem; }
+
+.dark .discussion-topic { border-color: rgb(255 255 255 / 0.1); background: var(--gray-900); }
+.dark .discussion-topic__header, .dark .discussion-topic__closed-note { border-color: rgb(255 255 255 / 0.1); background: rgb(255 255 255 / 0.04); }
+.dark .discussion-topic h2, .dark .discussion-topic__history h3, .dark .discussion-entry strong, .dark .discussion-topic__reply label { color: white; }
+.dark .discussion-topic__header p, .dark .discussion-entry header span, .dark .discussion-entry time, .dark .discussion-topic__status small, .dark .discussion-topic__closed-note { color: var(--gray-300); }
+.dark .discussion-entry__content { background: rgb(255 255 255 / 0.05); }
+.dark .discussion-entry__body { color: var(--gray-200); }
+.dark .discussion-topic__reply { border-color: rgb(255 255 255 / 0.1); }
+.dark .discussion-topic__reply textarea, .dark .discussion-topic__status button { border-color: rgb(255 255 255 / 0.16); color: white; background: var(--gray-950); }
+
+.arrival-desk { display: grid; gap: 1rem; }
+.arrival-desk__search { display: flex; align-items: center; gap: 0.625rem; max-width: 40rem; min-height: 2.75rem; padding: 0 0.875rem; border: 1px solid var(--gray-300); border-radius: 8px; background: white; color: var(--gray-500); }
+.arrival-desk__search svg { width: 1.25rem; height: 1.25rem; flex: none; }
+.arrival-desk__search input { width: 100%; border: 0; outline: 0; color: var(--gray-900); background: transparent; font-size: 0.9375rem; }
+.arrival-desk__summary { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; color: var(--gray-700); font-size: 0.8125rem; }
+.arrival-desk__summary strong { color: var(--gray-950); }
+.arrival-desk__lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr)); gap: 1rem; align-items: start; }
+.arrival-desk__panel { overflow: hidden; border: 1px solid var(--gray-200); border-radius: 12px; background: white; }
+.arrival-desk__panel > header { padding: 1rem; border-bottom: 1px solid var(--gray-200); background: var(--gray-50); }
+.arrival-desk__panel h2 { margin: 0; color: var(--gray-950); font-size: 1rem; line-height: 1.375rem; }
+.arrival-desk__panel p { margin: 0.25rem 0 0; color: var(--gray-600); font-size: 0.8125rem; line-height: 1.25rem; }
+.arrival-desk__rows { display: grid; max-height: 34rem; overflow: auto; }
+.arrival-desk__student { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-width: 0; padding: 0.875rem 1rem; }
+.arrival-desk__student + .arrival-desk__student { border-top: 1px solid var(--gray-100); }
+.arrival-desk__student div { min-width: 0; }
+.arrival-desk__student strong, .arrival-desk__student span { display: block; overflow-wrap: anywhere; }
+.arrival-desk__student strong { color: var(--gray-900); font-size: 0.875rem; line-height: 1.25rem; }
+.arrival-desk__student span { margin-top: 0.125rem; color: var(--gray-600); font-size: 0.75rem; line-height: 1rem; }
+.arrival-desk__student button { flex: none; min-height: 2.25rem; padding: 0.375rem 0.875rem; border-radius: 6px; color: white; background: var(--success-600); font-size: 0.8125rem; font-weight: 700; }
+.arrival-desk__student button:hover { background: var(--success-700); }
+.arrival-desk__status { flex: none; padding: 0.1875rem 0.5rem; border-radius: 6px; color: var(--success-800) !important; background: var(--success-50); font-weight: 700; white-space: nowrap; }
+.arrival-desk__status--late { color: var(--danger-800) !important; background: var(--danger-50); }
+.arrival-desk__empty { padding: 1.5rem 1rem; text-align: center; }
+.dark .arrival-desk__search, .dark .arrival-desk__panel { border-color: rgb(255 255 255 / 0.1); background: var(--gray-900); }
+.dark .arrival-desk__search input, .dark .arrival-desk__panel h2, .dark .arrival-desk__summary strong, .dark .arrival-desk__student strong { color: white; }
+.dark .arrival-desk__summary, .dark .arrival-desk__panel p, .dark .arrival-desk__student span { color: var(--gray-300); }
+.dark .arrival-desk__panel > header, .dark .arrival-desk__student + .arrival-desk__student { border-color: rgb(255 255 255 / 0.1); background: rgb(255 255 255 / 0.04); }
+
+@media (max-width: 40rem) { .arrival-desk__student { align-items: flex-start; } }
+
+@media (max-width: 40rem) {
+    .discussion-topic__header, .discussion-entry header { flex-direction: column; }
+    .discussion-topic__status { justify-items: start; text-align: left; }
+    .discussion-entry time { white-space: normal; }
+}
+
 @media (max-width: 40rem) {
     .current-lesson__header {
         align-items: flex-start;

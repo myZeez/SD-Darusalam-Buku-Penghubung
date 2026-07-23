@@ -14,23 +14,32 @@ use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $modelLabel = 'Pengguna';
+    protected static ?string $modelLabel = 'Staf Sekolah';
 
-    protected static ?string $pluralModelLabel = 'Pengguna';
+    protected static ?string $pluralModelLabel = 'Staf Sekolah';
 
-    protected static ?string $navigationLabel = 'Pengguna';
+    protected static ?string $navigationLabel = 'Staf Sekolah';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Administrasi';
 
     protected static ?int $navigationSort = 1;
 
     protected static string|BackedEnum|null $navigationIcon = 'gmdi-manage-accounts-o';
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->whereDoesntHave(
+            'roles',
+            fn (Builder $query): Builder => $query->whereIn('name', ['siswa', 'orang_tua']),
+        );
+    }
 
     public static function canViewAny(): bool
     {

@@ -16,6 +16,7 @@ class TeachersTable
     public static function configure(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn ($query) => $query->with(['user', 'classes', 'assistedClasses']))
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Nama')
@@ -35,6 +36,17 @@ class TeachersTable
                         default => $state,
                     })
                     ->searchable(),
+                TextColumn::make('classes.name')
+                    ->label('Wali Kelas')
+                    ->badge()
+                    ->separator(',')
+                    ->placeholder('—'),
+                TextColumn::make('assistedClasses.name')
+                    ->label('Guru Pendamping')
+                    ->badge()
+                    ->color('info')
+                    ->separator(',')
+                    ->placeholder('—'),
                 TextColumn::make('created_at')
                     ->label('Dibuat Pada')
                     ->dateTime()

@@ -23,11 +23,11 @@ class ActivityCommentResource extends Resource
 {
     protected static ?string $model = ActivityComment::class;
 
-    protected static ?string $modelLabel = 'Diskusi Aktivitas';
+    protected static ?string $modelLabel = 'Topik Diskusi';
 
-    protected static ?string $pluralModelLabel = 'Diskusi Aktivitas';
+    protected static ?string $pluralModelLabel = 'Topik Diskusi';
 
-    protected static ?string $navigationLabel = 'Diskusi Aktivitas';
+    protected static ?string $navigationLabel = 'Topik Diskusi';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Buku Penghubung';
 
@@ -106,7 +106,8 @@ class ActivityCommentResource extends Resource
             return false;
         }
 
-        return $user->isAdmin() || ($record->user_id === $user->id && static::canView($record));
+        return ! $record->threadRoot()->isClosed()
+            && ($user->isAdmin() || ($record->user_id === $user->id && static::canView($record)));
     }
 
     public static function canDelete(Model $record): bool
@@ -124,7 +125,7 @@ class ActivityCommentResource extends Resource
         $user = auth()->user();
         $root = $comment->threadRoot();
 
-        abort_unless($user && static::canCreate() && static::canView($root), 403);
+        abort_unless($user && static::canCreate() && static::canView($root) && ! $root->isClosed(), 403);
 
         $reply = ActivityComment::create([
             'parent_id' => $root->getKey(),

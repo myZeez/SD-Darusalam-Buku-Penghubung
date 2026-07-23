@@ -334,8 +334,8 @@ class ParentWorkspaceTest extends TestCase
             ->assertOk()
             ->assertSee($teacherComment->comment)
             ->assertSee($parentComment->comment)
-            ->assertSee('discussion-chat', false)
-            ->assertSee('wire:click="selectReply(', false);
+            ->assertSee('discussion-topic', false)
+            ->assertSee('Riwayat tanggapan');
 
         $this->get(ScheduleResource::getUrl())
             ->assertOk()

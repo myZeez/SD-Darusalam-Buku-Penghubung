@@ -12,11 +12,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -40,36 +39,22 @@ class LessonSchedulesTable
                 ->orderBy(LessonPeriod::query()
                     ->select('sequence')
                     ->whereColumn('lesson_periods.id', 'lesson_schedules.lesson_period_id')))
-            ->columns($isTeacher
-                ? [
-                    ViewColumn::make('ringkasan_jadwal_mengajar')
-                        ->label('Jadwal Mengajar')
-                        ->view('filament.tables.columns.teacher-lesson-schedule-card'),
-                ]
-                : [
-                    TextColumn::make('day_of_week')
-                        ->label('Hari')
-                        ->badge()
-                        ->color('info')
-                        ->formatStateUsing(fn (?string $state): string => AcademicCalendar::dayLabel($state)),
-                    TextColumn::make('lessonPeriod.name')
-                        ->label('Waktu')
-                        ->description(fn (LessonSchedule $record): string => sprintf(
-                            '%s-%s',
-                            substr($record->lessonPeriod?->start_time ?? '', 0, 5),
-                            substr($record->lessonPeriod?->end_time ?? '', 0, 5),
-                        ))
-                        ->sortable(),
-                    TextColumn::make('teachingAssignment.subject.name')
-                        ->label('Mata Pelajaran')
-                        ->description(fn (LessonSchedule $record): ?string => $record->teachingAssignment?->subject?->code)
-                        ->searchable()
-                        ->weight('bold'),
-                    TextColumn::make('teachingAssignment.schoolClass.name')->label('Kelas')->badge()->searchable(),
-                    TextColumn::make('teachingAssignment.teacher.user.name')->label('Guru')->searchable()->wrap(),
-                    TextColumn::make('room')->label('Ruang')->placeholder('-')->toggleable(),
-                    IconColumn::make('is_active')->label('Aktif')->boolean(),
-                ])
+            ->columns([
+                ViewColumn::make('ringkasan_jadwal')
+                    ->label('Jadwal mingguan')
+                    ->view('filament.tables.columns.teacher-lesson-schedule-card')
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'teachingAssignment.subject',
+                        fn (Builder $query): Builder => $query->where('name', 'like', "%{$search}%"),
+                    )),
+            ])
+            ->groups([
+                Group::make('day_of_week')
+                    ->label('Hari')
+                    ->titlePrefixedWithLabel(false)
+                    ->getTitleFromRecordUsing(fn (LessonSchedule $record): string => AcademicCalendar::dayLabel($record->day_of_week)),
+            ])
+            ->defaultGroup('day_of_week')
             ->filters($isTeacher
                 ? []
                 : [

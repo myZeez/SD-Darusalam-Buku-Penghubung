@@ -5,7 +5,6 @@ namespace App\Actions\Auth;
 use App\Models\PasswordResetRequest;
 use App\Models\UserNotification;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class ProcessPasswordResetRequest
@@ -32,7 +31,7 @@ class ProcessPasswordResetRequest
                 ]);
             }
 
-            $temporaryPassword = Str::password(10, symbols: false);
+            $temporaryPassword = (string) config('school.default_login_password');
             $request->user->update([
                 'password' => $temporaryPassword,
                 'must_change_password' => true,
@@ -47,9 +46,9 @@ class ProcessPasswordResetRequest
             UserNotification::create([
                 'user_id' => $teacherId,
                 'created_by' => auth()->id(),
-                'title' => 'Password Sementara: '.($request->student?->name ?? $request->user->name),
+                'title' => 'Password Default: '.($request->student?->name ?? $request->user->name),
                 'message' => sprintf(
-                    'Sampaikan secara pribadi kepada %s. Email login: %s. Password sementara: %s. Pengguna wajib mengganti password setelah login.',
+                    'Sampaikan secara pribadi kepada %s. Email login: %s. Password default: %s. Pengguna wajib mengganti password setelah login.',
                     $request->user->name,
                     $request->user->email,
                     $temporaryPassword,

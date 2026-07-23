@@ -35,6 +35,7 @@ class CreateActivityComment extends CreateRecord
         abort_unless($user->canAccessActivity($data['activity_type'], (int) $data['activity_id']), 403);
 
         $data['user_id'] = $user->id;
+        $data['status'] = 'open';
 
         return $data;
     }

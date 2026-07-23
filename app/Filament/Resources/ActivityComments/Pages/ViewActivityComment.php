@@ -21,7 +21,7 @@ class ViewActivityComment extends ViewRecord
     {
         $message = $this->resolveThreadMessage($messageId);
 
-        abort_unless(ActivityCommentResource::canCreate() && ActivityCommentResource::canView($message->threadRoot()), 403);
+        abort_unless(ActivityCommentResource::canCreate() && ActivityCommentResource::canView($message->threadRoot()) && ! $message->threadRoot()->isClosed(), 403);
 
         $this->replyingToId = $message->getKey();
     }
@@ -33,7 +33,7 @@ class ViewActivityComment extends ViewRecord
 
     public function sendReply(): void
     {
-        abort_unless(ActivityCommentResource::canCreate() && ActivityCommentResource::canView($this->record->threadRoot()), 403);
+        abort_unless(ActivityCommentResource::canCreate() && ActivityCommentResource::canView($this->record->threadRoot()) && ! $this->record->threadRoot()->isClosed(), 403);
 
         $data = $this->validate([
             'replyMessage' => ['required', 'string', 'max:5000'],
@@ -47,7 +47,7 @@ class ViewActivityComment extends ViewRecord
         $this->record->refresh();
 
         Notification::make()
-            ->title('Pesan berhasil dikirim')
+            ->title('Tanggapan berhasil dikirim')
             ->success()
             ->send();
     }
@@ -87,6 +87,31 @@ class ViewActivityComment extends ViewRecord
                     ->success()
                     ->send();
             });
+    }
+
+    public function closeDiscussion(): void
+    {
+        $thread = $this->record->threadRoot();
+        $user = auth()->user();
+
+        abort_unless(
+            $user && ActivityCommentResource::canView($thread) && ($user->isAdmin() || $thread->user_id === $user->id),
+            403,
+        );
+
+        $thread->update([
+            'status' => 'closed',
+            'closed_at' => now(),
+            'closed_by' => $user->id,
+        ]);
+
+        $this->record->refresh();
+
+        Notification::make()
+            ->title('Diskusi ditutup')
+            ->body('Topik ini tersimpan sebagai riwayat dan tidak dapat diberi tanggapan lagi.')
+            ->success()
+            ->send();
     }
 
     private function resolveThreadMessage(int $messageId): ActivityComment

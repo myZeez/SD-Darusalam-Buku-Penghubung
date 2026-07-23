@@ -6,6 +6,7 @@ use App\Models\HomeActivity;
 use App\Models\SchoolActivity;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -18,8 +19,8 @@ class ActivityCommentForm
     {
         return $schema
             ->components([
-                Section::make('Pilih Aktivitas')
-                    ->description('Pilih laporan aktivitas yang akan diberi komentar.')
+                Section::make('Konteks Diskusi')
+                    ->description('Pilih laporan terkait agar pembahasan mudah ditelusuri kembali.')
                     ->icon(Heroicon::OutlinedClipboardDocumentList)
                     ->columnSpanFull()
                     ->schema([
@@ -44,12 +45,33 @@ class ActivityCommentForm
                             ->optionsLimit(100)
                             ->required(),
                     ]),
-                Section::make('Tulis Komentar')
+                Section::make('Topik dan Pembuka Diskusi')
+                    ->description('Satu topik untuk satu pembahasan. Diskusi yang sudah selesai dapat ditutup.')
                     ->icon(Heroicon::OutlinedChatBubbleLeftRight)
                     ->columnSpanFull()
                     ->schema([
+                        ToggleButtons::make('category')
+                            ->label('Kategori')
+                            ->options([
+                                'learning' => 'Pelajaran',
+                                'behaviour' => 'Sikap & Perkembangan',
+                                'attendance' => 'Kehadiran',
+                                'other' => 'Lainnya',
+                            ])
+                            ->default('other')
+                            ->inline()
+                            ->grouped()
+                            ->required()
+                            ->columnSpanFull(),
+                        TextInput::make('topic')
+                            ->label('Topik yang dibahas')
+                            ->placeholder('Contoh: Pendampingan membaca di rumah')
+                            ->maxLength(150)
+                            ->required()
+                            ->columnSpanFull(),
                         Textarea::make('comment')
-                            ->label('Komentar')
+                            ->label('Penjelasan awal')
+                            ->placeholder('Jelaskan hal yang ingin didiskusikan secara singkat dan jelas.')
                             ->rows(6)
                             ->required(),
                     ]),

@@ -12,6 +12,7 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -98,6 +99,12 @@ class ParentSubmissionsTable
                         'rejected' => 'Ditolak',
                     ]),
             ])
+            ->groups([
+                Group::make('student.class.name')
+                    ->label('Kelas')
+                    ->titlePrefixedWithLabel(false),
+            ])
+            ->defaultGroup('student.class.name')
             ->defaultSort('created_at', 'desc')
             ->recordActions([
                 Action::make('approve')

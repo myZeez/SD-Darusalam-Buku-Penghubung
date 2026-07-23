@@ -26,6 +26,11 @@ class PasswordResetRequestInfolist
                 ->icon('gmdi-admin-panel-settings-o')
                 ->columns(['md' => 2])
                 ->schema([
+                    TextEntry::make('default_password')
+                        ->label('Password Default')
+                        ->state(fn (): string => (string) config('school.default_login_password'))
+                        ->copyable()
+                        ->columnSpanFull(),
                     TextEntry::make('status')
                         ->label('Status')
                         ->badge()

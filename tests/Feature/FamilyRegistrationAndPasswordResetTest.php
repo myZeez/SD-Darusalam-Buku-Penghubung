@@ -177,13 +177,14 @@ class FamilyRegistrationAndPasswordResetTest extends TestCase
         $studentUser->refresh();
         $request->refresh();
         $this->assertTrue(Hash::check($temporaryPassword, $studentUser->password));
+        $this->assertSame(config('school.default_login_password'), $temporaryPassword);
         $this->assertTrue($studentUser->must_change_password);
         $this->assertSame('processed', $request->status);
         $this->assertSame($admin->id, $request->processed_by);
 
         $teacherNotification = UserNotification::query()
             ->where('user_id', $teacherUser->id)
-            ->where('title', 'like', 'Password Sementara:%')
+            ->where('title', 'like', 'Password Default:%')
             ->firstOrFail();
         $this->assertStringContainsString($studentUser->email, $teacherNotification->message);
         $this->assertStringContainsString($temporaryPassword, $teacherNotification->message);

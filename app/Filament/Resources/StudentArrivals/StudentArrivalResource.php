@@ -5,6 +5,7 @@ namespace App\Filament\Resources\StudentArrivals;
 use App\Filament\Resources\StudentArrivals\Pages\CreateStudentArrival;
 use App\Filament\Resources\StudentArrivals\Pages\EditStudentArrival;
 use App\Filament\Resources\StudentArrivals\Pages\ListStudentArrivals;
+use App\Filament\Resources\StudentArrivals\Pages\LoketArrival;
 use App\Filament\Resources\StudentArrivals\Pages\ViewStudentArrival;
 use App\Filament\Resources\StudentArrivals\Schemas\StudentArrivalForm;
 use App\Filament\Resources\StudentArrivals\Schemas\StudentArrivalInfolist;
@@ -38,6 +39,13 @@ class StudentArrivalResource extends Resource
         return auth()->user()?->hasRole('loket')
             ? 'Catat Kedatangan'
             : parent::getNavigationLabel();
+    }
+
+    public static function getNavigationUrl(): string
+    {
+        return auth()->user()?->hasRole('loket')
+            ? static::getUrl('desk')
+            : parent::getNavigationUrl();
     }
 
     public static function getEloquentQuery(): Builder
@@ -118,6 +126,7 @@ class StudentArrivalResource extends Resource
     {
         return [
             'index' => ListStudentArrivals::route('/'),
+            'desk' => LoketArrival::route('/loket'),
             'create' => CreateStudentArrival::route('/create'),
             'view' => ViewStudentArrival::route('/{record}'),
             'edit' => EditStudentArrival::route('/{record}/edit'),

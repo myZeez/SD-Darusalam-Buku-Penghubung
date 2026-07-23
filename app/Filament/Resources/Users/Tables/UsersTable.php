@@ -9,6 +9,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class UsersTable
@@ -61,7 +62,14 @@ class UsersTable
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('roles')
+                    ->label('Peran Staf')
+                    ->relationship('roles', 'name')
+                    ->options([
+                        'admin' => 'Admin / Kepala Sekolah',
+                        'guru' => 'Guru',
+                        'loket' => 'Petugas Loket',
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make()

@@ -27,12 +27,18 @@
         ? 'Laporan sekolah'
         : 'Laporan rumah';
     $messageCount = ((int) ($record->replies_count ?? 0)) + 1;
+    $category = match ($record->category) {
+        'learning' => 'Pelajaran',
+        'behaviour' => 'Sikap & Perkembangan',
+        'attendance' => 'Kehadiran',
+        default => 'Lainnya',
+    };
 @endphp
 
 <a
     class="activity-conversation"
     href="{{ ActivityCommentResource::getUrl('view', ['record' => $record]) }}"
-    aria-label="Buka percakapan dengan {{ $contactName }} tentang {{ $student?->name ?? 'murid' }}"
+    aria-label="Buka topik {{ $record->topic }} untuk {{ $student?->name ?? 'murid' }}"
 >
     <span class="activity-conversation__avatar" aria-hidden="true">
         {{ $initials ?: 'OT' }}
@@ -40,19 +46,19 @@
 
     <span class="activity-conversation__content">
         <span class="activity-conversation__identity">
-            <strong>{{ $contactName }}</strong>
-            <span>{{ $contactRole }} {{ $student?->name ?? 'murid' }}</span>
+            <strong>{{ $record->topic ?: 'Topik diskusi' }}</strong>
+            <span>{{ $category }} &middot; {{ $student?->name ?? 'murid' }}</span>
         </span>
 
         <span class="activity-conversation__preview">
-            <span class="activity-conversation__sender">{{ $messageSender }}:</span>
+            <span class="activity-conversation__sender">Tanggapan terakhir {{ $messageSender }}:</span>
             {{ $messagePreview }}
         </span>
 
         <span class="activity-conversation__context">
             {{ $student?->class?->name ?? 'Kelas belum ditentukan' }}
             <span aria-hidden="true">&bull;</span>
-            {{ $activityLabel }}
+            {{ $record->status === 'closed' ? 'Diskusi ditutup' : $activityLabel }}
         </span>
     </span>
 
@@ -62,7 +68,7 @@
                 ? $latestMessage->created_at?->format('H:i')
                 : $latestMessage->created_at?->format('d M') }}
         </time>
-        <span class="activity-conversation__count" aria-label="{{ $messageCount }} pesan">
+        <span class="activity-conversation__count" aria-label="{{ $messageCount }} tanggapan">
             {{ $messageCount }}
         </span>
     </span>
