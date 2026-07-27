@@ -18,8 +18,6 @@ class SchoolSettingsTable
                 TextColumn::make('school_name')
                     ->label('Nama Sekolah')
                     ->searchable(),
-                TextColumn::make('academic_year')
-                    ->label('Tahun Ajaran'),
                 TextColumn::make('school_start_time')
                     ->label('Jam Masuk')
                     ->time('H:i'),

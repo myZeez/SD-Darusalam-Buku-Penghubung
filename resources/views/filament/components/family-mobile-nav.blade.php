@@ -2,7 +2,6 @@
     use App\Filament\Resources\ActivityComments\ActivityCommentResource;
     use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
     use App\Filament\Resources\HomeActivities\HomeActivityResource;
-    use App\Filament\Resources\LessonSchedules\LessonScheduleResource;
     use App\Filament\Resources\ParentSubmissions\ParentSubmissionResource;
     use App\Filament\Resources\ParentProfiles\ParentProfileResource;
     use App\Filament\Resources\Extracurriculars\ExtracurricularResource;
@@ -82,12 +81,6 @@
             'icon' => 'gmdi-approval-o',
             'url' => ParentSubmissionResource::getUrl(),
             'active' => request()->routeIs('filament.admin.resources.parent-submissions.*'),
-        ],
-        [
-            'label' => 'Pelajaran',
-            'icon' => 'gmdi-calendar-view-week-o',
-            'url' => LessonScheduleResource::getUrl(),
-            'active' => request()->routeIs('filament.admin.resources.lesson-schedules.*'),
         ],
         [
             'label' => 'Agenda',

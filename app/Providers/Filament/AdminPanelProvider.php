@@ -34,15 +34,14 @@ class AdminPanelProvider extends PanelProvider
             ->login(Login::class)
             ->registration(RegisterStudent::class)
             ->passwordReset(RequestPasswordHelp::class, null)
-            ->brandName('Buku Penghubung Digital')
+            ->brandName('SIMPATI')
             ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Blue,
             ])
             ->navigationGroups([
                 'Administrasi',
                 'Data Sekolah',
-                'Akademik',
                 'Kehadiran',
                 'Ekstrakurikuler',
                 'Buku Penghubung',
@@ -76,6 +75,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::USER_MENU_BEFORE,
                 fn () => view('filament.components.topbar-notifications'),
+            )
+            ->renderHook(
+                PanelsRenderHook::HEAD_START,
+                fn () => view('filament.components.palette-init'),
             )
             ->renderHook(
                 PanelsRenderHook::BODY_END,

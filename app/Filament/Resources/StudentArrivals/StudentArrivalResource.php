@@ -22,22 +22,22 @@ class StudentArrivalResource extends Resource
 {
     protected static ?string $model = StudentArrival::class;
 
-    protected static ?string $modelLabel = 'Kedatangan Siswa';
+    protected static ?string $modelLabel = 'Keterlambatan Siswa';
 
-    protected static ?string $pluralModelLabel = 'Kedatangan Siswa';
+    protected static ?string $pluralModelLabel = 'Keterlambatan Siswa';
 
-    protected static ?string $navigationLabel = 'Kedatangan Siswa';
+    protected static ?string $navigationLabel = 'Keterlambatan Siswa';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Kehadiran';
 
     protected static ?int $navigationSort = 1;
 
-    protected static string|BackedEnum|null $navigationIcon = 'gmdi-login-o';
+    protected static string|BackedEnum|null $navigationIcon = 'gmdi-alarm-o';
 
     public static function getNavigationLabel(): string
     {
         return auth()->user()?->hasRole('loket')
-            ? 'Catat Kedatangan'
+            ? 'Piket Keterlambatan'
             : parent::getNavigationLabel();
     }
 
@@ -126,7 +126,7 @@ class StudentArrivalResource extends Resource
     {
         return [
             'index' => ListStudentArrivals::route('/'),
-            'desk' => LoketArrival::route('/loket'),
+            'desk' => LoketArrival::route('/piket'),
             'create' => CreateStudentArrival::route('/create'),
             'view' => ViewStudentArrival::route('/{record}'),
             'edit' => EditStudentArrival::route('/{record}/edit'),

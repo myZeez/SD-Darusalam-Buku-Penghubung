@@ -2,17 +2,12 @@
 
 namespace Database\Seeders;
 
-use App\Models\AcademicPeriod;
-use App\Models\LessonPeriod;
-use App\Models\LessonSchedule;
 use App\Models\ParentProfile;
 use App\Models\Schedule;
 use App\Models\SchoolClass;
 use App\Models\SchoolSetting;
 use App\Models\Student;
-use App\Models\Subject;
 use App\Models\Teacher;
-use App\Models\TeachingAssignment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -48,23 +43,7 @@ class DatabaseSeeder extends Seeder
         ]);
         $adminUser->syncRoles([$admin]);
 
-        $schoolSetting = SchoolSetting::current();
-        $startYear = (int) substr($schoolSetting->academic_year, 0, 4);
-        $academicPeriod = AcademicPeriod::firstOrCreate(
-            [
-                'academic_year' => $schoolSetting->academic_year,
-                'semester' => 'odd',
-            ],
-            [
-                'start_date' => "{$startYear}-07-01",
-                'end_date' => "{$startYear}-12-31",
-                'is_active' => true,
-            ],
-        );
-
-        if (! $academicPeriod->is_active) {
-            $academicPeriod->update(['is_active' => true]);
-        }
+        SchoolSetting::current();
 
         $principalUser = User::firstOrCreate(
             ['email' => 'kepala.sekolah@sddarusalam.test'],
@@ -142,10 +121,9 @@ class DatabaseSeeder extends Seeder
         );
 
         $class = SchoolClass::firstOrCreate(
-            ['name' => 'Kelas 1A', 'academic_year' => '2026/2027'],
+            ['name' => 'Kelas 1A'],
             [
                 'teacher_id' => $teacher->id,
-                'academic_period_id' => $academicPeriod->id,
                 'grade_level' => 1,
                 'capacity' => 30,
                 'room' => 'Ruang 1A',
@@ -154,7 +132,6 @@ class DatabaseSeeder extends Seeder
 
         $class->update([
             'teacher_id' => $teacher->id,
-            'academic_period_id' => $academicPeriod->id,
             'grade_level' => $class->grade_level ?? 1,
             'capacity' => $class->capacity ?: 30,
             'room' => $class->room ?: 'Ruang 1A',
@@ -172,41 +149,6 @@ class DatabaseSeeder extends Seeder
                 'status' => 'active',
             ],
         );
-
-        $subject = Subject::firstOrCreate(
-            ['code' => 'MTK'],
-            [
-                'name' => 'Matematika',
-                'description' => 'Mata pelajaran Matematika tingkat sekolah dasar.',
-                'is_active' => true,
-            ],
-        );
-        $assignment = TeachingAssignment::firstOrCreate([
-            'academic_period_id' => $academicPeriod->id,
-            'teacher_id' => $teacher->id,
-            'class_id' => $class->id,
-            'subject_id' => $subject->id,
-        ], [
-            'is_active' => true,
-        ]);
-        $lessonPeriod = LessonPeriod::firstOrCreate([
-            'academic_period_id' => $academicPeriod->id,
-            'sequence' => 1,
-        ], [
-            'name' => 'Jam Pelajaran 1',
-            'start_time' => '07:00:00',
-            'end_time' => '07:35:00',
-            'type' => 'lesson',
-            'is_active' => true,
-        ]);
-        LessonSchedule::firstOrCreate([
-            'teaching_assignment_id' => $assignment->id,
-            'lesson_period_id' => $lessonPeriod->id,
-            'day_of_week' => 'monday',
-        ], [
-            'room' => $class->room,
-            'is_active' => true,
-        ]);
 
         Schedule::firstOrCreate([
             'title' => 'Pertemuan Orang Tua',

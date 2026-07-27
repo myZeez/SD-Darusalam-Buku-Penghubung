@@ -34,6 +34,9 @@ class TeacherAttendance extends Page
 
     public string $selectedDate = '';
 
+    /** The first day of the month currently shown in the attendance calendar. */
+    public string $calendarMonth = '';
+
     public ?int $selectedClassId = null;
 
     /** @var array<int, array<string, mixed>> */
@@ -93,12 +96,13 @@ class TeacherAttendance extends Page
 
     public function getSubheading(): ?string
     {
-        return 'Periksa data dari Loket dan laporan orang tua, lalu lengkapi status seluruh siswa dalam satu kelas.';
+        return 'Yuk, lengkapi kehadiran siswa dan pantau tanggal yang masih perlu diisi.';
     }
 
     public function mount(): void
     {
         $this->selectedDate = today()->toDateString();
+        $this->calendarMonth = today()->startOfMonth()->toDateString();
         $this->classes = auth()->user()
             ->managedClasses()
             ->withCount(['students' => fn ($query) => $query->where('status', 'active')])
@@ -107,7 +111,6 @@ class TeacherAttendance extends Page
             ->map(fn ($class): array => [
                 'id' => $class->id,
                 'name' => $class->name,
-                'academic_year' => $class->academic_year,
                 'students_count' => $class->students_count,
             ])
             ->all();
@@ -122,6 +125,7 @@ class TeacherAttendance extends Page
             'selectedDate' => ['required', 'date'],
         ]);
 
+        $this->calendarMonth = CarbonImmutable::parse($this->selectedDate)->startOfMonth()->toDateString();
         $this->loadAttendance();
     }
 
@@ -131,13 +135,36 @@ class TeacherAttendance extends Page
         $this->loadAttendance();
     }
 
+    public function showPreviousCalendarMonth(): void
+    {
+        $this->calendarMonth = CarbonImmutable::parse($this->calendarMonth)
+            ->subMonthNoOverflow()
+            ->startOfMonth()
+            ->toDateString();
+    }
+
+    public function showNextCalendarMonth(): void
+    {
+        $this->calendarMonth = CarbonImmutable::parse($this->calendarMonth)
+            ->addMonthNoOverflow()
+            ->startOfMonth()
+            ->toDateString();
+    }
+
+    public function selectCalendarDate(string $date): void
+    {
+        $this->selectedDate = CarbonImmutable::parse($date)->toDateString();
+        $this->calendarMonth = CarbonImmutable::parse($date)->startOfMonth()->toDateString();
+        $this->loadAttendance();
+    }
+
     public function reloadAttendance(): void
     {
         $this->loadAttendance();
 
         Notification::make()
             ->title('Data presensi diperbarui')
-            ->body('Check-in Loket dan laporan orang tua terbaru sudah dimuat.')
+            ->body('Catatan Piket dan laporan orang tua terbaru sudah dimuat.')
             ->success()
             ->send();
     }
@@ -277,6 +304,57 @@ class TeacherAttendance extends Page
         ]);
     }
 
+    /**
+     * @return array<int, array<string, bool|int|string|null>>
+     */
+    public function calendarDays(): array
+    {
+        $month = CarbonImmutable::parse($this->calendarMonth)->startOfMonth();
+        $calendarStart = $month->startOfWeek(CarbonImmutable::MONDAY);
+        $calendarEnd = $month->endOfMonth()->endOfWeek(CarbonImmutable::SUNDAY);
+        $today = today()->toDateString();
+
+        if (! $this->selectedClassId) {
+            return [];
+        }
+
+        $classId = $this->authorizedClassId();
+        $activeStudentCount = Student::query()
+            ->where('class_id', $classId)
+            ->where('status', 'active')
+            ->count();
+        $recordsByDate = AttendanceRecord::query()
+            ->where('class_id', $classId)
+            ->whereBetween('attendance_date', [$calendarStart->toDateString(), $calendarEnd->toDateString()])
+            ->selectRaw('date(attendance_date) as attendance_day, count(*) as records_count')
+            ->groupBy('attendance_day')
+            ->pluck('records_count', 'attendance_day');
+
+        $days = [];
+
+        for ($date = $calendarStart; $date->lte($calendarEnd); $date = $date->addDay()) {
+            $dateString = $date->toDateString();
+            $recordCount = (int) ($recordsByDate[$dateString] ?? 0);
+            $isFuture = $dateString > $today;
+            $isComplete = ! $isFuture && $activeStudentCount > 0 && $recordCount >= $activeStudentCount;
+
+            $days[] = [
+                'date' => $dateString,
+                'day' => $date->day,
+                'in_month' => $date->month === $month->month,
+                'is_selected' => $dateString === $this->selectedDate,
+                'is_today' => $dateString === $today,
+                'is_future' => $isFuture,
+                'is_complete' => $isComplete,
+                'is_incomplete' => ! $isFuture && ! $isComplete,
+                'record_count' => $recordCount,
+                'label' => $date->translatedFormat('l, d F Y'),
+            ];
+        }
+
+        return $days;
+    }
+
     private function loadAttendance(): void
     {
         $this->students = [];
@@ -306,7 +384,7 @@ class TeacherAttendance extends Page
         $this->pendingSubmissions = ParentSubmission::query()
             ->with(['student', 'parent.user'])
             ->whereHas('student', fn ($query) => $query->where('class_id', $classId))
-            ->whereIn('type', ['sick', 'permission'])
+            ->whereIn('type', ['sick', 'permission', 'early_leave'])
             ->where('status', 'pending')
             ->whereDate('start_date', '<=', $date)
             ->whereDate('end_date', '>=', $date)
@@ -317,7 +395,11 @@ class TeacherAttendance extends Page
                 'student_name' => $submission->student?->name ?? 'Siswa',
                 'parent_name' => $submission->parent?->user?->name ?? 'Orang tua',
                 'type' => $submission->type,
-                'type_label' => $submission->type === 'sick' ? 'Sakit' : 'Izin',
+                'type_label' => match ($submission->type) {
+                    'sick' => 'Sakit',
+                    'early_leave' => 'Izin Pulang Cepat',
+                    default => 'Izin',
+                },
                 'description' => $submission->description,
                 'date_label' => $submission->start_date->eq($submission->end_date)
                     ? $submission->start_date->format('d/m/Y')
@@ -372,7 +454,7 @@ class TeacherAttendance extends Page
     private function sourceLabel(?AttendanceRecord $record): string
     {
         return match ($record?->source) {
-            'arrival' => 'Dari Loket',
+            'arrival' => 'Dari Piket',
             'parent_submission' => 'Laporan Orang Tua',
             'teacher' => 'Dicatat Guru',
             'manual' => 'Catatan Manual',

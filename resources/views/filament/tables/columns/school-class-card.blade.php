@@ -11,7 +11,7 @@
     <div class="school-class-card__header">
         <div class="school-class-card__identity">
             <p class="school-class-card__eyebrow">
-                Tingkat {{ $record->grade_level ?? '-' }} &middot; {{ $record->academic_year }}
+                Tingkat {{ $record->grade_level ?? '-' }}
             </p>
             <h3 class="school-class-card__title">
                 {{ $record->name }}
@@ -35,12 +35,8 @@
 
     <dl class="school-class-card__details">
         <div>
-            <dt class="school-class-card__term">Guru Utama</dt>
+            <dt class="school-class-card__term">Wali Kelas</dt>
             <dd class="school-class-card__value">{{ $record->teacher?->user?->name ?? 'Belum ditentukan' }}</dd>
-        </div>
-        <div>
-            <dt class="school-class-card__term">Guru Pendamping</dt>
-            <dd class="school-class-card__value">{{ $record->assistantTeacher?->user?->name ?? 'Belum ditentukan' }}</dd>
         </div>
         <div>
             <dt class="school-class-card__term">Ruang</dt>

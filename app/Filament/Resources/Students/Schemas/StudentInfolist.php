@@ -58,7 +58,7 @@ class StudentInfolist
                                 default => $state,
                             }),
                     ]),
-                Section::make('Akademik dan Akun Siswa')
+                Section::make('Kelas dan Akun Siswa')
                     ->icon(Heroicon::OutlinedUserGroup)
                     ->columns([
                         'md' => 2,
@@ -71,9 +71,6 @@ class StudentInfolist
                         TextEntry::make('class.teacher.user.name')
                             ->label('Wali Kelas')
                             ->placeholder('Belum ditentukan'),
-                        TextEntry::make('class.academic_year')
-                            ->label('Tahun Ajaran')
-                            ->placeholder('Belum ditempatkan'),
                         TextEntry::make('class.room')
                             ->label('Ruang Kelas')
                             ->placeholder('Belum ditentukan'),

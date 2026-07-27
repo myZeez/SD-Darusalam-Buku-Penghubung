@@ -16,7 +16,6 @@ class SchoolSetting extends Model
         'phone',
         'email',
         'logo',
-        'academic_year',
         'school_start_time',
         'late_tolerance_minutes',
         'school_days',
@@ -35,7 +34,6 @@ class SchoolSetting extends Model
     {
         return static::query()->firstOrCreate([], [
             'school_name' => 'Sekolah Dasar Islam Darussalam',
-            'academic_year' => '2026/2027',
             'school_start_time' => '07:00:00',
             'school_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
             'timezone' => 'Asia/Jakarta',

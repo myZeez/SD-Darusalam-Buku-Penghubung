@@ -40,9 +40,9 @@ class AttendanceRecordsExport implements FromQuery, WithHeadings, WithMapping
             },
             $record->is_late ? 'Ya' : 'Tidak',
             match ($record->source) {
-                'arrival' => 'Check-in Loket',
+                'arrival' => 'Catatan Piket',
                 'parent_submission' => 'Pengajuan Orang Tua',
-                'teacher' => 'Guru',
+                'teacher' => 'Wali Kelas',
                 default => 'Manual',
             },
             $record->recorder?->name,

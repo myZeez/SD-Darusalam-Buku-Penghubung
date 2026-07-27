@@ -33,7 +33,7 @@ class StudentWorkspaceTest extends TestCase
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
-    public function test_student_navigation_only_contains_dashboard_profile_and_extracurricular(): void
+    public function test_student_navigation_contains_dashboard_profile_and_extracurricular(): void
     {
         $studentUser = User::role('siswa')->firstOrFail();
         $student = $studentUser->student;
@@ -52,6 +52,7 @@ class StudentWorkspaceTest extends TestCase
             ->assertSee('Ekskul')
             ->assertSee("/admin/students/{$student->id}", false)
             ->assertSee('/admin/extracurriculars', false)
+            ->assertDontSee('/admin/lesson-schedules', false)
             ->assertDontSee('/admin/school-activities', false)
             ->assertDontSee('/admin/home-activities', false)
             ->assertDontSee('/admin/activity-comments', false)
@@ -66,6 +67,7 @@ class StudentWorkspaceTest extends TestCase
             ->assertSee($student->name)
             ->assertSee($student->class->name)
             ->assertDontSee(StudentResource::getUrl('edit', ['record' => $student]), false);
+
     }
 
     public function test_student_cannot_open_removed_operational_pages_directly(): void

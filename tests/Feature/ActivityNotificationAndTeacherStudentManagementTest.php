@@ -154,7 +154,6 @@ class ActivityNotificationAndTeacherStudentManagementTest extends TestCase
             'teacher_id' => $teacher->id,
             'name' => 'Kelas Mutasi 2A',
             'grade_level' => 2,
-            'academic_year' => '2026/2027',
             'capacity' => 30,
         ]);
     }

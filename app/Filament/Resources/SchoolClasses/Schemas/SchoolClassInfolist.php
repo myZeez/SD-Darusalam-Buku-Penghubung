@@ -15,7 +15,7 @@ class SchoolClassInfolist
         return $schema
             ->components([
                 Section::make('Informasi Kelas')
-                    ->description('Ringkasan wali kelas, tahun ajaran, dan jumlah siswa.')
+                    ->description('Ringkasan wali kelas dan jumlah siswa.')
                     ->icon(Heroicon::OutlinedBookOpen)
                     ->columns([
                         'md' => 2,
@@ -24,23 +24,14 @@ class SchoolClassInfolist
                     ->schema([
                         TextEntry::make('name')
                             ->label('Nama Kelas'),
-                        TextEntry::make('academicPeriod.label')
-                            ->label('Periode Akademik')
-                            ->placeholder(fn (SchoolClass $record): string => $record->academic_year),
                         TextEntry::make('grade_level')
                             ->label('Tingkat')
                             ->formatStateUsing(fn (?int $state): string => $state ? "Kelas {$state}" : 'Belum ditentukan'),
                         TextEntry::make('teacher.user.name')
-                            ->label('Guru Utama')
+                            ->label('Wali Kelas')
                             ->placeholder('Belum ditentukan'),
                         TextEntry::make('teacher.nip')
-                            ->label('NIP Guru Utama')
-                            ->placeholder('Belum tersedia'),
-                        TextEntry::make('assistantTeacher.user.name')
-                            ->label('Guru Pendamping')
-                            ->placeholder('Belum ditentukan'),
-                        TextEntry::make('assistantTeacher.nip')
-                            ->label('NIP Guru Pendamping')
+                            ->label('NIP Wali Kelas')
                             ->placeholder('Belum tersedia'),
                         TextEntry::make('jumlah_siswa')
                             ->label('Jumlah Siswa')

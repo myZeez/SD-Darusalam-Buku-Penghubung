@@ -4,7 +4,7 @@ namespace Tests\Feature;
 
 use App\Filament\Resources\ActivityComments\ActivityCommentResource;
 use App\Filament\Resources\HomeActivities\HomeActivityResource;
-use App\Filament\Resources\HomeActivities\Pages\CreateHomeActivity;
+use App\Filament\Resources\HomeActivities\Pages\EditHomeActivity;
 use App\Filament\Resources\ParentProfiles\Pages\EditParentProfile;
 use App\Filament\Resources\ParentProfiles\ParentProfileResource;
 use App\Filament\Resources\ParentSubmissions\Pages\CreateParentSubmission;
@@ -132,41 +132,43 @@ class ParentWorkspaceTest extends TestCase
             ->assertOk()
             ->assertSee('Profil Anak')
             ->assertSee('Wali Kelas')
-            ->assertSee($student->class->academic_year)
             ->assertDontSee(StudentResource::getUrl('edit', ['record' => $student]), false);
 
         $this->get(StudentResource::getUrl('view', ['record' => $unrelatedStudent]))
             ->assertNotFound();
     }
 
-    public function test_home_report_automatically_uses_the_linked_student_and_parent(): void
+    public function test_parent_can_only_complete_the_fixed_home_activity_checklist_for_their_child(): void
     {
         $parentUser = User::role('orang_tua')->firstOrFail();
         $student = $parentUser->accessibleStudents()->firstOrFail();
+        $activity = HomeActivity::create([
+            'student_id' => $student->id,
+            'parent_id' => $student->parent_id,
+            'activity_date' => today(),
+            'activity_groups' => HomeActivity::defaultActivityGroupsForGrade($student->class->grade_level),
+        ]);
+        $groups = $activity->activity_groups;
+        $groups[0]['items'][0]['checked'] = true;
 
         $this->actingAs($parentUser);
 
-        Livewire::test(CreateHomeActivity::class)
-            ->assertFormSet([
-                'student_id' => $student->id,
-            ])
-            ->assertFormFieldDisabled('student_id')
+        $this->assertFalse(HomeActivityResource::canCreate());
+
+        Livewire::test(EditHomeActivity::class, ['record' => $activity->getRouteKey()])
             ->fillForm([
-                'activity_date' => today()->toDateString(),
-                'worship' => true,
-                'study' => true,
-                'homework' => false,
-                'sleep' => true,
-                'meal' => true,
+                'activity_groups' => $groups,
                 'note' => 'Laporan otomatis dari hubungan keluarga.',
             ])
-            ->call('create')
+            ->call('save')
             ->assertHasNoFormErrors();
 
-        $activity = HomeActivity::query()->latest('id')->firstOrFail();
+        $activity->refresh();
 
         $this->assertSame($student->id, $activity->student_id);
         $this->assertSame($student->parent_id, $activity->parent_id);
+        $this->assertTrue($activity->activity_groups[0]['items'][0]['checked']);
+        $this->assertSame('Melaksanakan salat Subuh', $activity->activity_groups[0]['items'][0]['label']);
     }
 
     public function test_home_reports_follow_parent_relationship_changes(): void
@@ -219,7 +221,6 @@ class ParentWorkspaceTest extends TestCase
             'teacher_id' => $teacher->id,
             'name' => 'Kelas 2B',
             'grade_level' => 2,
-            'academic_year' => '2026/2027',
             'capacity' => 30,
         ]);
         $secondStudent = Student::create([

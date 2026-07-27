@@ -64,34 +64,53 @@ class FlexibleActivityAndStudentReportTest extends TestCase
             ->assertSee('Sangat bersemangat dalam melakukan kegiatan outdoor.');
     }
 
-    public function test_parent_can_create_home_activity_categories_with_checklists_and_text(): void
+    public function test_teacher_applies_the_fixed_home_activity_template_to_every_student_in_a_class(): void
     {
-        $parent = User::role('orang_tua')->firstOrFail();
-        $student = $parent->accessibleStudents()->firstOrFail();
-        $groups = $this->homeGroups();
+        $teacher = User::role('guru')->firstOrFail();
+        $class = $teacher->managedClasses()->withCount('students')->firstOrFail();
 
-        $this->actingAs($parent);
+        $this->actingAs($teacher);
 
         Livewire::test(CreateHomeActivity::class)
             ->fillForm([
-                'student_id' => $student->id,
+                'class_id' => $class->id,
                 'activity_date' => today()->toDateString(),
-                'activity_groups' => $groups,
-                'note' => 'Aktivitas rumah dicatat orang tua.',
             ])
             ->call('create')
             ->assertHasNoFormErrors();
 
-        $activity = HomeActivity::query()->latest('id')->firstOrFail();
+        $activities = HomeActivity::query()
+            ->whereDate('activity_date', today())
+            ->orderBy('student_id')
+            ->get();
+        $activity = $activities->firstOrFail();
 
-        $this->assertSame($student->parent_id, $activity->parent_id);
-        $this->assertSame($groups, $activity->activity_groups);
+        $this->assertCount($class->students_count, $activities);
+        $this->assertSame(
+            HomeActivity::defaultActivityGroupsForGrade($class->grade_level),
+            $activity->activity_groups,
+        );
+        $this->assertSame('Berakhlak, Berprestasi, Berjiwa Sosial, Peduli Lingkungan', $activity->activity_category_summary);
 
         $this->get(HomeActivityResource::getUrl('view', ['record' => $activity]))
             ->assertOk()
-            ->assertSee('Kebiasaan Harian')
-            ->assertSee('Mengerjakan PR')
-            ->assertSee('Belajar mandiri selama tiga puluh menit.');
+            ->assertSee('Berakhlak')
+            ->assertSee('Menjaga kebersihan dan kerapian rumah');
+    }
+
+    public function test_tahajud_is_included_only_for_the_upper_grades(): void
+    {
+        $lowerGradeLabels = collect(HomeActivity::defaultActivityGroupsForGrade(3))
+            ->pluck('items')
+            ->flatten(1)
+            ->pluck('label');
+        $upperGradeLabels = collect(HomeActivity::defaultActivityGroupsForGrade(4))
+            ->pluck('items')
+            ->flatten(1)
+            ->pluck('label');
+
+        $this->assertFalse($lowerGradeLabels->contains('Melaksanakan salat Tahajud'));
+        $this->assertTrue($upperGradeLabels->contains('Melaksanakan salat Tahajud'));
     }
 
     public function test_admin_report_combines_attendance_arrival_and_both_activity_sources_in_pdf(): void
@@ -219,6 +238,7 @@ class FlexibleActivityAndStudentReportTest extends TestCase
                     [
                         'label' => 'Kegiatan Outdoor',
                         'type' => 'text',
+                        'checked' => null,
                         'text' => 'Sangat bersemangat dalam melakukan kegiatan outdoor.',
                     ],
                 ],

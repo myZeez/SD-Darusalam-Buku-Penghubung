@@ -21,11 +21,8 @@ class CreateHomeActivity extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $user = auth()->user();
-
         abort_unless(HomeActivityResource::canCreate(), 403);
-        $classes = $user?->hasRole('guru') ? $user->managedClasses() : $user?->accessibleClasses();
-        $classes?->findOrFail((int) $data['class_id']);
+        $this->accessibleClasses()->findOrFail((int) $data['class_id']);
 
         return $data;
     }
@@ -33,6 +30,7 @@ class CreateHomeActivity extends CreateRecord
     protected function handleRecordCreation(array $data): Model
     {
         $classId = (int) Arr::pull($data, 'class_id');
+        $class = $this->accessibleClasses()->findOrFail($classId);
         $students = Student::query()
             ->where('class_id', $classId)
             ->orderBy('name')
@@ -55,7 +53,10 @@ class CreateHomeActivity extends CreateRecord
             ]);
         }
 
-        $template = Arr::except($data, ['student_id', 'parent_id']);
+        $template = [
+            ...Arr::except($data, ['student_id', 'parent_id', 'activity_groups']),
+            'activity_groups' => HomeActivity::defaultActivityGroupsForGrade($class?->grade_level),
+        ];
 
         return DB::transaction(function () use ($students, $template): HomeActivity {
             $firstActivity = null;
@@ -83,5 +84,14 @@ class CreateHomeActivity extends CreateRecord
     protected function getRedirectUrl(): string
     {
         return static::getResource()::getUrl();
+    }
+
+    private function accessibleClasses()
+    {
+        $user = auth()->user();
+
+        return $user?->hasRole('guru')
+            ? $user->managedClasses()
+            : $user?->accessibleClasses();
     }
 }

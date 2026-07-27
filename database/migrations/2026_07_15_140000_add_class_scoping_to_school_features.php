@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('classes', function (Blueprint $table) {
             $table->unsignedTinyInteger('grade_level')->nullable()->after('name');
-            $table->unsignedSmallInteger('capacity')->default(30)->after('academic_year');
+            $table->unsignedSmallInteger('capacity')->default(30)->after('grade_level');
             $table->string('room')->nullable()->after('capacity');
             $table->text('description')->nullable()->after('room');
         });

@@ -20,7 +20,7 @@ class AttendanceRecordForm
     {
         return $schema->components([
             Section::make('Presensi Siswa')
-                ->description('Kelas mengikuti penempatan siswa. Status dapat dikoreksi oleh admin atau guru yang berwenang.')
+                ->description('Kelas mengikuti penempatan siswa. Status dapat dikoreksi oleh admin atau wali kelas yang berwenang.')
                 ->icon(Heroicon::OutlinedClipboardDocumentCheck)
                 ->columns(['md' => 2])
                 ->schema([
@@ -73,7 +73,7 @@ class AttendanceRecordForm
                         ->columnSpanFull(),
                     Toggle::make('is_late')
                         ->label('Datang Terlambat')
-                        ->helperText('Status ini biasanya terisi otomatis dari check-in gerbang.'),
+                        ->helperText('Status ini biasanya terisi otomatis dari catatan Piket.'),
                     Textarea::make('notes')
                         ->label('Catatan Presensi')
                         ->rows(3)

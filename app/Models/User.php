@@ -79,10 +79,10 @@ class User extends Authenticatable implements FilamentUser
     {
         return match ($role) {
             'admin' => 'Admin / Kepala Sekolah',
-            'guru' => 'Guru',
+            'guru' => 'Wali Kelas',
             'orang_tua' => 'Orang Tua',
             'siswa' => 'Siswa',
-            'loket' => 'Petugas Loket',
+            'loket' => 'Petugas Piket',
             default => $role,
         };
     }
@@ -137,12 +137,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         if ($this->hasRole('guru')) {
-            return $query->where(function (Builder $query): void {
-                $query
-                    ->whereHas('teacher', fn (Builder $query) => $query->where('user_id', $this->id))
-                    ->orWhereHas('assistantTeacher', fn (Builder $query) => $query->where('user_id', $this->id))
-                    ->orWhereHas('teachingAssignments.teacher', fn (Builder $query) => $query->where('user_id', $this->id));
-            });
+            return $query->whereHas('teacher', fn (Builder $query) => $query->where('user_id', $this->id));
         }
 
         if ($this->hasAnyRole(['orang_tua', 'siswa'])) {
@@ -166,11 +161,7 @@ class User extends Authenticatable implements FilamentUser
         }
 
         if ($this->hasRole('guru')) {
-            return $query->where(function (Builder $query): void {
-                $query
-                    ->whereHas('teacher', fn (Builder $query) => $query->where('user_id', $this->id))
-                    ->orWhereHas('assistantTeacher', fn (Builder $query) => $query->where('user_id', $this->id));
-            });
+            return $query->whereHas('teacher', fn (Builder $query) => $query->where('user_id', $this->id));
         }
 
         return $query->whereRaw('1 = 0');

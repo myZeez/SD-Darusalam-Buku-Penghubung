@@ -11,15 +11,15 @@
 
             context.fillStyle = '#ffffff';
             context.fillRect(0, 0, canvas.width, canvas.height);
-            context.fillStyle = '#f59e0b';
+            context.fillStyle = '#2563eb';
             context.fillRect(0, 0, canvas.width, 18);
 
             context.fillStyle = '#18181b';
             context.font = '700 42px Arial, sans-serif';
-            context.fillText('Buku Penghubung Digital', 72, 92);
+            context.fillText('SIMPATI', 72, 92);
             context.font = '400 24px Arial, sans-serif';
-            context.fillStyle = '#52525b';
-            context.fillText('SD Islam Darussalam', 72, 132);
+            context.fillStyle = '#334155';
+            context.fillText('Mendekatkan komunikasi, memantau perkembangan', 72, 132);
 
             const drawAccount = (top, title, name, email, password) => {
                 context.fillStyle = '#f4f4f5';

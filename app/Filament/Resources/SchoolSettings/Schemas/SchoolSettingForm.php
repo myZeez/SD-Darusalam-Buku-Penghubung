@@ -34,10 +34,6 @@ class SchoolSettingForm
                         ->label('NPSN'),
                     TextInput::make('principal_name')
                         ->label('Nama Kepala Sekolah'),
-                    TextInput::make('academic_year')
-                        ->label('Tahun Ajaran Aktif')
-                        ->placeholder('2026/2027')
-                        ->required(),
                     TextInput::make('phone')
                         ->label('Nomor Telepon')
                         ->tel(),
@@ -50,7 +46,7 @@ class SchoolSettingForm
                         ->columnSpanFull(),
                 ]),
             Section::make('Aturan Kehadiran')
-                ->description('Jam ini menjadi dasar penentuan tepat waktu atau terlambat di loket.')
+                ->description('Jam ini menjadi dasar penentuan keterlambatan oleh Piket.')
                 ->icon(Heroicon::OutlinedClock)
                 ->columns(['md' => 2])
                 ->schema([

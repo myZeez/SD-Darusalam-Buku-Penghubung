@@ -2,7 +2,6 @@
 
 namespace App\Filament\Resources\SchoolClasses\Schemas;
 
-use App\Models\AcademicPeriod;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -24,15 +23,6 @@ class SchoolClassForm
                         'md' => 2,
                     ])
                     ->schema([
-                        Select::make('academic_period_id')
-                            ->relationship('academicPeriod', 'academic_year')
-                            ->getOptionLabelFromRecordUsing(fn (AcademicPeriod $record): string => $record->label)
-                            ->default(fn (): ?int => AcademicPeriod::query()->where('is_active', true)->value('id'))
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->disabled(fn (): bool => ! (auth()->user()?->can('manage classes') ?? false))
-                            ->label('Periode Akademik'),
                         Select::make('teacher_id')
                             ->relationship('teacher', 'nip')
                             ->getOptionLabelFromRecordUsing(fn ($record): string => $record->user?->name ?? $record->nip ?? 'Guru')
@@ -40,15 +30,7 @@ class SchoolClassForm
                             ->preload()
                             ->required()
                             ->disabled(fn (): bool => ! (auth()->user()?->can('manage classes') ?? false))
-                            ->label('Guru Utama'),
-                        Select::make('assistant_teacher_id')
-                            ->relationship('assistantTeacher', 'nip')
-                            ->getOptionLabelFromRecordUsing(fn ($record): string => $record->user?->name ?? $record->nip ?? 'Guru')
-                            ->searchable()
-                            ->preload()
-                            ->different('teacher_id')
-                            ->disabled(fn (): bool => ! (auth()->user()?->can('manage classes') ?? false))
-                            ->label('Guru Pendamping'),
+                            ->label('Wali Kelas'),
                         TextInput::make('name')
                             ->label('Nama Kelas')
                             ->required()

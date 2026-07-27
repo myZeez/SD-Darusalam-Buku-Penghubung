@@ -14,8 +14,8 @@ class TeacherInfolist
     {
         return $schema
             ->components([
-                Section::make('Profil Guru')
-                    ->description('Identitas dan kontak guru yang terdaftar.')
+                Section::make('Profil Wali Kelas')
+                    ->description('Identitas dan kontak wali kelas yang terdaftar.')
                     ->icon(Heroicon::OutlinedAcademicCap)
                     ->columns([
                         'md' => 2,
@@ -27,9 +27,9 @@ class TeacherInfolist
                             ->imageSize(120)
                             ->circular(),
                         TextEntry::make('user.name')
-                            ->label('Nama Guru'),
+                            ->label('Nama Wali Kelas'),
                         TextEntry::make('class_duty_summary')
-                            ->label('Peran di Kelas')
+                            ->label('Wali Kelas')
                             ->columnSpanFull(),
                         TextEntry::make('nip')
                             ->label('NIP')

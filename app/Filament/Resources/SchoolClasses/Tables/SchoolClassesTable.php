@@ -12,7 +12,7 @@ class SchoolClassesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['teacher.user', 'assistantTeacher.user'])->withCount([
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->with(['teacher.user'])->withCount([
                 'students' => fn (Builder $query): Builder => $query->where('status', 'active'),
             ]))
             ->columns([
@@ -23,12 +23,6 @@ class SchoolClassesTable
                     ->searchable()
                     ->hidden(),
                 TextColumn::make('teacher.user.name')
-                    ->searchable()
-                    ->hidden(),
-                TextColumn::make('assistantTeacher.user.name')
-                    ->searchable()
-                    ->hidden(),
-                TextColumn::make('academic_year')
                     ->searchable()
                     ->hidden(),
             ])

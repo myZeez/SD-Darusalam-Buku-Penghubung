@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\ActivityGroups;
+use App\Support\HomeActivityTemplate;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 
@@ -44,18 +45,13 @@ class HomeActivity extends Model
             return $groups;
         }
 
-        return ActivityGroups::normalize([
-            [
-                'category' => 'Kebiasaan Harian',
-                'items' => [
-                    ['label' => 'Ibadah', 'type' => 'checklist', 'checked' => $this->worship],
-                    ['label' => 'Belajar', 'type' => 'checklist', 'checked' => $this->study],
-                    ['label' => 'Mengerjakan PR', 'type' => 'checklist', 'checked' => $this->homework],
-                    ['label' => 'Tidur Tepat Waktu', 'type' => 'checklist', 'checked' => $this->sleep],
-                    ['label' => 'Makan Teratur', 'type' => 'checklist', 'checked' => $this->meal],
-                ],
-            ],
-        ]);
+        return self::defaultActivityGroupsForGrade($this->student?->class?->grade_level);
+    }
+
+    /** @return array<int, array<string, mixed>> */
+    public static function defaultActivityGroupsForGrade(?int $gradeLevel): array
+    {
+        return HomeActivityTemplate::forGrade($gradeLevel);
     }
 
     protected function activityCategorySummary(): Attribute

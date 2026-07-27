@@ -46,10 +46,10 @@ class AttendanceRecordInfolist
                         ->label('Sumber Data')
                         ->badge()
                         ->formatStateUsing(fn (string $state): string => match ($state) {
-                            'arrival' => 'Check-in Loket',
+                            'arrival' => 'Catatan Piket',
                             'parent_submission' => 'Pengajuan Orang Tua',
                             'manual' => 'Pencatatan Manual',
-                            'teacher' => 'Konfirmasi Guru',
+                            'teacher' => 'Konfirmasi Wali Kelas',
                             default => $state,
                         })
                         ->hidden(fn (): bool => auth()->user()?->hasRole('orang_tua') ?? false),

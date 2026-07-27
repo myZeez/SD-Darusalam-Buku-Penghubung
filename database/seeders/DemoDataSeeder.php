@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\AcademicPeriod;
 use App\Models\ActivityComment;
 use App\Models\AttendanceRecord;
 use App\Models\Extracurricular;
@@ -11,8 +10,6 @@ use App\Models\ExtracurricularEnrollment;
 use App\Models\ExtracurricularScore;
 use App\Models\ExtracurricularSession;
 use App\Models\HomeActivity;
-use App\Models\LessonPeriod;
-use App\Models\LessonSchedule;
 use App\Models\ParentProfile;
 use App\Models\ParentSubmission;
 use App\Models\PasswordResetRequest;
@@ -23,9 +20,7 @@ use App\Models\SchoolClass;
 use App\Models\SchoolSetting;
 use App\Models\Student;
 use App\Models\StudentArrival;
-use App\Models\Subject;
 use App\Models\Teacher;
-use App\Models\TeachingAssignment;
 use App\Models\User;
 use App\Models\UserNotification;
 use Carbon\CarbonImmutable;
@@ -36,8 +31,6 @@ use Spatie\Permission\Models\Role;
 
 class DemoDataSeeder extends Seeder
 {
-    private const ACADEMIC_YEAR = '2026/2027';
-
     private const DEMO_PASSWORD = 'password';
 
     private const STUDENT_COUNT = 50;
@@ -49,12 +42,10 @@ class DemoDataSeeder extends Seeder
         DB::transaction(function (): void {
             $coreUsers = $this->seedCoreUsers();
             $settings = $this->seedSchoolSettings();
-            $period = $this->seedAcademicPeriod();
             $teachers = $this->seedTeachers();
-            $classes = $this->seedClasses($period, $teachers);
+            $classes = $this->seedClasses($teachers);
             $families = $this->seedFamiliesAndStudents($classes);
-
-            $this->seedAcademicStructure($period, $classes);
+            $demoStartDate = CarbonImmutable::now($settings->timezone)->startOfMonth();
 
             $schoolDays = $this->recentSchoolDays(10, $settings->timezone);
             $attendancePlan = $this->buildAttendancePlan($families, $schoolDays);
@@ -62,7 +53,7 @@ class DemoDataSeeder extends Seeder
                 $families,
                 $attendancePlan,
                 $coreUsers['admin'],
-                CarbonImmutable::parse($period->start_date),
+                $demoStartDate,
             );
 
             $this->seedAttendance(
@@ -79,7 +70,7 @@ class DemoDataSeeder extends Seeder
             $schedules = $this->seedSchedules(
                 $classes,
                 $coreUsers['admin'],
-                CarbonImmutable::parse($period->start_date),
+                $demoStartDate,
             );
             $this->seedScheduleResponses($schedules, $families);
             $this->seedNotifications($families, $teachers, $coreUsers['admin']);
@@ -87,7 +78,7 @@ class DemoDataSeeder extends Seeder
             $this->seedExtracurriculars(
                 $families,
                 $teachers,
-                CarbonImmutable::parse($period->start_date),
+                $demoStartDate,
             );
         });
 
@@ -137,7 +128,6 @@ class DemoDataSeeder extends Seeder
             'address' => 'Jl. Pendidikan No. 10, Kota Bandung, Jawa Barat',
             'phone' => '022-7000000',
             'email' => 'sekolah@sddarusalam.test',
-            'academic_year' => self::ACADEMIC_YEAR,
             'school_start_time' => '07:00:00',
             'late_tolerance_minutes' => 10,
             'school_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'],
@@ -145,22 +135,6 @@ class DemoDataSeeder extends Seeder
         ]);
 
         return $settings;
-    }
-
-    private function seedAcademicPeriod(): AcademicPeriod
-    {
-        return AcademicPeriod::query()->updateOrCreate(
-            [
-                'academic_year' => self::ACADEMIC_YEAR,
-                'semester' => 'odd',
-            ],
-            [
-                'start_date' => '2026-07-01',
-                'end_date' => '2026-12-31',
-                'is_active' => true,
-                'notes' => 'Semester ganjil aktif untuk data demonstrasi dan pengujian aplikasi.',
-            ],
-        );
     }
 
     /** @return Collection<int, Teacher> */
@@ -199,32 +173,29 @@ class DemoDataSeeder extends Seeder
      * @param  Collection<int, Teacher>  $teachers
      * @return Collection<int, SchoolClass>
      */
-    private function seedClasses(AcademicPeriod $period, Collection $teachers): Collection
+    private function seedClasses(Collection $teachers): Collection
     {
         $definitions = [
-            ['Kelas 1A', 1, 'Ruang 1A', 0, 2],
-            ['Kelas 1B', 1, 'Ruang 1B', 1, 6],
-            ['Kelas 2A', 2, 'Ruang 2A', 3, 7],
-            ['Kelas 2B', 2, 'Ruang 2B', 4, 8],
-            ['Kelas 3A', 3, 'Ruang 3A', 5, 9],
+            ['Kelas 1A', 1, 'Ruang 1A', 0],
+            ['Kelas 1B', 1, 'Ruang 1B', 1],
+            ['Kelas 2A', 2, 'Ruang 2A', 3],
+            ['Kelas 2B', 2, 'Ruang 2B', 4],
+            ['Kelas 3A', 3, 'Ruang 3A', 5],
         ];
 
-        return collect($definitions)->map(function (array $definition) use ($period, $teachers): SchoolClass {
-            [$name, $grade, $room, $teacherIndex, $assistantIndex] = $definition;
+        return collect($definitions)->map(function (array $definition) use ($teachers): SchoolClass {
+            [$name, $grade, $room, $teacherIndex] = $definition;
 
             return SchoolClass::query()->updateOrCreate(
                 [
                     'name' => $name,
-                    'academic_year' => self::ACADEMIC_YEAR,
                 ],
                 [
                     'teacher_id' => $teachers[$teacherIndex]->id,
-                    'assistant_teacher_id' => $teachers[$assistantIndex]->id,
-                    'academic_period_id' => $period->id,
                     'grade_level' => $grade,
                     'capacity' => 30,
                     'room' => $room,
-                    'description' => "Rombongan belajar {$name} tahun ajaran ".self::ACADEMIC_YEAR.'.',
+                    'description' => "Rombongan belajar {$name}.",
                 ],
             );
         })->values();
@@ -312,140 +283,6 @@ class DemoDataSeeder extends Seeder
         }
 
         return $families;
-    }
-
-    /** @param Collection<int, SchoolClass> $classes */
-    private function seedAcademicStructure(AcademicPeriod $period, Collection $classes): void
-    {
-        $subjectDefinitions = [
-            ['PAI', 'Pendidikan Agama Islam'],
-            ['BIND', 'Bahasa Indonesia'],
-            ['MTK', 'Matematika'],
-            ['IPAS', 'Ilmu Pengetahuan Alam dan Sosial'],
-            ['PPKN', 'Pendidikan Pancasila'],
-            ['PJOK', 'Pendidikan Jasmani, Olahraga, dan Kesehatan'],
-            ['SBDP', 'Seni Budaya dan Prakarya'],
-        ];
-        $subjects = collect($subjectDefinitions)->map(fn (array $definition): Subject => Subject::query()->updateOrCreate(
-            ['code' => $definition[0]],
-            [
-                'name' => $definition[1],
-                'description' => $definition[1].' untuk jenjang sekolah dasar.',
-                'is_active' => true,
-            ],
-        ))->values();
-
-        $periodDefinitions = [
-            [1, 'Jam Pelajaran 1', '07:00:00', '07:35:00', 'lesson'],
-            [2, 'Jam Pelajaran 2', '07:35:00', '08:10:00', 'lesson'],
-            [3, 'Jam Pelajaran 3', '08:10:00', '08:45:00', 'lesson'],
-            [4, 'Istirahat', '08:45:00', '09:05:00', 'break'],
-            [5, 'Jam Pelajaran 4', '09:05:00', '09:40:00', 'lesson'],
-            [6, 'Jam Pelajaran 5', '09:40:00', '10:15:00', 'lesson'],
-            [7, 'Jam Pelajaran 6', '10:15:00', '10:50:00', 'lesson'],
-            [8, 'Jam Pelajaran 7', '10:50:00', '11:25:00', 'lesson'],
-        ];
-        $lessonPeriods = collect($periodDefinitions)->map(fn (array $definition): LessonPeriod => LessonPeriod::query()->updateOrCreate(
-            [
-                'academic_period_id' => $period->id,
-                'sequence' => $definition[0],
-            ],
-            [
-                'name' => $definition[1],
-                'start_time' => $definition[2],
-                'end_time' => $definition[3],
-                'type' => $definition[4],
-                'is_active' => true,
-            ],
-        ))->keyBy('sequence');
-
-        $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
-        $lessonSequences = [1, 2, 3, 5, 6];
-
-        $assignmentsByClass = [];
-
-        foreach ($classes as $class) {
-            $assignmentsByClass[$class->id] = $subjects
-                ->map(fn (Subject $subject): TeachingAssignment => $this->upsertTeachingAssignment($period, $class, $subject))
-                ->values();
-        }
-
-        foreach ($classes as $class) {
-            $assignments = $assignmentsByClass[$class->id];
-
-            foreach ($days as $dayIndex => $day) {
-                foreach ($lessonSequences as $periodIndex => $sequence) {
-                    $assignment = $assignments[($dayIndex + $periodIndex) % $assignments->count()];
-                    $lessonPeriod = $lessonPeriods[$sequence];
-                    $schedule = LessonSchedule::query()
-                        ->where('lesson_period_id', $lessonPeriod->id)
-                        ->where('day_of_week', $day)
-                        ->whereHas('teachingAssignment', fn ($query) => $query
-                            ->where('academic_period_id', $period->id)
-                            ->where('class_id', $class->id))
-                        ->first();
-
-                    if ($schedule) {
-                        $schedule->update([
-                            'teaching_assignment_id' => $assignment->id,
-                            'room' => $class->room,
-                            'notes' => "Jadwal rutin {$class->name}.",
-                            'is_active' => true,
-                        ]);
-
-                        continue;
-                    }
-
-                    LessonSchedule::query()->create([
-                        'teaching_assignment_id' => $assignment->id,
-                        'lesson_period_id' => $lessonPeriod->id,
-                        'day_of_week' => $day,
-                        'room' => $class->room,
-                        'notes' => "Jadwal rutin {$class->name}.",
-                        'is_active' => true,
-                    ]);
-                }
-            }
-        }
-    }
-
-    private function upsertTeachingAssignment(
-        AcademicPeriod $period,
-        SchoolClass $class,
-        Subject $subject,
-    ): TeachingAssignment {
-        $matchingAssignments = TeachingAssignment::query()
-            ->where('academic_period_id', $period->id)
-            ->where('class_id', $class->id)
-            ->where('subject_id', $subject->id)
-            ->orderBy('id')
-            ->get();
-        $assignment = $matchingAssignments->firstWhere('teacher_id', $class->teacher_id)
-            ?? $matchingAssignments->first()
-            ?? new TeachingAssignment([
-                'academic_period_id' => $period->id,
-                'class_id' => $class->id,
-                'subject_id' => $subject->id,
-            ]);
-        $duplicateAssignmentIds = $matchingAssignments
-            ->where('id', '!=', $assignment->id)
-            ->pluck('id');
-
-        if ($duplicateAssignmentIds->isNotEmpty()) {
-            LessonSchedule::query()
-                ->whereIn('teaching_assignment_id', $duplicateAssignmentIds)
-                ->delete();
-            TeachingAssignment::query()->whereKey($duplicateAssignmentIds)->delete();
-        }
-
-        $assignment->fill([
-            'teacher_id' => $class->teacher_id,
-            'is_active' => true,
-            'notes' => "Penugasan aktif {$subject->name} untuk {$class->name}.",
-        ]);
-        $assignment->save();
-
-        return $assignment;
     }
 
     /** @return Collection<int, CarbonImmutable> */
@@ -699,7 +536,7 @@ class DemoDataSeeder extends Seeder
                     'student_id' => $family['student']->id,
                     'parent_id' => $family['parent']->id,
                     'activity_date' => $date,
-                    'activity_groups' => json_encode($this->homeActivityGroups($family['index'], $dayIndex), JSON_UNESCAPED_UNICODE),
+                    'activity_groups' => json_encode($this->homeActivityGroups($family['class']->grade_level, $family['index'], $dayIndex), JSON_UNESCAPED_UNICODE),
                     'worship' => true,
                     'study' => true,
                     'homework' => (($family['index'] + $dayIndex) % 5) !== 0,
@@ -766,25 +603,19 @@ class DemoDataSeeder extends Seeder
     }
 
     /** @return array<int, array{category: string, items: array<int, array<string, mixed>>}> */
-    private function homeActivityGroups(int $index, int $dayIndex): array
+    private function homeActivityGroups(?int $gradeLevel, int $index, int $dayIndex): array
     {
-        return [
-            [
-                'category' => 'Kebiasaan Harian',
-                'items' => [
-                    ['label' => 'Beribadah', 'type' => 'checklist', 'checked' => true],
-                    ['label' => 'Belajar mandiri', 'type' => 'checklist', 'checked' => true],
-                    ['label' => 'Mengerjakan PR', 'type' => 'checklist', 'checked' => ($index + $dayIndex) % 5 !== 0],
-                    ['label' => 'Tidur tepat waktu', 'type' => 'checklist', 'checked' => ($index + $dayIndex) % 7 !== 0],
-                ],
-            ],
-            [
-                'category' => 'Catatan Orang Tua',
-                'items' => [
-                    ['label' => 'Perkembangan di rumah', 'type' => 'text', 'text' => 'Anak mengikuti rutinitas rumah dengan baik dan kooperatif.'],
-                ],
-            ],
-        ];
+        $groups = HomeActivity::defaultActivityGroupsForGrade($gradeLevel);
+
+        foreach ($groups as $groupIndex => &$group) {
+            foreach ($group['items'] as $itemIndex => &$item) {
+                $item['checked'] = ($index + $dayIndex + $groupIndex + $itemIndex) % 6 !== 0;
+            }
+            unset($item);
+        }
+        unset($group);
+
+        return $groups;
     }
 
     /**
@@ -1175,12 +1006,10 @@ class DemoDataSeeder extends Seeder
             [
                 ['Siswa demo', Student::query()->where('nis', 'like', 'SDD-%')->count()],
                 ['Guru', Teacher::query()->count()],
-                ['Kelas', SchoolClass::query()->where('academic_year', self::ACADEMIC_YEAR)->count()],
+                ['Kelas', SchoolClass::query()->count()],
                 ['Presensi', AttendanceRecord::query()->count()],
                 ['Laporan sekolah', SchoolActivity::query()->count()],
                 ['Laporan rumah', HomeActivity::query()->count()],
-                ['Penugasan mengajar', TeachingAssignment::query()->count()],
-                ['Jadwal mengajar', LessonSchedule::query()->count()],
                 ['Utas diskusi', ActivityComment::query()->whereNull('parent_id')->count()],
                 ['Agenda kegiatan', Schedule::query()->count()],
                 ['Ekstrakurikuler', Extracurricular::query()->count()],

@@ -23,7 +23,6 @@ class SchoolSettingInfolist
                     TextEntry::make('school_name')->label('Nama Sekolah'),
                     TextEntry::make('npsn')->label('NPSN')->placeholder('Belum diisi'),
                     TextEntry::make('principal_name')->label('Kepala Sekolah')->placeholder('Belum diisi'),
-                    TextEntry::make('academic_year')->label('Tahun Ajaran'),
                     TextEntry::make('phone')->label('Telepon')->placeholder('Belum diisi'),
                     TextEntry::make('email')->label('Email')->placeholder('Belum diisi'),
                     TextEntry::make('address')->label('Alamat')->placeholder('Belum diisi')->columnSpanFull(),

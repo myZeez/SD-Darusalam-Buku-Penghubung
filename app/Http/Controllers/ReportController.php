@@ -74,7 +74,6 @@ class ReportController extends Controller
         $schoolClass = SchoolClass::query()
             ->with([
                 'teacher.user',
-                'assistantTeacher.user',
                 'students' => fn ($query) => $query->where('status', 'active')->orderBy('name'),
             ])
             ->findOrFail($classId);

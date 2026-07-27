@@ -67,11 +67,69 @@
             </div>
         </section>
 
+        <section class="teacher-attendance__calendar" aria-labelledby="attendance-calendar-title">
+            <header class="teacher-attendance__calendar-header">
+                <div>
+                    <p>Kalender Presensi 📅</p>
+                    <h2 id="attendance-calendar-title">{{ \Carbon\CarbonImmutable::parse($calendarMonth)->translatedFormat('F Y') }}</h2>
+                </div>
+
+                <div class="teacher-attendance__calendar-actions" aria-label="Pindah bulan kalender">
+                    <x-filament::button
+                        type="button"
+                        color="gray"
+                        size="sm"
+                        icon="gmdi-chevron-left"
+                        wire:click="showPreviousCalendarMonth"
+                        aria-label="Bulan sebelumnya"
+                    />
+                    <x-filament::button
+                        type="button"
+                        color="gray"
+                        size="sm"
+                        icon="gmdi-chevron-right"
+                        wire:click="showNextCalendarMonth"
+                        aria-label="Bulan berikutnya"
+                    />
+                </div>
+            </header>
+
+            <div class="teacher-attendance__calendar-legend" aria-label="Keterangan warna kalender">
+                <span><i class="is-complete" aria-hidden="true"></i> Lengkap</span>
+                <span><i class="is-incomplete" aria-hidden="true"></i> Belum lengkap</span>
+                <span><i class="is-future" aria-hidden="true"></i> Belum waktunya</span>
+            </div>
+
+            <div class="teacher-attendance__calendar-weekdays" aria-hidden="true">
+                @foreach (['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'] as $day)
+                    <span>{{ $day }}</span>
+                @endforeach
+            </div>
+
+            <div class="teacher-attendance__calendar-days">
+                @foreach ($this->calendarDays() as $day)
+                    <button
+                        type="button"
+                        wire:click="selectCalendarDate('{{ $day['date'] }}')"
+                        wire:key="attendance-calendar-{{ $day['date'] }}"
+                        class="teacher-attendance__calendar-day {{ $day['in_month'] ? '' : 'is-outside-month' }} {{ $day['is_complete'] ? 'is-complete' : '' }} {{ $day['is_incomplete'] ? 'is-incomplete' : '' }} {{ $day['is_future'] ? 'is-future' : '' }} {{ $day['is_selected'] ? 'is-selected' : '' }} {{ $day['is_today'] ? 'is-today' : '' }}"
+                        aria-label="{{ $day['label'] }}{{ $day['is_complete'] ? ', presensi lengkap' : ($day['is_incomplete'] ? ', presensi belum lengkap' : '') }}"
+                        aria-pressed="{{ $day['is_selected'] ? 'true' : 'false' }}"
+                    >
+                        <span>{{ $day['day'] }}</span>
+                        @if (! $day['is_future'])
+                            <small>{{ $day['record_count'] }} data</small>
+                        @endif
+                    </button>
+                @endforeach
+            </div>
+        </section>
+
         @if ($pendingSubmissions)
             <section class="teacher-attendance__submissions" aria-labelledby="parent-submissions-title">
                 <header class="teacher-attendance__submissions-header">
                     <div>
-                        <h2 id="parent-submissions-title">Informasi dari Orang Tua</h2>
+                        <h2 id="parent-submissions-title">Informasi dari Orang Tua 💌</h2>
                         <p>Tinjau sakit atau izin sebelum melengkapi presensi kelas.</p>
                     </div>
                     <span>{{ count($pendingSubmissions) }} menunggu</span>
@@ -81,7 +139,7 @@
                     @foreach ($pendingSubmissions as $submission)
                         <article class="teacher-attendance__submission" wire:key="parent-submission-{{ $submission['id'] }}">
                             <div class="teacher-attendance__submission-icon teacher-attendance__submission-icon--{{ $submission['type'] }}">
-                                <x-filament::icon :icon="$submission['type'] === 'sick' ? 'gmdi-medical-information-o' : 'gmdi-description-o'" />
+                                    <x-filament::icon :icon="$submission['type'] === 'sick' ? 'gmdi-medical-information-o' : ($submission['type'] === 'early_leave' ? 'gmdi-directions-walk-o' : 'gmdi-description-o')" />
                             </div>
                             <div class="teacher-attendance__submission-body">
                                 <div class="teacher-attendance__submission-heading">
@@ -141,8 +199,8 @@
         <section class="teacher-attendance__roster" aria-labelledby="attendance-roster-title">
             <header class="teacher-attendance__roster-header">
                 <div>
-                    <h2 id="attendance-roster-title">Daftar Siswa</h2>
-                    <p>{{ $this->formattedDate() }} - Data Loket dan laporan orang tua ditampilkan otomatis.</p>
+                    <h2 id="attendance-roster-title">Daftar Siswa 🌟</h2>
+                    <p>{{ $this->formattedDate() }} - Data Piket dan laporan orang tua ditampilkan otomatis.</p>
                 </div>
 
                 <span>{{ count($students) }} siswa</span>

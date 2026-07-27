@@ -24,15 +24,15 @@ class LoketArrival extends Page
 
     public function getTitle(): string
     {
-        return 'Loket Kedatangan';
+        return 'Piket Keterlambatan';
     }
 
     public function getSubheading(): ?string
     {
-        return 'Cari siswa, lalu tekan Hadir. Waktu, kelas, dan status kedatangan disimpan otomatis.';
+        return 'Catat hanya siswa yang terlambat. Waktu, kelas, dan notifikasi wali kelas tersimpan otomatis.';
     }
 
-    public function getWaitingStudentsProperty(): Collection
+    public function getUnrecordedStudentsProperty(): Collection
     {
         return Student::query()
             ->with('class')
@@ -45,11 +45,12 @@ class LoketArrival extends Page
             ->get();
     }
 
-    public function getAttendedStudentsProperty(): Collection
+    public function getLateStudentsProperty(): Collection
     {
         return StudentArrival::query()
             ->with(['student', 'schoolClass'])
             ->whereDate('arrival_date', today())
+            ->where('status', 'late')
             ->when(filled($this->search), fn ($query) => $query->whereHas('student', function ($query): void {
                 $query->where('name', 'like', '%'.$this->search.'%')->orWhere('nis', 'like', '%'.$this->search.'%');
             }))
@@ -57,7 +58,7 @@ class LoketArrival extends Page
             ->get();
     }
 
-    public function markPresent(int $studentId): void
+    public function markLate(int $studentId): void
     {
         $student = Student::query()->where('status', 'active')->findOrFail($studentId);
 
@@ -67,7 +68,7 @@ class LoketArrival extends Page
         );
 
         Notification::make()
-            ->title($student->name.' tercatat hadir')
+            ->title($student->name.' tercatat terlambat')
             ->success()
             ->send();
     }

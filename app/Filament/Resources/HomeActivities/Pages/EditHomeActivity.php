@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\HomeActivities\Pages;
 
 use App\Filament\Resources\HomeActivities\HomeActivityResource;
-use App\Filament\Resources\HomeActivities\Schemas\HomeActivityForm;
 use App\Support\ActivityGroups;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -15,8 +14,7 @@ class EditHomeActivity extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        $data['activity_groups'] = $this->record->resolvedActivityGroups()
-            ?: HomeActivityForm::defaultActivityGroups();
+        $data['activity_groups'] = $this->record->resolvedActivityGroups();
 
         return $data;
     }
@@ -42,7 +40,7 @@ class EditHomeActivity extends EditRecord
         abort_unless($student->parent_id, 403);
 
         $data['parent_id'] = $student->parent_id;
-        $data['activity_groups'] = $this->preserveChecklistStatus($data['activity_groups'] ?? []);
+        $data['activity_groups'] = $this->record->resolvedActivityGroups();
         $data['note'] = $this->record->note;
         $data['photo'] = $this->record->photo;
 

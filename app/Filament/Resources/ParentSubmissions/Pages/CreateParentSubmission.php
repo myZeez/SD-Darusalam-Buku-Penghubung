@@ -21,7 +21,11 @@ class CreateParentSubmission extends CreateRecord
         $data['status'] = 'pending';
         $data['title'] = sprintf(
             '%s - %s',
-            ($data['type'] ?? null) === 'sick' ? 'Sakit' : 'Izin',
+            match ($data['type'] ?? null) {
+                'sick' => 'Sakit',
+                'early_leave' => 'Izin Pulang Cepat',
+                default => 'Izin',
+            },
             $student->name,
         );
 

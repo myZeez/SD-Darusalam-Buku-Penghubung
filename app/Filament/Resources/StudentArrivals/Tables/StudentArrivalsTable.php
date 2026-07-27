@@ -47,7 +47,7 @@ class StudentArrivalsTable
                     ->date('d M Y')
                     ->sortable(),
                 TextColumn::make('arrival_time')
-                    ->label('Waktu Datang')
+                    ->label('Waktu Tercatat')
                     ->time('H:i')
                     ->sortable(),
                 TextColumn::make('status')
@@ -67,7 +67,7 @@ class StudentArrivalsTable
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->label('Status Kedatangan')
+                    ->label('Status Keterlambatan')
                     ->options([
                         'on_time' => 'Tepat Waktu',
                         'late' => 'Terlambat',
@@ -126,7 +126,7 @@ class StudentArrivalsTable
                         ->visible(fn (): bool => StudentArrivalResource::canDeleteAny()),
                 ]),
             ])
-            ->emptyStateHeading('Belum ada siswa yang check-in')
-            ->emptyStateDescription('Pencatatan dari loket akan muncul di sini secara otomatis.');
+            ->emptyStateHeading('Belum ada keterlambatan tercatat')
+            ->emptyStateDescription('Catatan dari Piket akan muncul di sini secara otomatis.');
     }
 }

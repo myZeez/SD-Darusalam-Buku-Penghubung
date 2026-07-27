@@ -2,19 +2,14 @@
 
 namespace Tests\Feature;
 
-use App\Filament\Resources\AcademicPeriods\AcademicPeriodResource;
 use App\Filament\Resources\ActivityComments\ActivityCommentResource;
 use App\Filament\Resources\HomeActivities\HomeActivityResource;
-use App\Filament\Resources\LessonPeriods\LessonPeriodResource;
-use App\Filament\Resources\LessonSchedules\LessonScheduleResource;
 use App\Filament\Resources\ParentProfiles\ParentProfileResource;
 use App\Filament\Resources\Schedules\ScheduleResource;
 use App\Filament\Resources\SchoolActivities\SchoolActivityResource;
 use App\Filament\Resources\SchoolClasses\SchoolClassResource;
 use App\Filament\Resources\Students\StudentResource;
-use App\Filament\Resources\Subjects\SubjectResource;
 use App\Filament\Resources\Teachers\TeacherResource;
-use App\Filament\Resources\TeachingAssignments\TeachingAssignmentResource;
 use App\Filament\Resources\UserNotifications\UserNotificationResource;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
@@ -52,16 +47,6 @@ class RoleBoundaryTest extends TestCase
             'manage students',
             'view classes',
             'manage classes',
-            'view academic periods',
-            'manage academic periods',
-            'view subjects',
-            'manage subjects',
-            'view teaching assignments',
-            'manage teaching assignments',
-            'view lesson periods',
-            'manage lesson periods',
-            'view lesson schedules',
-            'manage lesson schedules',
             'view schedules',
             'manage schedules',
             'view reports',
@@ -101,8 +86,6 @@ class RoleBoundaryTest extends TestCase
             'view teachers',
             'view students',
             'view classes',
-            'view teaching assignments',
-            'view lesson schedules',
             'view schedules',
             'manage schedules',
             'view school activities',
@@ -124,11 +107,9 @@ class RoleBoundaryTest extends TestCase
             'view students',
             'view reports',
             'export reports',
-            'view lesson schedules',
             'view schedules',
             'view school activities',
             'view home activities',
-            'manage home activities',
             'view comments',
             'manage comments',
             'view notifications',
@@ -173,11 +154,6 @@ class RoleBoundaryTest extends TestCase
         $this->assertSame('gmdi-school-o', TeacherResource::getNavigationIcon());
         $this->assertSame('gmdi-family-restroom-o', ParentProfileResource::getNavigationIcon());
         $this->assertSame('gmdi-class-o', SchoolClassResource::getNavigationIcon());
-        $this->assertSame('gmdi-date-range-o', AcademicPeriodResource::getNavigationIcon());
-        $this->assertSame('gmdi-menu-book-o', SubjectResource::getNavigationIcon());
-        $this->assertSame('gmdi-assignment-ind-o', TeachingAssignmentResource::getNavigationIcon());
-        $this->assertSame('gmdi-schedule-o', LessonPeriodResource::getNavigationIcon());
-        $this->assertSame('gmdi-calendar-view-week-o', LessonScheduleResource::getNavigationIcon());
         $this->assertSame('gmdi-badge-o', StudentResource::getNavigationIcon());
         $this->assertSame('gmdi-assignment-o', SchoolActivityResource::getNavigationIcon());
         $this->assertSame('gmdi-home-work-o', HomeActivityResource::getNavigationIcon());
@@ -220,16 +196,6 @@ class RoleBoundaryTest extends TestCase
             '/admin/parent-profiles/create',
             '/admin/school-classes',
             '/admin/school-classes/create',
-            '/admin/academic-periods',
-            '/admin/academic-periods/create',
-            '/admin/subjects',
-            '/admin/subjects/create',
-            '/admin/teaching-assignments',
-            '/admin/teaching-assignments/create',
-            '/admin/lesson-periods',
-            '/admin/lesson-periods/create',
-            '/admin/lesson-schedules',
-            '/admin/lesson-schedules/create',
             '/admin/students',
             '/admin/students/create',
             '/admin/school-activities',
@@ -262,15 +228,8 @@ class RoleBoundaryTest extends TestCase
         $this->get('/admin/teachers/create')->assertForbidden();
         $this->get('/admin/parent-profiles')->assertForbidden();
         $this->get('/admin/school-classes/create')->assertForbidden();
-        $this->get('/admin/academic-periods')->assertForbidden();
-        $this->get('/admin/subjects')->assertForbidden();
-        $this->get('/admin/teaching-assignments')->assertOk();
-        $this->get('/admin/teaching-assignments/create')->assertForbidden();
-        $this->get('/admin/lesson-periods')->assertForbidden();
-        $this->get('/admin/lesson-schedules')->assertOk();
-        $this->get('/admin/lesson-schedules/create')->assertForbidden();
         $this->get('/admin/students/create')->assertOk();
-        $this->get('/admin/home-activities/create')->assertForbidden();
+        $this->get('/admin/home-activities/create')->assertOk();
         $this->get('/admin/school-activities/create')->assertOk();
         $this->get('/admin/activity-comments/create')->assertOk();
         $this->get('/admin/schedules/create')->assertOk();
@@ -287,14 +246,11 @@ class RoleBoundaryTest extends TestCase
         $this->get('/admin/users')->assertForbidden();
         $this->get('/admin/teachers')->assertForbidden();
         $this->get('/admin/school-classes')->assertForbidden();
-        $this->get('/admin/teaching-assignments')->assertForbidden();
-        $this->get('/admin/lesson-schedules')->assertOk();
-        $this->get('/admin/lesson-schedules/create')->assertForbidden();
         $this->get('/admin/students/create')->assertForbidden();
         $this->get('/admin/school-activities/create')->assertForbidden();
         $this->get('/admin/schedules/create')->assertForbidden();
         $this->get('/admin/user-notifications/create')->assertForbidden();
-        $this->get('/admin/home-activities/create')->assertOk();
+        $this->get('/admin/home-activities/create')->assertForbidden();
         $this->get('/admin/activity-comments/create')->assertOk();
     }
 
@@ -307,8 +263,6 @@ class RoleBoundaryTest extends TestCase
         $this->get('/admin/teachers')->assertForbidden();
         $this->get('/admin/parent-profiles')->assertForbidden();
         $this->get('/admin/school-classes')->assertForbidden();
-        $this->get('/admin/teaching-assignments')->assertForbidden();
-        $this->get('/admin/lesson-schedules')->assertForbidden();
         $this->get('/admin/students/create')->assertForbidden();
         $this->get('/admin/school-activities/create')->assertForbidden();
         $this->get('/admin/home-activities/create')->assertForbidden();

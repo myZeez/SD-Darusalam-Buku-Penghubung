@@ -20,8 +20,8 @@ class StudentArrivalForm
     public static function configure(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make('Check-in Gerbang')
-                ->description('Pilih siswa. Kelas dan status keterlambatan dihitung otomatis oleh sistem.')
+            Section::make('Catat Keterlambatan')
+                ->description('Pilih hanya siswa yang datang terlambat. Catatan ini tidak digunakan untuk presensi hadir.')
                 ->icon(Heroicon::OutlinedArrowRightEndOnRectangle)
                 ->columns(['md' => 2])
                 ->schema([
@@ -61,13 +61,13 @@ class StudentArrivalForm
                                 .($setting->late_tolerance_minutes ? " + {$setting->late_tolerance_minutes} menit toleransi" : '');
                         }),
                     DatePicker::make('arrival_date')
-                        ->label('Tanggal Kedatangan')
+                        ->label('Tanggal Keterlambatan')
                         ->default(today())
                         ->disabled(fn (): bool => auth()->user()?->hasRole('loket') ?? false)
                         ->dehydrated()
                         ->required(),
                     TimePicker::make('arrival_time')
-                        ->label('Waktu Kedatangan')
+                        ->label('Waktu Tercatat')
                         ->default(fn (): string => now(SchoolSetting::current()->timezone)->format('H:i'))
                         ->seconds(false)
                         ->required(),

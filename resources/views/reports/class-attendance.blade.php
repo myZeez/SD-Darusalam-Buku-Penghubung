@@ -42,9 +42,9 @@
             'absent' => 'A',
         ];
         $sourceLabels = [
-            'arrival' => 'Loket',
+            'arrival' => 'Piket',
             'parent_submission' => 'Orang Tua',
-            'teacher' => 'Guru',
+            'teacher' => 'Wali Kelas',
             'manual' => 'Manual',
         ];
     @endphp
@@ -60,11 +60,7 @@
     <table class="identity">
         <tr>
             <td><strong>Kelas</strong> {{ $schoolClass->name }}</td>
-            <td><strong>Guru Utama</strong> {{ $schoolClass->teacher?->user?->name ?? '-' }}</td>
-            <td><strong>Guru Pendamping</strong> {{ $schoolClass->assistantTeacher?->user?->name ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td><strong>Tahun Ajaran</strong> {{ $schoolClass->academic_year }}</td>
+            <td><strong>Wali Kelas</strong> {{ $schoolClass->teacher?->user?->name ?? '-' }}</td>
             <td><strong>Ruang</strong> {{ $schoolClass->room ?: '-' }}</td>
             <td><strong>Jumlah Siswa</strong> {{ $schoolClass->students->count() }}</td>
         </tr>
@@ -121,17 +117,11 @@
 
     <table class="signatures">
         <tr>
-            <td>
-                Guru Utama
+            <td colspan="2">
+                Wali Kelas
                 <div class="signature-space"></div>
                 <span class="signature-name">{{ $schoolClass->teacher?->user?->name ?? 'Belum ditentukan' }}</span>
                 <div class="muted">NIP {{ $schoolClass->teacher?->nip ?: '-' }}</div>
-            </td>
-            <td>
-                Guru Pendamping
-                <div class="signature-space"></div>
-                <span class="signature-name">{{ $schoolClass->assistantTeacher?->user?->name ?? 'Belum ditentukan' }}</span>
-                <div class="muted">NIP {{ $schoolClass->assistantTeacher?->nip ?: '-' }}</div>
             </td>
         </tr>
     </table>

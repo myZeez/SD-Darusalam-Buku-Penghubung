@@ -277,10 +277,6 @@
             <dd class="student-family-card__value">{{ $record->class?->teacher?->user?->name ?? 'Belum ditentukan' }}</dd>
         </div>
         <div>
-            <dt class="student-family-card__label">Tahun Ajaran</dt>
-            <dd class="student-family-card__value">{{ $record->class?->academic_year ?? '-' }}</dd>
-        </div>
-        <div>
             <dt class="student-family-card__label">Ruang</dt>
             <dd class="student-family-card__value">{{ $record->class?->room ?: 'Belum ditentukan' }}</dd>
         </div>

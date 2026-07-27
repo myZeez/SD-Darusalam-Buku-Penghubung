@@ -74,10 +74,10 @@ class AttendanceRecordsTable
                     ->badge()
                     ->color('gray')
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'arrival' => 'Loket',
+                        'arrival' => 'Piket',
                         'parent_submission' => 'Pengajuan Orang Tua',
                         'manual' => 'Manual',
-                        'teacher' => 'Guru',
+                        'teacher' => 'Wali Kelas',
                         default => $state,
                     })
                     ->hidden(fn (): bool => auth()->user()?->hasRole('orang_tua') ?? false),
@@ -153,6 +153,6 @@ class AttendanceRecordsTable
                 ]),
             ])
             ->emptyStateHeading('Belum ada presensi')
-            ->emptyStateDescription('Check-in loket atau pencatatan manual akan membentuk data presensi.');
+            ->emptyStateDescription('Catatan Piket atau pencatatan manual akan membentuk data presensi.');
     }
 }

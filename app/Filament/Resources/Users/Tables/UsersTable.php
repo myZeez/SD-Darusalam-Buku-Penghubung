@@ -67,8 +67,8 @@ class UsersTable
                     ->relationship('roles', 'name')
                     ->options([
                         'admin' => 'Admin / Kepala Sekolah',
-                        'guru' => 'Guru',
-                        'loket' => 'Petugas Loket',
+                        'guru' => 'Wali Kelas',
+                        'loket' => 'Petugas Piket',
                     ]),
             ])
             ->recordActions([

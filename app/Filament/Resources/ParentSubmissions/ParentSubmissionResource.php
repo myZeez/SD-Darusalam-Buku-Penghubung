@@ -38,10 +38,10 @@ class ParentSubmissionResource extends Resource
         $user = auth()->user();
 
         if ($user?->isAdmin()) {
-            return 'Monitoring Izin dan Sakit';
+            return 'Monitoring Izin';
         }
 
-        return $user?->hasRole('orang_tua') ? 'Izin dan Sakit' : 'Pengajuan Orang Tua';
+        return $user?->hasRole('orang_tua') ? 'Izin Siswa' : 'Pengajuan Orang Tua';
     }
 
     public static function getEloquentQuery(): Builder

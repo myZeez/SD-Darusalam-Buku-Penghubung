@@ -96,8 +96,7 @@
                     <td><strong>Kelas</strong> {{ $student->class?->name ?? 'Belum ditentukan' }}</td>
                 </tr>
                 <tr>
-                    <td><strong>NIS</strong> {{ $student->nis }}</td>
-                    <td><strong>Tahun Ajaran</strong> {{ $student->class?->academic_year ?? $settings->academic_year }}</td>
+                    <td colspan="2"><strong>NIS</strong> {{ $student->nis }}</td>
                 </tr>
                 <tr>
                     <td><strong>Guru Kelas</strong> {{ $teacherName }}</td>

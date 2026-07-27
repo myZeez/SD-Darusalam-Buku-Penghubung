@@ -15,7 +15,6 @@ return new class extends Migration
             $table->id();
             $table->foreignId('teacher_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
-            $table->string('academic_year');
             $table->timestamps();
         });
     }

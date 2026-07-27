@@ -37,8 +37,8 @@ class DashboardStats extends StatsOverviewWidget
                     ->icon('gmdi-badge-o'),
                 Stat::make('Total Kelas', SchoolClass::count())
                     ->icon('gmdi-class-o'),
-                Stat::make('Check-in Hari Ini', $arrivalsToday)
-                    ->icon('gmdi-login-o')
+                Stat::make('Catatan Piket Hari Ini', $arrivalsToday)
+                    ->icon('gmdi-alarm-o')
                     ->url(StudentArrivalResource::getUrl()),
                 Stat::make('Terlambat Hari Ini', StudentArrival::query()
                     ->whereDate('arrival_date', today())
@@ -52,8 +52,6 @@ class DashboardStats extends StatsOverviewWidget
                     ->count())
                     ->icon('gmdi-fact-check-o')
                     ->url(AttendanceRecordResource::getUrl()),
-                Stat::make('Belum Check-in', max(0, $activeStudents - $arrivalsToday))
-                    ->icon('gmdi-hourglass-empty-o'),
                 Stat::make('Jadwal Hari Ini', Schedule::whereDate('activity_date', today())->count())
                     ->icon('gmdi-calendar-month-o'),
             ];
@@ -65,15 +63,11 @@ class DashboardStats extends StatsOverviewWidget
             $arrivalCount = (clone $arrivalsToday)->count();
 
             return [
-                Stat::make('Check-in Hari Ini', $arrivalCount)
-                    ->icon('gmdi-login-o')
+                Stat::make('Terlambat Hari Ini', $arrivalCount)
+                    ->icon('gmdi-alarm-o')
                     ->url(StudentArrivalResource::getUrl()),
-                Stat::make('Tepat Waktu', (clone $arrivalsToday)->where('status', 'on_time')->count())
-                    ->icon('gmdi-check-circle-o'),
-                Stat::make('Terlambat', (clone $arrivalsToday)->where('status', 'late')->count())
-                    ->icon('gmdi-alarm-o'),
-                Stat::make('Belum Check-in', max(0, $activeStudents - $arrivalCount))
-                    ->icon('gmdi-hourglass-empty-o'),
+                Stat::make('Kelas Terdampak', (clone $arrivalsToday)->distinct('class_id')->count('class_id'))
+                    ->icon('gmdi-class-o'),
             ];
         }
 

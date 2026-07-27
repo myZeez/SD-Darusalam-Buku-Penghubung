@@ -21,11 +21,11 @@ class TeacherResource extends Resource
 {
     protected static ?string $model = Teacher::class;
 
-    protected static ?string $modelLabel = 'Guru';
+    protected static ?string $modelLabel = 'Wali Kelas';
 
-    protected static ?string $pluralModelLabel = 'Guru';
+    protected static ?string $pluralModelLabel = 'Wali Kelas';
 
-    protected static ?string $navigationLabel = 'Data Guru';
+    protected static ?string $navigationLabel = 'Data Wali Kelas';
 
     protected static string|\UnitEnum|null $navigationGroup = 'Data Sekolah';
 
@@ -35,7 +35,7 @@ class TeacherResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return auth()->user()?->hasRole('guru') ? 'Profil Guru' : 'Data Guru';
+        return auth()->user()?->hasRole('guru') ? 'Profil Wali Kelas' : 'Data Wali Kelas';
     }
 
     public static function getNavigationUrl(): string

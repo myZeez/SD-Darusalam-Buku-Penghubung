@@ -10,11 +10,8 @@ class SchoolClass extends Model
 
     protected $fillable = [
         'teacher_id',
-        'assistant_teacher_id',
-        'academic_period_id',
         'name',
         'grade_level',
-        'academic_year',
         'capacity',
         'room',
         'description',
@@ -28,30 +25,9 @@ class SchoolClass extends Model
         ];
     }
 
-    protected static function booted(): void
-    {
-        static::saving(function (SchoolClass $class): void {
-            if ($class->academic_period_id) {
-                $class->academic_year = AcademicPeriod::query()
-                    ->whereKey($class->academic_period_id)
-                    ->value('academic_year') ?? $class->academic_year;
-            }
-        });
-    }
-
-    public function academicPeriod()
-    {
-        return $this->belongsTo(AcademicPeriod::class);
-    }
-
     public function teacher()
     {
         return $this->belongsTo(Teacher::class);
-    }
-
-    public function assistantTeacher()
-    {
-        return $this->belongsTo(Teacher::class, 'assistant_teacher_id');
     }
 
     public function students()
@@ -69,8 +45,4 @@ class SchoolClass extends Model
         return $this->hasMany(AttendanceRecord::class, 'class_id');
     }
 
-    public function teachingAssignments()
-    {
-        return $this->hasMany(TeachingAssignment::class, 'class_id');
-    }
 }

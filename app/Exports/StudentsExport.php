@@ -19,7 +19,6 @@ class StudentsExport implements FromCollection, WithHeadings
                 'gender' => $student->gender,
                 'birth_date' => optional($student->birth_date)->format('Y-m-d'),
                 'class' => $student->class?->name,
-                'academic_year' => $student->class?->academic_year,
                 'parent' => $student->parent?->user?->name,
                 'status' => $student->status,
             ]);
@@ -33,7 +32,6 @@ class StudentsExport implements FromCollection, WithHeadings
             'gender',
             'birth_date',
             'class',
-            'academic_year',
             'parent',
             'status',
         ];

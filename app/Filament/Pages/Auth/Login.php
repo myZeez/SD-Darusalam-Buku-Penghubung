@@ -20,6 +20,6 @@ class Login extends BaseLogin
 
     public function getHeading(): string|Htmlable|null
     {
-        return 'Masuk ke Buku Penghubung';
+        return 'SIMPATI — Mendekatkan komunikasi, memantau perkembangan';
     }
 }

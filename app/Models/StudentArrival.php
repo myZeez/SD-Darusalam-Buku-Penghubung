@@ -34,6 +34,7 @@ class StudentArrival extends Model
             if (auth()->user()?->hasRole('loket')) {
                 $arrival->arrival_date = $now->toDateString();
                 $arrival->recorded_by = auth()->id();
+                $arrival->status = 'late';
             }
 
             $arrival->arrival_date ??= $now->toDateString();
@@ -46,9 +47,11 @@ class StudentArrival extends Model
                 $timezone,
             );
 
-            $arrival->status = $arrivalMoment->greaterThan($settings->arrivalDeadline($arrival->arrival_date))
-                ? 'late'
-                : 'on_time';
+            if (! auth()->user()?->hasRole('loket')) {
+                $arrival->status = $arrivalMoment->greaterThan($settings->arrivalDeadline($arrival->arrival_date))
+                    ? 'late'
+                    : 'on_time';
+            }
         });
 
         static::saved(function (StudentArrival $arrival): void {
@@ -94,10 +97,9 @@ class StudentArrival extends Model
 
     private function notifyTeacherWhenLate(): void
     {
-        $this->loadMissing(['student.class.teacher', 'student.class.assistantTeacher']);
+        $this->loadMissing('student.class.teacher');
         $teacherUserIds = collect([
             $this->student?->class?->teacher?->user_id,
-            $this->student?->class?->assistantTeacher?->user_id,
         ])->filter()->unique();
 
         if ($teacherUserIds->isEmpty()) {

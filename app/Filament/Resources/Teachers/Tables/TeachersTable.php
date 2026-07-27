@@ -16,7 +16,7 @@ class TeachersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn ($query) => $query->with(['user', 'classes', 'assistedClasses']))
+            ->modifyQueryUsing(fn ($query) => $query->with(['user', 'classes']))
             ->columns([
                 TextColumn::make('user.name')
                     ->label('Nama')
@@ -42,6 +42,7 @@ class TeachersTable
                     ->separator(',')
                     ->placeholder('—'),
                 TextColumn::make('assistedClasses.name')
+                    ->hidden()
                     ->label('Guru Pendamping')
                     ->badge()
                     ->color('info')

@@ -8,6 +8,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -51,9 +52,8 @@ class ParentSubmissionForm
                         ->content(function (Get $get): string {
                             $class = self::student($get)?->class;
                             $teachers = collect([
-                                $class?->teacher?->user?->name,
-                                $class?->assistantTeacher?->user?->name,
-                            ])->filter()->join(' dan ');
+                            $class?->teacher?->user?->name,
+                        ])->filter()->join(' dan ');
 
                             return $teachers ?: 'Belum ada guru yang ditetapkan';
                         }),
@@ -62,6 +62,7 @@ class ParentSubmissionForm
                         ->options([
                             'sick' => 'Sakit',
                             'permission' => 'Izin',
+                            'early_leave' => 'Izin Pulang Cepat',
                         ])
                         ->required(),
                     DatePicker::make('start_date')
@@ -71,6 +72,12 @@ class ParentSubmissionForm
                     DatePicker::make('end_date')
                         ->label('Sampai Tanggal')
                         ->afterOrEqual('start_date'),
+                    TimePicker::make('early_leave_time')
+                        ->label('Rencana Jam Pulang')
+                        ->seconds(false)
+                        ->visible(fn (Get $get): bool => $get('type') === 'early_leave')
+                        ->required(fn (Get $get): bool => $get('type') === 'early_leave')
+                        ->dehydratedWhenHidden(false),
                     Textarea::make('description')
                         ->label('Deskripsi Singkat')
                         ->placeholder('Contoh: Demam sejak tadi malam dan perlu beristirahat di rumah.')
@@ -92,7 +99,7 @@ class ParentSubmissionForm
         $studentId = $get('student_id');
 
         return $studentId
-            ? Student::query()->with(['class.teacher.user', 'class.assistantTeacher.user'])->find($studentId)
+            ? Student::query()->with('class.teacher.user')->find($studentId)
             : null;
     }
 }

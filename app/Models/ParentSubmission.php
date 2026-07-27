@@ -16,6 +16,7 @@ class ParentSubmission extends Model
         'description',
         'start_date',
         'end_date',
+        'early_leave_time',
         'attachment',
         'status',
         'review_note',
@@ -27,6 +28,7 @@ class ParentSubmission extends Model
         return [
             'start_date' => 'date',
             'end_date' => 'date',
+            'early_leave_time' => 'string',
             'reviewed_at' => 'datetime',
         ];
     }
@@ -80,11 +82,35 @@ class ParentSubmission extends Model
         return $this->hasMany(AttendanceRecord::class);
     }
 
+    public function earlyDepartures()
+    {
+        return $this->hasMany(EarlyDeparture::class);
+    }
+
     private function syncAttendanceRecords(): void
     {
+        if ($this->status === 'approved' && $this->type === 'early_leave') {
+            EarlyDeparture::query()->updateOrCreate(
+                [
+                    'student_id' => $this->student_id,
+                    'departure_date' => $this->start_date->toDateString(),
+                ],
+                [
+                    'class_id' => $this->student?->class_id,
+                    'parent_submission_id' => $this->id,
+                    'recorded_by' => $this->reviewed_by,
+                    'departure_time' => $this->early_leave_time,
+                    'notes' => $this->description,
+                ],
+            );
+
+            return;
+        }
+
         if ($this->status !== 'approved' || ! in_array($this->type, ['sick', 'permission'], true)) {
             if ($this->status === 'rejected') {
                 $this->attendanceRecords()->where('source', 'parent_submission')->delete();
+                $this->earlyDepartures()->delete();
             }
 
             return;
@@ -112,7 +138,7 @@ class ParentSubmission extends Model
 
     private function notifyTeacherOfNewReport(): void
     {
-        $this->loadMissing(['student.class.teacher', 'student.class.assistantTeacher', 'parent.user']);
+        $this->loadMissing(['student.class.teacher', 'parent.user']);
         $teacherUserIds = $this->teacherUserIds();
 
         if ($teacherUserIds->isEmpty()) {
@@ -164,7 +190,7 @@ class ParentSubmission extends Model
 
     private function markTeacherNotificationAsRead(): void
     {
-        $this->loadMissing(['student.class.teacher', 'student.class.assistantTeacher']);
+        $this->loadMissing('student.class.teacher');
         $teacherUserIds = $this->teacherUserIds();
 
         if ($teacherUserIds->isEmpty()) {
@@ -181,7 +207,6 @@ class ParentSubmission extends Model
     {
         return collect([
             $this->student?->class?->teacher?->user_id,
-            $this->student?->class?->assistantTeacher?->user_id,
         ])->filter()->unique()->values();
     }
 
@@ -195,6 +220,7 @@ class ParentSubmission extends Model
         return match ($this->type) {
             'sick' => 'sakit',
             'permission' => 'izin',
+            'early_leave' => 'izin pulang cepat',
             'family' => 'keperluan keluarga',
             'late' => 'keterlambatan',
             'home_report' => 'dari rumah',

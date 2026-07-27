@@ -7,7 +7,6 @@ use App\Filament\Pages\AccountSecurity;
 use App\Filament\Pages\TeacherAttendance;
 use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
 use App\Filament\Resources\Extracurriculars\ExtracurricularResource;
-use App\Filament\Resources\LessonSchedules\LessonScheduleResource;
 use App\Filament\Resources\ParentSubmissions\ParentSubmissionResource;
 use App\Filament\Resources\Schedules\Pages\CreateSchedule;
 use App\Filament\Resources\Schedules\ScheduleResource;
@@ -19,9 +18,9 @@ use App\Filament\Resources\SchoolClasses\SchoolClassResource;
 use App\Filament\Resources\StudentArrivals\StudentArrivalResource;
 use App\Filament\Resources\Students\StudentResource;
 use App\Filament\Resources\Teachers\TeacherResource;
-use App\Filament\Resources\TeachingAssignments\TeachingAssignmentResource;
 use App\Filament\Resources\UserNotifications\UserNotificationResource;
-use App\Models\LessonSchedule;
+use App\Models\AttendanceRecord;
+use App\Models\EarlyDeparture;
 use App\Models\ParentProfile;
 use App\Models\ParentSubmission;
 use App\Models\Schedule;
@@ -30,7 +29,6 @@ use App\Models\SchoolClass;
 use App\Models\Student;
 use App\Models\StudentArrival;
 use App\Models\Teacher;
-use App\Models\TeachingAssignment;
 use App\Models\User;
 use App\Models\UserNotification;
 use Database\Seeders\DatabaseSeeder;
@@ -67,7 +65,7 @@ class TeacherWorkspaceTest extends TestCase
 
         $this->get(TeacherResource::getNavigationUrl())
             ->assertOk()
-            ->assertSee('Profil Guru')
+            ->assertSee('Profil Wali Kelas')
             ->assertSee($guru->name)
             ->assertSee($teacher->nip);
 
@@ -134,20 +132,6 @@ class TeacherWorkspaceTest extends TestCase
             ->assertCanSeeTableRecords([$student]);
     }
 
-    public function test_teacher_teaching_schedule_uses_an_informative_card(): void
-    {
-        $guru = User::role('guru')->firstOrFail();
-
-        $this->actingAs($guru);
-
-        $this->get(LessonScheduleResource::getUrl())
-            ->assertOk()
-            ->assertSee('Jadwal Mengajar')
-            ->assertSee('teacher-schedule-card', false)
-            ->assertSee('Matematika')
-            ->assertSee('Senin');
-    }
-
     public function test_teacher_gets_a_validation_error_for_a_duplicate_daily_school_report(): void
     {
         $guru = User::role('guru')->firstOrFail();
@@ -207,7 +191,6 @@ class TeacherWorkspaceTest extends TestCase
             'teacher_id' => $otherTeacher->id,
             'name' => 'Kelas 1B',
             'grade_level' => 1,
-            'academic_year' => '2026/2027',
             'capacity' => 30,
         ]);
         $parent = ParentProfile::query()->firstOrFail();
@@ -310,50 +293,6 @@ class TeacherWorkspaceTest extends TestCase
             ->assertSee('Agenda Umum')
             ->assertSee('Agenda Kelas Saya')
             ->assertDontSee('Agenda Kelas Lain');
-    }
-
-    public function test_assistant_teacher_has_the_same_class_scope_as_the_primary_teacher(): void
-    {
-        $class = SchoolClass::query()->firstOrFail();
-        $student = Student::query()->firstOrFail();
-        $otherClass = $this->createOtherClass();
-        $assistantUser = User::factory()->create([
-            'email' => 'guru-pendamping@sddarusalam.test',
-            'status' => 'active',
-        ]);
-        $assistantUser->assignRole('guru');
-        $assistant = Teacher::create([
-            'user_id' => $assistantUser->id,
-            'nip' => '197001012000011004',
-        ]);
-        $class->update(['assistant_teacher_id' => $assistant->id]);
-        $assignment = TeachingAssignment::query()->firstOrFail();
-        $lessonSchedule = LessonSchedule::query()->firstOrFail();
-
-        $this->actingAs($assistantUser);
-
-        $this->assertTrue($assistantUser->accessibleClasses()->whereKey($class)->exists());
-        $this->assertFalse($assistantUser->accessibleClasses()->whereKey($otherClass)->exists());
-        $this->assertTrue($assistantUser->accessibleStudents()->whereKey($student)->exists());
-        $this->assertTrue(SchoolClassResource::canView($class));
-        $this->assertTrue(SchoolClassResource::canEdit($class));
-        $this->assertFalse(SchoolClassResource::canView($otherClass));
-        $this->assertTrue(TeachingAssignmentResource::getEloquentQuery()->whereKey($assignment)->exists());
-        $this->assertTrue(LessonScheduleResource::getEloquentQuery()->whereKey($lessonSchedule)->exists());
-        $this->get(SchoolClassResource::getUrl('view', ['record' => $class]))->assertOk();
-        $this->get(SchoolClassResource::getUrl('view', ['record' => $otherClass]))->assertNotFound();
-        $this->get(TeacherResource::getUrl('view', ['record' => $assistant]))
-            ->assertOk()
-            ->assertSee('Guru Pendamping Kelas 1A')
-            ->assertSee('mendampingi Guru Kelas');
-        $this->get(LessonScheduleResource::getUrl())
-            ->assertOk()
-            ->assertSee('teacher-schedule-card', false)
-            ->assertSee('Matematika');
-
-        Livewire::test(TeacherAttendance::class)
-            ->assertSet('selectedClassId', $class->id)
-            ->assertSee($student->name);
     }
 
     public function test_teacher_can_notify_only_students_and_parents_from_their_class(): void
@@ -482,7 +421,7 @@ class TeacherWorkspaceTest extends TestCase
             ->assertSee($firstStudent->name)
             ->assertSee($secondStudent->name)
             ->assertSee($thirdStudent->name)
-            ->assertSee('Dari Loket')
+            ->assertSee('Dari Piket')
             ->assertSee('Laporan Orang Tua')
             ->assertSee('Terlambat');
 
@@ -545,6 +484,85 @@ class TeacherWorkspaceTest extends TestCase
         $this->get(TeacherAttendance::getUrl())->assertForbidden();
     }
 
+    public function test_teacher_attendance_calendar_marks_complete_and_incomplete_dates_and_selects_a_date(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $class = $teacher->managedClasses()->firstOrFail();
+        $students = Student::query()->where('class_id', $class->id)->where('status', 'active')->get();
+
+        if ($students->isEmpty()) {
+            $students->push(Student::create([
+                'class_id' => $class->id,
+                'parent_id' => ParentProfile::query()->firstOrFail()->id,
+                'nis' => 'SDD-CALENDAR-001',
+                'name' => 'Siswa Kalender',
+                'status' => 'active',
+            ]));
+        }
+        $completeDate = today()->toImmutable()->subMonthNoOverflow()->startOfMonth()->addDays(2);
+        $incompleteDate = $completeDate->addDay();
+
+        foreach ($students as $student) {
+            AttendanceRecord::create([
+                'student_id' => $student->id,
+                'class_id' => $class->id,
+                'recorded_by' => $teacher->id,
+                'attendance_date' => $completeDate,
+                'status' => 'present',
+                'source' => 'teacher',
+            ]);
+        }
+
+        $this->actingAs($teacher);
+
+        $page = Livewire::test(TeacherAttendance::class)
+            ->set('selectedClassId', $class->id)
+            ->set('calendarMonth', $completeDate->startOfMonth()->toDateString());
+
+        $calendarDays = collect($page->instance()->calendarDays())->keyBy('date');
+
+        $this->assertTrue($calendarDays[$completeDate->toDateString()]['is_complete']);
+        $this->assertFalse($calendarDays[$completeDate->toDateString()]['is_incomplete']);
+        $this->assertFalse($calendarDays[$incompleteDate->toDateString()]['is_complete']);
+        $this->assertTrue($calendarDays[$incompleteDate->toDateString()]['is_incomplete']);
+
+        $page
+            ->call('selectCalendarDate', $completeDate->toDateString())
+            ->assertSet('selectedDate', $completeDate->toDateString())
+            ->assertSee('Kalender Presensi');
+    }
+
+    public function test_approved_early_leave_request_creates_a_early_departure_record(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $parent = User::role('orang_tua')->firstOrFail();
+        $student = $teacher->managedStudents()->firstOrFail();
+
+        $this->actingAs($parent);
+
+        $submission = ParentSubmission::create([
+            'student_id' => $student->id,
+            'type' => 'early_leave',
+            'title' => 'Izin Pulang Cepat - '.$student->name,
+            'description' => 'Ada jadwal pemeriksaan kesehatan.',
+            'start_date' => today(),
+            'early_leave_time' => '11:30:00',
+            'status' => 'pending',
+        ]);
+
+        $this->actingAs($teacher);
+        $submission->update(['status' => 'approved']);
+
+        $departure = EarlyDeparture::query()
+            ->where('student_id', $student->id)
+            ->where('parent_submission_id', $submission->id)
+            ->firstOrFail();
+
+        $this->assertTrue($departure->departure_date->isSameDay(today()));
+        $this->assertSame('11:30:00', $departure->departure_time);
+        $this->assertSame('Ada jadwal pemeriksaan kesehatan.', $departure->notes);
+    }
+
     private function createOtherClass(): SchoolClass
     {
         $teacherUser = User::factory()->create([
@@ -561,7 +579,6 @@ class TeacherWorkspaceTest extends TestCase
             'teacher_id' => $teacher->id,
             'name' => 'Kelas 2A',
             'grade_level' => 2,
-            'academic_year' => '2026/2027',
             'capacity' => 30,
         ]);
     }

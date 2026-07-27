@@ -43,6 +43,7 @@ class ParentSubmissionsTable
                     ->formatStateUsing(fn (string $state): string => match ($state) {
                         'sick' => 'Sakit',
                         'permission' => 'Izin',
+                        'early_leave' => 'Izin Pulang Cepat',
                         'family' => 'Keperluan Keluarga',
                         'late' => 'Pemberitahuan Terlambat',
                         'home_report' => 'Laporan Rumah',
@@ -86,6 +87,7 @@ class ParentSubmissionsTable
                     ->options([
                         'sick' => 'Sakit',
                         'permission' => 'Izin',
+                        'early_leave' => 'Izin Pulang Cepat',
                         'family' => 'Keperluan Keluarga',
                         'late' => 'Pemberitahuan Terlambat',
                         'home_report' => 'Laporan Rumah',

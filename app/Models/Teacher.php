@@ -23,39 +23,18 @@ class Teacher extends Model
         return $this->hasMany(SchoolClass::class);
     }
 
-    public function assistedClasses()
-    {
-        return $this->hasMany(SchoolClass::class, 'assistant_teacher_id');
-    }
-
     public function schoolActivities()
     {
         return $this->hasMany(SchoolActivity::class);
     }
 
-    public function teachingAssignments()
-    {
-        return $this->hasMany(TeachingAssignment::class);
-    }
-
     public function getClassDutySummaryAttribute(): string
     {
-        $this->loadMissing(['classes', 'assistedClasses.teacher.user']);
+        $this->loadMissing('classes');
 
-        $primaryDuties = $this->classes
+        return $this->classes
             ->sortBy('name')
-            ->map(fn (SchoolClass $class): string => "Guru Utama {$class->name}");
-        $assistantDuties = $this->assistedClasses
-            ->sortBy('name')
-            ->map(fn (SchoolClass $class): string => sprintf(
-                'Guru Pendamping %s — mendampingi %s',
-                $class->name,
-                $class->teacher?->user?->name ?? 'guru utama',
-            ));
-
-        return collect()
-            ->concat($primaryDuties)
-            ->concat($assistantDuties)
-            ->join(' • ') ?: 'Belum ditetapkan pada kelas';
+            ->map(fn (SchoolClass $class): string => "Wali Kelas {$class->name}")
+            ->join(' | ') ?: 'Belum ditetapkan sebagai wali kelas';
     }
 }

@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
             $table->string('logo')->nullable();
-            $table->string('academic_year')->default('2026/2027');
             $table->time('school_start_time')->default('07:00:00');
             $table->unsignedSmallInteger('late_tolerance_minutes')->default(0);
             $table->json('school_days')->nullable();
