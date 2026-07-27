@@ -527,8 +527,6 @@ class DemoDataSeeder extends Seeder
                         ? 'Perkembangan siswa baik dan aktif mengikuti kegiatan kelas.'
                         : 'Siswa tidak mengikuti kegiatan kelas karena '.($attendance === 'sick' ? 'sakit.' : 'izin.'),
                     'photo' => null,
-                    'submitted_at' => $date->setTime(20, 0),
-                    'submitted_by' => $family['parent']->user_id,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -547,6 +545,8 @@ class DemoDataSeeder extends Seeder
                     'meal' => true,
                     'note' => 'Belajar bersama orang tua selama 30 menit dan menyiapkan perlengkapan untuk esok hari.',
                     'photo' => null,
+                    'submitted_at' => $date->setTime(20, 0),
+                    'submitted_by' => $family['parent']->user_id,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
