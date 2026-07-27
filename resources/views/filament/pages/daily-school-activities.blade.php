@@ -151,7 +151,7 @@
                                                 ])>
                                                     <input
                                                         type="checkbox"
-                                                        wire:model="checks.{{ $student['id'] }}.{{ $item['key'] }}"
+                                                        wire:model.live="checks.{{ $student['id'] }}.{{ $item['key'] }}"
                                                         @disabled($item['key'] === 'on-time-arrival')
                                                     >
                                                     <span>{{ $student['initials'] }}</span>
@@ -208,7 +208,7 @@
                                             <label @class(['is-checked' => $checks[$selectedStudent['id']][$item['key']] ?? false])>
                                                 <input
                                                     type="checkbox"
-                                                    wire:model="checks.{{ $selectedStudent['id'] }}.{{ $item['key'] }}"
+                                                    wire:model.live="checks.{{ $selectedStudent['id'] }}.{{ $item['key'] }}"
                                                     @disabled($item['key'] === 'on-time-arrival')
                                                 >
                                                 <span>

@@ -5487,7 +5487,13 @@ html[data-simpati-palette='lembut'] {
     height: 1px;
     overflow: hidden;
     opacity: 0;
-    pointer-events: none;
+}
+
+.daily-activity__student-checks label:has(input:focus-visible),
+.daily-activity__student-form fieldset label:has(input:focus-visible),
+.daily-activity__home-checklist fieldset label:has(input:focus-visible) {
+    outline: 2px solid var(--primary-500);
+    outline-offset: 2px;
 }
 
 .daily-activity__student-checks label > span {

@@ -111,7 +111,7 @@
                                 <div>
                                     @foreach ($group['items'] as $item)
                                         <label @class(['is-checked' => $checks[$item['key']] ?? false])>
-                                            <input type="checkbox" wire:model="checks.{{ $item['key'] }}">
+                                            <input type="checkbox" wire:model.live="checks.{{ $item['key'] }}">
                                             <span>
                                                 <x-filament::icon :icon="($checks[$item['key']] ?? false) ? 'gmdi-check-circle-o' : 'gmdi-radio-button-unchecked-o'" />
                                             </span>
