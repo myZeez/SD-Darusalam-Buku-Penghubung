@@ -21,6 +21,8 @@ class HomeActivity extends Model
         'meal',
         'note',
         'photo',
+        'submitted_at',
+        'submitted_by',
     ];
 
     protected function casts(): array
@@ -33,6 +35,7 @@ class HomeActivity extends Model
             'homework' => 'boolean',
             'sleep' => 'boolean',
             'meal' => 'boolean',
+            'submitted_at' => 'datetime',
         ];
     }
 
@@ -85,5 +88,10 @@ class HomeActivity extends Model
     public function comments()
     {
         return $this->morphMany(ActivityComment::class, 'activity');
+    }
+
+    public function submittedBy()
+    {
+        return $this->belongsTo(User::class, 'submitted_by');
     }
 }

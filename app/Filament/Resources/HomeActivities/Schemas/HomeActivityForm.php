@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\HomeActivities\Schemas;
 
-use App\Filament\Forms\ActivityGroupsField;
+use App\Models\HomeActivity;
 use App\Models\SchoolClass;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Placeholder;
@@ -83,16 +83,9 @@ class HomeActivityForm
                     ->icon(Heroicon::OutlinedListBullet)
                     ->columnSpanFull()
                     ->schema([
-                        ActivityGroupsField::make(
-                            defaults: self::defaultActivityGroups(),
-                            checklistItemsOnly: true,
-                            parentChecklistOnly: true,
-                        )
-                            ->visible(fn (): bool => self::isParent()),
                         Placeholder::make('fixed_activity_information')
                             ->label('Daftar aktivitas tetap')
-                            ->content('Terdiri dari Berakhlak, Berprestasi, Berjiwa Sosial, dan Peduli Lingkungan. Salat Tahajud otomatis ditambahkan untuk kelas 4–6.')
-                            ->visible(fn (): bool => ! self::isParent()),
+                            ->content('Gunakan halaman Aktivitas Rumah untuk mengisi checklist tetap. Salat Tahajud otomatis ditambahkan untuk kelas 4–6.'),
                     ]),
                 Section::make('Catatan Orang Tua')
                     ->description('Gunakan bagian ini untuk tambahan informasi yang tidak ada pada daftar aktivitas.')
@@ -125,6 +118,6 @@ class HomeActivityForm
     /** @return array<int, array<string, mixed>> */
     public static function defaultActivityGroups(): array
     {
-        return \App\Models\HomeActivity::defaultActivityGroupsForGrade(null);
+        return HomeActivity::defaultActivityGroupsForGrade(null);
     }
 }

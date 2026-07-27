@@ -1,5 +1,5 @@
 @php
-    use App\Filament\Resources\SchoolActivities\SchoolActivityResource;
+    use App\Filament\Pages\DailySchoolActivities;
 @endphp
 
 <x-filament-widgets::widget class="fi-wi-pending-school-reports">
@@ -34,7 +34,7 @@
                         </div>
                         <x-filament::button
                             tag="a"
-                            :href="SchoolActivityResource::getUrl('create', ['student_id' => $student->id])"
+                            :href="DailySchoolActivities::getUrl(['student_id' => $student->id])"
                             icon="gmdi-add-task-o"
                             size="sm"
                         >

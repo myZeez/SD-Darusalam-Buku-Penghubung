@@ -68,6 +68,37 @@
 
                     <section class="student-report__section">
                         <div class="student-report__section-heading">
+                            <x-filament::icon icon="gmdi-assessment-o" />
+                            <div>
+                                <h3>Rekap Buku Penghubung</h3>
+                                <p>Persentase berdasarkan aktivitas tetap dan skor 5 untuk setiap checklist yang dilakukan.</p>
+                            </div>
+                        </div>
+                        <div class="student-report__score-groups">
+                            @foreach ([
+                                ['label' => 'Aktivitas Sekolah', 'scores' => $studentReport['summary']['school_activity_scores']],
+                                ['label' => 'Aktivitas Rumah', 'scores' => $studentReport['summary']['home_activity_scores']],
+                            ] as $scoreGroup)
+                                <section>
+                                    <h4>{{ $scoreGroup['label'] }}</h4>
+                                    @foreach ($scoreGroup['scores'] as $score)
+                                        <div class="student-report__score">
+                                            <div>
+                                                <strong>{{ $score['category'] }}</strong>
+                                                <span>{{ $score['rating'] }}</span>
+                                                <em>{{ $score['percentage'] }}%</em>
+                                            </div>
+                                            <i><b style="width: {{ $score['percentage'] }}%"></b></i>
+                                            <small>Skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
+                                        </div>
+                                    @endforeach
+                                </section>
+                            @endforeach
+                        </div>
+                    </section>
+
+                    <section class="student-report__section">
+                        <div class="student-report__section-heading">
                             <x-filament::icon icon="gmdi-groups-o" />
                             <div>
                                 <h3>Empat Aspek Perkembangan</h3>

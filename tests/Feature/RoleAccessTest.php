@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Actions\Students\SaveStudentWithFamily;
+use App\Filament\Pages\DailyHomeActivities;
+use App\Filament\Pages\DailySchoolActivities;
 use App\Filament\Resources\ActivityComments\ActivityCommentResource;
 use App\Filament\Resources\HomeActivities\HomeActivityResource;
 use App\Filament\Resources\ParentProfiles\ParentProfileResource;
@@ -49,8 +51,10 @@ class RoleAccessTest extends TestCase
         $this->actingAs($admin);
         $this->assertTrue(UserResource::canViewAny());
         $this->assertTrue(StudentResource::canCreate());
-        $this->assertTrue(SchoolActivityResource::canCreate());
-        $this->assertTrue(HomeActivityResource::canCreate());
+        $this->assertFalse(SchoolActivityResource::canCreate());
+        $this->assertFalse(HomeActivityResource::canCreate());
+        $this->assertTrue(DailySchoolActivities::canAccess());
+        $this->assertTrue(DailyHomeActivities::canAccess());
         $this->assertTrue(ActivityCommentResource::canCreate());
         $this->assertTrue(ScheduleResource::canCreate());
         $this->assertTrue(UserNotificationResource::canCreate());
@@ -60,8 +64,10 @@ class RoleAccessTest extends TestCase
         $this->assertTrue(TeacherResource::canViewAny());
         $this->assertTrue(SchoolClassResource::canViewAny());
         $this->assertTrue(StudentResource::canCreate());
-        $this->assertTrue(SchoolActivityResource::canCreate());
+        $this->assertFalse(SchoolActivityResource::canCreate());
         $this->assertFalse(HomeActivityResource::canCreate());
+        $this->assertTrue(DailySchoolActivities::canAccess());
+        $this->assertTrue(DailyHomeActivities::canAccess());
         $this->assertTrue(ActivityCommentResource::canCreate());
         $this->assertTrue(ScheduleResource::canViewAny());
         $this->assertTrue(ScheduleResource::canCreate());
@@ -76,7 +82,9 @@ class RoleAccessTest extends TestCase
         $this->assertFalse(StudentResource::canCreate());
         $this->assertTrue(SchoolActivityResource::canViewAny());
         $this->assertFalse(SchoolActivityResource::canCreate());
-        $this->assertTrue(HomeActivityResource::canCreate());
+        $this->assertFalse(HomeActivityResource::canCreate());
+        $this->assertFalse(DailySchoolActivities::canAccess());
+        $this->assertTrue(DailyHomeActivities::canAccess());
         $this->assertTrue(ActivityCommentResource::canCreate());
         $this->assertTrue(ScheduleResource::canViewAny());
         $this->assertFalse(ScheduleResource::canCreate());
@@ -154,13 +162,13 @@ class RoleAccessTest extends TestCase
         ]);
 
         $this->actingAs($guru);
-        $this->assertTrue(SchoolActivityResource::canEdit($schoolActivity));
+        $this->assertFalse(SchoolActivityResource::canEdit($schoolActivity));
         $this->assertFalse(HomeActivityResource::canEdit($homeActivity));
 
         $this->actingAs($orangTua);
         $this->assertTrue(SchoolActivityResource::canView($schoolActivity));
         $this->assertFalse(SchoolActivityResource::canEdit($schoolActivity));
-        $this->assertTrue(HomeActivityResource::canEdit($homeActivity));
+        $this->assertFalse(HomeActivityResource::canEdit($homeActivity));
 
         $this->actingAs($siswa);
         $this->assertFalse(SchoolActivityResource::canView($schoolActivity));
@@ -268,10 +276,8 @@ class RoleAccessTest extends TestCase
         $this->actingAs($guru)
             ->get('/admin')
             ->assertOk()
-            ->assertSee('Profil Guru')
-            ->assertSee('Kelas dan Siswa')
-            ->assertSee('/admin/school-activities', false)
-            ->assertSee('/admin/home-activities', false)
+            ->assertSee('/admin/laporan-sekolah-harian', false)
+            ->assertSee('/admin/aktivitas-rumah-harian', false)
             ->assertSee('/admin/activity-comments', false)
             ->assertSee('/admin/laporan-aktivitas', false)
             ->assertDontSee('/admin/student-arrivals', false)
@@ -294,7 +300,7 @@ class RoleAccessTest extends TestCase
             ->assertSee('/admin/students', false)
             ->assertSee("/admin/parent-profiles/{$orangTua->parentProfile->id}", false)
             ->assertSee('/admin/school-activities', false)
-            ->assertSee('/admin/home-activities', false)
+            ->assertSee('/admin/aktivitas-rumah-harian', false)
             ->assertSee('/admin/activity-comments', false)
             ->assertSee('/admin/attendance-records', false)
             ->assertSee('/admin/laporan-aktivitas', false)
@@ -371,7 +377,7 @@ class RoleAccessTest extends TestCase
 
         $this->actingAs(User::role('guru')->firstOrFail());
         $this->assertSame('Siswa Kelas Saya', StudentResource::getNavigationLabel());
-        $this->assertSame('Profil Guru', TeacherResource::getNavigationLabel());
+        $this->assertSame('Profil Wali Kelas', TeacherResource::getNavigationLabel());
         $this->assertSame('Kelas dan Siswa', SchoolClassResource::getNavigationLabel());
 
         $this->actingAs(User::role('orang_tua')->firstOrFail());

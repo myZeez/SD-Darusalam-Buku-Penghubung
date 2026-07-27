@@ -27,6 +27,10 @@
         .aspects strong { display: block; font-size: 8px; }
         .aspects span { color: #4b5563; display: block; font-size: 7px; margin-top: 2px; }
         .aspects em { color: #92400e; display: block; font-size: 7px; font-style: normal; font-weight: bold; margin-top: 4px; }
+        .score-table { border-collapse: collapse; table-layout: fixed; width: 100%; }
+        .score-table th, .score-table td { border: 1px solid #d1d5db; padding: 4px 5px; }
+        .score-table th { background: #f3f4f6; font-size: 8px; text-align: left; }
+        .score-table td.number { text-align: center; width: 14%; }
         .section { margin-top: 14px; }
         .section-title { border-bottom: 1px solid #9ca3af; font-size: 11px; margin-bottom: 6px; padding-bottom: 3px; }
         table.data { border-collapse: collapse; width: 100%; }
@@ -128,6 +132,38 @@
                         @endforeach
                     </tr>
                 </table>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title">Rekap Buku Penghubung</h2>
+                @foreach ([
+                    'Aktivitas Sekolah' => $studentReport['summary']['school_activity_scores'],
+                    'Aktivitas Rumah' => $studentReport['summary']['home_activity_scores'],
+                ] as $scoreLabel => $scores)
+                    <h3 style="font-size: 9px; margin: {{ $loop->first ? '0' : '7px' }} 0 3px;">{{ $scoreLabel }}</h3>
+                    <table class="score-table">
+                        <thead>
+                            <tr>
+                                <th>Kategori</th>
+                                <th class="number">Skor</th>
+                                <th class="number">Maksimum</th>
+                                <th class="number">Persentase</th>
+                                <th class="number">Predikat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($scores as $score)
+                                <tr>
+                                    <td>{{ $score['category'] }}</td>
+                                    <td class="number">{{ $score['score'] }}</td>
+                                    <td class="number">{{ $score['maximum_score'] }}</td>
+                                    <td class="number">{{ $score['percentage'] }}%</td>
+                                    <td class="number">{{ $score['rating'] }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @endforeach
             </section>
 
             <section class="section">

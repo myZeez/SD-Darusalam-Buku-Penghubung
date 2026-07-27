@@ -2,23 +2,20 @@
 
 namespace App\Support;
 
-class HomeActivityTemplate
+class SchoolActivityTemplate
 {
     /** @return array<int, array{category: string, items: array<int, array{key: string, label: string, type: string, checked: bool}>}> */
     public static function forGrade(?int $gradeLevel): array
     {
         $akhlak = [
-            ...($gradeLevel !== null && $gradeLevel >= 4
-                ? [['tahajud-prayer', 'Melaksanakan salat Tahajud']]
-                : []),
-            ['subuh-prayer', 'Melaksanakan salat Subuh'],
+            ['on-time-arrival', 'Hadir di sekolah tepat waktu'],
             ['duha-prayer', 'Melaksanakan salat Duha'],
             ['zuhur-prayer', 'Melaksanakan salat Zuhur'],
-            ['asar-prayer', 'Melaksanakan salat Asar'],
-            ['magrib-prayer', 'Melaksanakan salat Magrib'],
-            ['isya-prayer', 'Melaksanakan salat Isya'],
+            ...($gradeLevel !== null && $gradeLevel >= 4
+                ? [['ashar-prayer', 'Melaksanakan salat Ashar']]
+                : []),
+            ['murajaah', 'Murajaah hafalan surah, hadis, dan doa'],
             ['eating-etiquette', 'Membiasakan adab makan dan minum'],
-            ['bedtime-wudu-prayer', 'Berwudu dan berdoa sebelum tidur'],
             ['neat-dress', 'Berpakaian rapi dan sopan'],
         ];
 
@@ -30,28 +27,31 @@ class HomeActivityTemplate
             [
                 'category' => 'Berprestasi',
                 'items' => self::checklistItems([
-                    ['morning-routine', 'Bangun pagi dan merapikan tempat tidur'],
-                    ['study', 'Belajar dengan tekun'],
-                    ['murajaah', "Mengulang hafalan surah, hadis, doa, dan bacaan UMMI/Al-Qur'an"],
+                    ['orderly-learning', 'Belajar dengan tertib dan disiplin'],
+                    ['on-time-assignment', 'Mengerjakan tugas tepat waktu'],
+                    ['library-reading', 'Membaca buku di perpustakaan'],
+                    ['daily-language', 'Menggunakan ungkapan sederhana dalam bahasa Inggris, Arab, atau Dayak'],
                     ['exercise', 'Rutin berolahraga'],
-                    ['healthy-food', 'Mengonsumsi makanan sehat dan bergizi'],
-                    ['early-sleep', 'Tidur lebih awal'],
                 ]),
             ],
             [
                 'category' => 'Berjiwa Sosial',
                 'items' => self::checklistItems([
-                    ['respect-parent', 'Hormat dan patuh kepada orang tua'],
+                    ['five-s', 'Membiasakan 5S (Senyum, Salam, Sapa, Sopan, Santun)'],
+                    ['respect-teacher', 'Hormat dan patuh kepada guru'],
+                    ['respect-friend', 'Menghormati dan menghargai teman'],
                     ['polite-speaking', 'Berbicara dengan sopan kepada semua orang'],
+                    ['queue', 'Membiasakan antre'],
                     ['charity', 'Berinfak'],
-                    ['helping', 'Membantu orang tua atau orang lain'],
+                    ['helping', 'Membantu guru atau teman'],
                 ]),
             ],
             [
                 'category' => 'Peduli Lingkungan',
                 'items' => self::checklistItems([
                     ['dispose-trash', 'Membuang sampah pada tempatnya'],
-                    ['tidy-home', 'Menjaga kebersihan dan kerapian rumah'],
+                    ['tidy-personal-area', 'Menjaga kebersihan dan kerapian meja, laci, dan loker'],
+                    ['care-school-environment', 'Menjaga dan merawat lingkungan sekolah'],
                 ]),
             ],
         ];

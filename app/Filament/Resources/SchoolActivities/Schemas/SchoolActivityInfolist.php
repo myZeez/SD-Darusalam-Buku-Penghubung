@@ -50,7 +50,7 @@ class SchoolActivityInfolist
                             }),
                     ]),
                 Section::make('Aktivitas Siswa')
-                    ->description('Aktivitas dikelompokkan berdasarkan kategori yang dicatat guru.')
+                    ->description('Checklist dikelompokkan menurut empat kategori tetap pada Buku Penghubung.')
                     ->icon(Heroicon::OutlinedListBullet)
                     ->columnSpanFull()
                     ->schema([

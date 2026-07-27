@@ -1,7 +1,7 @@
 @php
     use App\Filament\Resources\ActivityComments\ActivityCommentResource;
     use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
-    use App\Filament\Resources\HomeActivities\HomeActivityResource;
+    use App\Filament\Pages\DailyHomeActivities;
     use App\Filament\Resources\ParentSubmissions\ParentSubmissionResource;
     use App\Filament\Resources\ParentProfiles\ParentProfileResource;
     use App\Filament\Resources\Extracurriculars\ExtracurricularResource;
@@ -67,8 +67,8 @@
         [
             'label' => 'Rumah',
             'icon' => 'gmdi-home-work-o',
-            'url' => HomeActivityResource::getUrl(),
-            'active' => request()->routeIs('filament.admin.resources.home-activities.*'),
+            'url' => DailyHomeActivities::getUrl(),
+            'active' => request()->routeIs('filament.admin.pages.aktivitas-rumah-harian'),
         ],
         [
             'label' => 'Diskusi',

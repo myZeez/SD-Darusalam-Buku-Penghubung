@@ -2,7 +2,8 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Resources\SchoolActivities\SchoolActivityResource;
+use App\Filament\Pages\DailySchoolActivities;
+use App\Models\Student;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -26,7 +27,7 @@ class PendingSchoolReports extends Widget
     }
 
     /**
-     * @return array{pendingStudents: Collection<int, \App\Models\Student>, reportedCount: int, totalCount: int, reportIndexUrl: string}
+     * @return array{pendingStudents: Collection<int, Student>, reportedCount: int, totalCount: int, reportIndexUrl: string}
      */
     protected function getViewData(): array
     {
@@ -34,10 +35,10 @@ class PendingSchoolReports extends Widget
 
         if (! $user?->hasRole('guru')) {
             return [
-                'pendingStudents' => new Collection(),
+                'pendingStudents' => new Collection,
                 'reportedCount' => 0,
                 'totalCount' => 0,
-                'reportIndexUrl' => SchoolActivityResource::getUrl(),
+                'reportIndexUrl' => DailySchoolActivities::getUrl(),
             ];
         }
 
@@ -55,7 +56,7 @@ class PendingSchoolReports extends Widget
             'pendingStudents' => $pendingStudents,
             'reportedCount' => $totalCount - $pendingStudents->count(),
             'totalCount' => $totalCount,
-            'reportIndexUrl' => SchoolActivityResource::getUrl(),
+            'reportIndexUrl' => DailySchoolActivities::getUrl(),
         ];
     }
 }

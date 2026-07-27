@@ -62,28 +62,27 @@ class SchoolActivityResource extends Resource
 
     public static function canCreate(): bool
     {
-        return auth()->user()?->can('manage school activities') ?? false;
+        return false;
     }
 
     public static function canEdit(Model $record): bool
     {
-        $user = auth()->user();
-
-        if (! ($user?->can('manage school activities') ?? false)) {
-            return false;
-        }
-
-        return $user->isAdmin() || $record->teacher?->user_id === $user->id;
+        return false;
     }
 
     public static function canDelete(Model $record): bool
     {
-        return static::canEdit($record);
+        return false;
     }
 
     public static function canDeleteAny(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole('orang_tua') ?? false;
     }
 
     public static function form(Schema $schema): Schema

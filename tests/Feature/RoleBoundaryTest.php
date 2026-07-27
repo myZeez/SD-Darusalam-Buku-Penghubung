@@ -199,9 +199,9 @@ class RoleBoundaryTest extends TestCase
             '/admin/students',
             '/admin/students/create',
             '/admin/school-activities',
-            '/admin/school-activities/create',
             '/admin/home-activities',
-            '/admin/home-activities/create',
+            '/admin/laporan-sekolah-harian',
+            '/admin/aktivitas-rumah-harian',
             '/admin/activity-comments',
             '/admin/activity-comments/create',
             '/admin/schedules',
@@ -229,8 +229,10 @@ class RoleBoundaryTest extends TestCase
         $this->get('/admin/parent-profiles')->assertForbidden();
         $this->get('/admin/school-classes/create')->assertForbidden();
         $this->get('/admin/students/create')->assertOk();
-        $this->get('/admin/home-activities/create')->assertOk();
-        $this->get('/admin/school-activities/create')->assertOk();
+        $this->get('/admin/home-activities/create')->assertForbidden();
+        $this->get('/admin/school-activities/create')->assertForbidden();
+        $this->get('/admin/laporan-sekolah-harian')->assertOk();
+        $this->get('/admin/aktivitas-rumah-harian')->assertOk();
         $this->get('/admin/activity-comments/create')->assertOk();
         $this->get('/admin/schedules/create')->assertOk();
         $this->get('/admin/user-notifications/create')->assertOk();

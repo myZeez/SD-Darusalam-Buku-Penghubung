@@ -4,14 +4,13 @@ namespace Tests\Feature;
 
 use App\Actions\Students\SaveStudentWithFamily;
 use App\Filament\Pages\AccountSecurity;
+use App\Filament\Pages\DailySchoolActivities;
 use App\Filament\Pages\TeacherAttendance;
 use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
 use App\Filament\Resources\Extracurriculars\ExtracurricularResource;
 use App\Filament\Resources\ParentSubmissions\ParentSubmissionResource;
 use App\Filament\Resources\Schedules\Pages\CreateSchedule;
 use App\Filament\Resources\Schedules\ScheduleResource;
-use App\Filament\Resources\SchoolActivities\Pages\CreateSchoolActivity;
-use App\Filament\Resources\SchoolActivities\Pages\EditSchoolActivity;
 use App\Filament\Resources\SchoolClasses\Pages\ViewSchoolClass;
 use App\Filament\Resources\SchoolClasses\RelationManagers\StudentsRelationManager;
 use App\Filament\Resources\SchoolClasses\SchoolClassResource;
@@ -132,45 +131,39 @@ class TeacherWorkspaceTest extends TestCase
             ->assertCanSeeTableRecords([$student]);
     }
 
-    public function test_teacher_gets_a_validation_error_for_a_duplicate_daily_school_report(): void
+    public function test_daily_school_checklist_updates_existing_records_without_duplicates(): void
     {
         $guru = User::role('guru')->firstOrFail();
         $student = $guru->accessibleStudents()->firstOrFail();
+        $date = today()->startOfWeek();
         $existingReport = SchoolActivity::create([
             'student_id' => $student->id,
             'teacher_id' => $guru->teacher->id,
-            'activity_date' => today(),
+            'activity_date' => $date,
             'attendance' => 'present',
             'note' => 'Laporan yang sudah tersimpan.',
         ]);
 
         $this->actingAs($guru);
 
-        Livewire::test(CreateSchoolActivity::class)
-            ->fillForm([
-                'student_id' => $student->id,
-                'activity_date' => today()->toDateString(),
-                'attendance' => 'present',
-                'note' => 'Data duplikat tidak boleh tersimpan.',
-            ])
-            ->call('create')
-            ->assertHasFormErrors(['activity_date'])
-            ->assertSee(SchoolActivity::DUPLICATE_DAILY_REPORT_MESSAGE);
-
-        $this->assertDatabaseCount('school_activities', 1);
-        $this->assertDatabaseMissing('school_activities', [
-            'note' => 'Data duplikat tidak boleh tersimpan.',
-        ]);
-
-        Livewire::test(EditSchoolActivity::class, ['record' => $existingReport->getRouteKey()])
-            ->fillForm(['note' => 'Laporan yang sudah tersimpan diperbarui.'])
-            ->call('save')
-            ->assertHasNoFormErrors();
+        Livewire::test(DailySchoolActivities::class)
+            ->set('selectedClassId', $student->class_id)
+            ->set('selectedDate', $date->toDateString())
+            ->set("notes.{$student->id}", 'Laporan yang sudah tersimpan diperbarui.')
+            ->call('saveChecklist')
+            ->assertHasNoErrors();
 
         $this->assertDatabaseHas('school_activities', [
             'id' => $existingReport->id,
             'note' => 'Laporan yang sudah tersimpan diperbarui.',
         ]);
+        $this->assertSame(
+            1,
+            SchoolActivity::query()
+                ->where('student_id', $student->id)
+                ->whereDate('activity_date', $date)
+                ->count(),
+        );
     }
 
     public function test_full_class_automatically_places_a_new_student_in_an_available_class_of_the_same_grade(): void

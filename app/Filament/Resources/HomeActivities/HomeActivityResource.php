@@ -70,31 +70,27 @@ class HomeActivityResource extends Resource
 
     public static function canCreate(): bool
     {
-        $user = auth()->user();
-
-        return ($user?->isAdmin() ?? false) || ($user?->hasRole('guru') ?? false);
+        return false;
     }
 
     public static function canEdit(Model $record): bool
     {
-        $user = auth()->user();
-
-        return ($user?->isAdmin() ?? false)
-            || ($user?->hasRole('guru') && $user->managedStudents()->whereKey($record->student_id)->exists())
-            || ($user?->hasRole('orang_tua') && $record->student?->parent?->user_id === $user->id);
+        return false;
     }
 
     public static function canDelete(Model $record): bool
     {
-        $user = auth()->user();
-
-        return ($user?->isAdmin() ?? false)
-            || ($user?->hasRole('guru') && $user->managedStudents()->whereKey($record->student_id)->exists());
+        return false;
     }
 
     public static function canDeleteAny(): bool
     {
-        return auth()->user()?->isAdmin() ?? false;
+        return false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 
     public static function form(Schema $schema): Schema

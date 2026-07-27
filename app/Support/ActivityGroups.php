@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Str;
+
 class ActivityGroups
 {
     /** @return array<int, array{category: string, items: array<int, array<string, mixed>>}> */
@@ -20,6 +22,7 @@ class ActivityGroups
                         $type = ($item['type'] ?? 'checklist') === 'text' ? 'text' : 'checklist';
 
                         return [
+                            'key' => trim((string) ($item['key'] ?? '')) ?: Str::slug((string) ($item['label'] ?? '')),
                             'label' => trim((string) ($item['label'] ?? '')),
                             'type' => $type,
                             'checked' => $type === 'checklist' && (bool) ($item['checked'] ?? false),

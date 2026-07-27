@@ -31,7 +31,7 @@ class HomeActivityInfolist
                             ->date('d M Y'),
                     ]),
                 Section::make('Aktivitas Rumah')
-                    ->description('Daftar aktivitas dibuat oleh guru dan dilengkapi checklist oleh orang tua.')
+                    ->description('Daftar aktivitas tetap mengikuti Buku Penghubung dan dilengkapi oleh orang tua.')
                     ->icon(Heroicon::OutlinedListBullet)
                     ->columnSpanFull()
                     ->schema([

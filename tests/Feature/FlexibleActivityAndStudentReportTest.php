@@ -3,9 +3,9 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\ActivityReports;
+use App\Filament\Pages\DailyHomeActivities;
+use App\Filament\Pages\DailySchoolActivities;
 use App\Filament\Resources\HomeActivities\HomeActivityResource;
-use App\Filament\Resources\HomeActivities\Pages\CreateHomeActivity;
-use App\Filament\Resources\SchoolActivities\Pages\CreateSchoolActivity;
 use App\Filament\Resources\SchoolActivities\SchoolActivityResource;
 use App\Models\AttendanceRecord;
 use App\Models\HomeActivity;
@@ -15,6 +15,7 @@ use App\Models\Student;
 use App\Models\StudentArrival;
 use App\Models\User;
 use App\Services\StudentReportService;
+use App\Support\SchoolActivityTemplate;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -33,63 +34,65 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
-    public function test_teacher_can_create_school_activity_categories_with_checklists_and_text(): void
-    {
-        $teacher = User::role('guru')->firstOrFail();
-        $student = $teacher->accessibleStudents()->firstOrFail();
-        $groups = $this->schoolGroups();
-
-        $this->actingAs($teacher);
-
-        Livewire::test(CreateSchoolActivity::class)
-            ->fillForm([
-                'student_id' => $student->id,
-                'activity_date' => today()->toDateString(),
-                'attendance' => 'present',
-                'activity_groups' => $groups,
-                'note' => 'Kegiatan sekolah berjalan baik.',
-            ])
-            ->call('create')
-            ->assertHasNoFormErrors();
-
-        $activity = SchoolActivity::query()->latest('id')->firstOrFail();
-
-        $this->assertSame($groups, $activity->activity_groups);
-        $this->assertSame('Kegiatan Ibadah, Aspek Perkembangan', $activity->activity_category_summary);
-
-        $this->get(SchoolActivityResource::getUrl('view', ['record' => $activity]))
-            ->assertOk()
-            ->assertSee('Kegiatan Ibadah')
-            ->assertSee('Salat')
-            ->assertSee('Sangat bersemangat dalam melakukan kegiatan outdoor.');
-    }
-
-    public function test_teacher_applies_the_fixed_home_activity_template_to_every_student_in_a_class(): void
+    public function test_teacher_can_fill_the_fixed_school_checklist_for_a_whole_class(): void
     {
         $teacher = User::role('guru')->firstOrFail();
         $class = $teacher->managedClasses()->withCount('students')->firstOrFail();
+        $date = now()->startOfWeek()->toDateString();
 
         $this->actingAs($teacher);
 
-        Livewire::test(CreateHomeActivity::class)
-            ->fillForm([
-                'class_id' => $class->id,
-                'activity_date' => today()->toDateString(),
-            ])
-            ->call('create')
-            ->assertHasNoFormErrors();
+        Livewire::test(DailySchoolActivities::class)
+            ->set('selectedClassId', $class->id)
+            ->set('selectedDate', $date)
+            ->call('markActivityForAll', 'duha-prayer', true)
+            ->call('saveChecklist')
+            ->assertHasNoErrors();
 
-        $activities = HomeActivity::query()
-            ->whereDate('activity_date', today())
-            ->orderBy('student_id')
+        $activities = SchoolActivity::query()
+            ->whereDate('activity_date', $date)
+            ->whereHas('student', fn ($query) => $query->where('class_id', $class->id))
             ->get();
-        $activity = $activities->firstOrFail();
 
         $this->assertCount($class->students_count, $activities);
         $this->assertSame(
-            HomeActivity::defaultActivityGroupsForGrade($class->grade_level),
-            $activity->activity_groups,
+            collect(SchoolActivityTemplate::forGrade($class->grade_level))->pluck('category')->all(),
+            collect($activities->firstOrFail()->activity_groups)->pluck('category')->all(),
         );
+        $this->assertTrue($activities->every(fn (SchoolActivity $activity): bool => collect($activity->activity_groups)
+            ->flatMap(fn (array $group) => $group['items'])
+            ->firstWhere('key', 'duha-prayer')['checked']));
+
+        $this->assertFalse(SchoolActivityResource::canCreate());
+        $this->assertFalse(SchoolActivityResource::canDeleteAny());
+    }
+
+    public function test_parent_gets_the_fixed_home_checklist_without_teacher_creating_it_first(): void
+    {
+        $parent = User::role('orang_tua')->firstOrFail();
+        $student = $parent->accessibleStudents()->firstOrFail();
+
+        $this->actingAs($parent);
+
+        Livewire::test(DailyHomeActivities::class)
+            ->set('selectedStudentId', $student->id)
+            ->set('selectedDate', today()->toDateString())
+            ->call('markAll', true)
+            ->set('note', 'Checklist diisi dari halaman aktivitas rumah harian.')
+            ->call('saveChecklist')
+            ->assertHasNoErrors();
+
+        $activity = HomeActivity::query()
+            ->where('student_id', $student->id)
+            ->whereDate('activity_date', today())
+            ->firstOrFail();
+
+        $this->assertSame(
+            collect(HomeActivity::defaultActivityGroupsForGrade($student->class->grade_level))->pluck('category')->all(),
+            collect($activity->activity_groups)->pluck('category')->all(),
+        );
+        $this->assertNotNull($activity->submitted_at);
+        $this->assertSame($parent->id, $activity->submitted_by);
         $this->assertSame('Berakhlak, Berprestasi, Berjiwa Sosial, Peduli Lingkungan', $activity->activity_category_summary);
 
         $this->get(HomeActivityResource::getUrl('view', ['record' => $activity]))

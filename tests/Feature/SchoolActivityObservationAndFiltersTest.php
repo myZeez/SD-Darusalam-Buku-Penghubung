@@ -26,14 +26,15 @@ class SchoolActivityObservationAndFiltersTest extends TestCase
         $this->app->make(PermissionRegistrar::class)->forgetCachedPermissions();
     }
 
-    public function test_school_observation_template_covers_the_daily_teacher_workflow(): void
+    public function test_school_template_matches_the_four_fixed_book_categories(): void
     {
         $groups = SchoolActivityForm::defaultActivityGroups();
 
         $this->assertSame([
-            'Rutinitas Pagi',
-            'Pembelajaran dan Perkembangan',
-            'Kebiasaan Harian',
+            'Berakhlak',
+            'Berprestasi',
+            'Berjiwa Sosial',
+            'Peduli Lingkungan',
         ], array_column($groups, 'category'));
 
         $labels = collect($groups)
@@ -42,18 +43,11 @@ class SchoolActivityObservationAndFiltersTest extends TestCase
             ->pluck('label')
             ->all();
 
-        $this->assertEqualsCanonicalizing([
-            'Kondisi Kedatangan',
-            'Morning Circle',
-            'Doa dan Ikrar',
-            'Kegiatan Jasmani/Motorik',
-            'Kegiatan Pembelajaran',
-            'Kedisiplinan',
-            'Kemandirian',
-            'Ibadah',
-            'Sosial',
-            'Istirahat',
-        ], $labels);
+        $this->assertCount(21, $labels);
+        $this->assertContains('Hadir di sekolah tepat waktu', $labels);
+        $this->assertContains('Melaksanakan salat Duha', $labels);
+        $this->assertContains('Membiasakan 5S (Senyum, Salam, Sapa, Sopan, Santun)', $labels);
+        $this->assertContains('Menjaga dan merawat lingkungan sekolah', $labels);
     }
 
     public function test_teacher_can_filter_school_reports_by_student_and_date_range(): void

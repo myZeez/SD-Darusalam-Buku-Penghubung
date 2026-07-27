@@ -23,6 +23,7 @@ use App\Models\StudentArrival;
 use App\Models\Teacher;
 use App\Models\User;
 use App\Models\UserNotification;
+use App\Support\SchoolActivityTemplate;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Collection;
@@ -513,7 +514,7 @@ class DemoDataSeeder extends Seeder
                     'teacher_id' => $family['class']->teacher_id,
                     'activity_date' => $date,
                     'attendance' => $attendance,
-                    'activity_groups' => json_encode($this->schoolActivityGroups($family['index'], $attendance), JSON_UNESCAPED_UNICODE),
+                    'activity_groups' => json_encode($this->schoolActivityGroups($family['class']->grade_level, $family['index'], $attendance), JSON_UNESCAPED_UNICODE),
                     'morning_activity' => 'Literasi pagi dan doa bersama sebelum pembelajaran.',
                     'learning_activity' => 'Mengikuti pembelajaran tematik, diskusi kelompok, dan latihan mandiri.',
                     'religious_activity' => 'Membaca doa harian dan murajaah surat pendek.',
@@ -526,6 +527,8 @@ class DemoDataSeeder extends Seeder
                         ? 'Perkembangan siswa baik dan aktif mengikuti kegiatan kelas.'
                         : 'Siswa tidak mengikuti kegiatan kelas karena '.($attendance === 'sick' ? 'sakit.' : 'izin.'),
                     'photo' => null,
+                    'submitted_at' => $date->setTime(20, 0),
+                    'submitted_by' => $family['parent']->user_id,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ];
@@ -573,33 +576,25 @@ class DemoDataSeeder extends Seeder
         DB::table('home_activities')->upsert(
             $homeRows,
             ['student_id', 'activity_date'],
-            ['parent_id', 'activity_groups', 'worship', 'study', 'homework', 'sleep', 'meal', 'note', 'photo', 'updated_at'],
+            ['parent_id', 'activity_groups', 'worship', 'study', 'homework', 'sleep', 'meal', 'note', 'photo', 'submitted_at', 'submitted_by', 'updated_at'],
         );
     }
 
     /** @return array<int, array{category: string, items: array<int, array<string, mixed>>}> */
-    private function schoolActivityGroups(int $index, string $attendance): array
+    private function schoolActivityGroups(?int $gradeLevel, int $index, string $attendance): array
     {
         $present = $attendance === 'present';
+        $groups = SchoolActivityTemplate::forGrade($gradeLevel);
 
-        return [
-            [
-                'category' => 'Pembelajaran',
-                'items' => [
-                    ['label' => 'Mengikuti literasi pagi', 'type' => 'checklist', 'checked' => $present],
-                    ['label' => 'Menyelesaikan tugas kelas', 'type' => 'checklist', 'checked' => $present && $index % 6 !== 0],
-                    ['label' => 'Catatan pembelajaran', 'type' => 'text', 'text' => $present ? 'Aktif bertanya dan bekerja sama dalam kelompok.' : 'Tidak mengikuti pembelajaran.'],
-                ],
-            ],
-            [
-                'category' => 'Karakter dan Kebiasaan',
-                'items' => [
-                    ['label' => 'Berdoa dengan tertib', 'type' => 'checklist', 'checked' => $present],
-                    ['label' => 'Menjaga kebersihan', 'type' => 'checklist', 'checked' => $present],
-                    ['label' => 'Catatan karakter', 'type' => 'text', 'text' => $present ? 'Menunjukkan sikap santun dan bertanggung jawab.' : 'Belum dapat diamati hari ini.'],
-                ],
-            ],
-        ];
+        foreach ($groups as $groupIndex => &$group) {
+            foreach ($group['items'] as $itemIndex => &$item) {
+                $item['checked'] = $present && ($index + $groupIndex + $itemIndex) % 8 !== 0;
+            }
+            unset($item);
+        }
+        unset($group);
+
+        return $groups;
     }
 
     /** @return array<int, array{category: string, items: array<int, array<string, mixed>>}> */

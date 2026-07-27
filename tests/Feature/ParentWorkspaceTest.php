@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Filament\Pages\DailyHomeActivities;
 use App\Filament\Resources\ActivityComments\ActivityCommentResource;
 use App\Filament\Resources\HomeActivities\HomeActivityResource;
-use App\Filament\Resources\HomeActivities\Pages\EditHomeActivity;
 use App\Filament\Resources\ParentProfiles\Pages\EditParentProfile;
 use App\Filament\Resources\ParentProfiles\ParentProfileResource;
 use App\Filament\Resources\ParentSubmissions\Pages\CreateParentSubmission;
@@ -148,26 +148,25 @@ class ParentWorkspaceTest extends TestCase
             'activity_date' => today(),
             'activity_groups' => HomeActivity::defaultActivityGroupsForGrade($student->class->grade_level),
         ]);
-        $groups = $activity->activity_groups;
-        $groups[0]['items'][0]['checked'] = true;
-
         $this->actingAs($parentUser);
 
         $this->assertFalse(HomeActivityResource::canCreate());
 
-        Livewire::test(EditHomeActivity::class, ['record' => $activity->getRouteKey()])
-            ->fillForm([
-                'activity_groups' => $groups,
-                'note' => 'Laporan otomatis dari hubungan keluarga.',
-            ])
-            ->call('save')
-            ->assertHasNoFormErrors();
+        Livewire::test(DailyHomeActivities::class)
+            ->set('selectedStudentId', $student->id)
+            ->set('selectedDate', today()->toDateString())
+            ->set('checks.subuh-prayer', true)
+            ->set('note', 'Laporan otomatis dari hubungan keluarga.')
+            ->call('saveChecklist')
+            ->assertHasNoErrors();
 
         $activity->refresh();
 
         $this->assertSame($student->id, $activity->student_id);
         $this->assertSame($student->parent_id, $activity->parent_id);
-        $this->assertTrue($activity->activity_groups[0]['items'][0]['checked']);
+        $this->assertTrue(collect($activity->activity_groups)
+            ->flatMap(fn (array $group) => $group['items'])
+            ->firstWhere('key', 'subuh-prayer')['checked']);
         $this->assertSame('Melaksanakan salat Subuh', $activity->activity_groups[0]['items'][0]['label']);
     }
 
@@ -200,7 +199,8 @@ class ParentWorkspaceTest extends TestCase
         $this->assertFalse(HomeActivityResource::canEdit($activity));
 
         $this->actingAs($newParentUser);
-        $this->assertTrue(HomeActivityResource::canEdit($activity));
+        $this->assertFalse(HomeActivityResource::canEdit($activity));
+        $this->assertTrue(DailyHomeActivities::canAccess());
     }
 
     public function test_parent_selects_a_child_and_class_teacher_context_is_filled_automatically(): void
@@ -323,7 +323,7 @@ class ParentWorkspaceTest extends TestCase
         $this->get(HomeActivityResource::getUrl())
             ->assertOk()
             ->assertSee($student->name)
-            ->assertSee(HomeActivityResource::getUrl('edit', ['record' => $homeActivity]), false);
+            ->assertDontSee(HomeActivityResource::getUrl('edit', ['record' => $homeActivity]), false);
 
         $this->get(ActivityCommentResource::getUrl())
             ->assertOk()
@@ -349,7 +349,8 @@ class ParentWorkspaceTest extends TestCase
             ->assertDontSee(UserNotificationResource::getUrl('edit', ['record' => $notification]), false);
 
         $this->get(SchoolActivityResource::getUrl('edit', ['record' => $schoolActivity]))->assertForbidden();
-        $this->get(HomeActivityResource::getUrl('edit', ['record' => $homeActivity]))->assertOk();
+        $this->get(HomeActivityResource::getUrl('edit', ['record' => $homeActivity]))->assertForbidden();
+        $this->get(DailyHomeActivities::getUrl())->assertOk();
         $this->get(ActivityCommentResource::getUrl('edit', ['record' => $teacherComment]))->assertForbidden();
         $this->get(ActivityCommentResource::getUrl('edit', ['record' => $parentComment]))->assertOk();
         $this->get(ScheduleResource::getUrl('edit', ['record' => $schedule]))->assertForbidden();

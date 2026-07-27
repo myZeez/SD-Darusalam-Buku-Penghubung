@@ -6,10 +6,15 @@ use App\Models\AttendanceRecord;
 use App\Models\HomeActivity;
 use App\Models\SchoolActivity;
 use App\Models\User;
+use App\Support\HomeActivityTemplate;
+use App\Support\SchoolActivityTemplate;
 
 class StudentReportService
 {
-    public function __construct(private readonly DevelopmentAspectService $developmentAspects) {}
+    public function __construct(
+        private readonly DevelopmentAspectService $developmentAspects,
+        private readonly ActivityScoreService $activityScores,
+    ) {}
 
     /** @return array<string, mixed> */
     public function build(User $user, string $from, string $to, ?int $studentId = null): array
@@ -49,7 +54,7 @@ class StudentReportService
             ->get()
             ->groupBy('student_id');
 
-        $reports = $students->map(function ($student) use ($attendanceRecords, $schoolActivities, $homeActivities): array {
+        $reports = $students->map(function ($student) use ($attendanceRecords, $schoolActivities, $homeActivities, $from, $to): array {
             $attendance = $attendanceRecords->get($student->id, collect())->values();
             $school = $schoolActivities->get($student->id, collect())->values();
             $home = $homeActivities->get($student->id, collect())->values();
@@ -66,6 +71,20 @@ class StudentReportService
                     'late' => $attendance->where('is_late', true)->count(),
                     'school_activities' => $school->count(),
                     'home_activities' => $home->count(),
+                    'school_activity_scores' => $this->activityScores->summarize(
+                        $school,
+                        SchoolActivityTemplate::forGrade($student->class?->grade_level),
+                        $from,
+                        $to,
+                        'school',
+                    ),
+                    'home_activity_scores' => $this->activityScores->summarize(
+                        $home,
+                        HomeActivityTemplate::forGrade($student->class?->grade_level),
+                        $from,
+                        $to,
+                        'home',
+                    ),
                     'development_aspects' => $this->developmentAspects->summarize($school, $home),
                 ],
             ];

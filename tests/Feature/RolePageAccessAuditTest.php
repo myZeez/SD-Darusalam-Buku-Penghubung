@@ -4,6 +4,8 @@ namespace Tests\Feature;
 
 use App\Filament\Pages\AccountSecurity;
 use App\Filament\Pages\ActivityReports;
+use App\Filament\Pages\DailyHomeActivities;
+use App\Filament\Pages\DailySchoolActivities;
 use App\Filament\Pages\TeacherAttendance;
 use App\Filament\Resources\ActivityComments\ActivityCommentResource;
 use App\Filament\Resources\AttendanceRecords\AttendanceRecordResource;
@@ -87,9 +89,9 @@ class RolePageAccessAuditTest extends TestCase
     public function test_every_create_button_follows_the_role_task_boundary(): void
     {
         $expected = [
-            'admin' => ['users', 'teachers', 'parents', 'students', 'classes', 'school_activities', 'home_activities', 'comments', 'schedules', 'notifications', 'arrivals', 'attendances', 'early_departures', 'extracurriculars'],
+            'admin' => ['users', 'teachers', 'parents', 'students', 'classes', 'comments', 'schedules', 'notifications', 'arrivals', 'attendances', 'early_departures', 'extracurriculars'],
             'loket' => ['arrivals'],
-            'guru' => ['students', 'school_activities', 'home_activities', 'comments', 'schedules', 'notifications', 'early_departures'],
+            'guru' => ['students', 'comments', 'schedules', 'notifications', 'early_departures'],
             'orang_tua' => ['comments', 'parent_submissions'],
             'siswa' => [],
         ];
@@ -112,6 +114,8 @@ class RolePageAccessAuditTest extends TestCase
         $teacher = User::role('guru')->firstOrFail();
         $this->actingAs($teacher);
         $this->assertTrue(TeacherAttendance::canAccess());
+        $this->assertTrue(DailySchoolActivities::canAccess());
+        $this->assertTrue(DailyHomeActivities::canAccess());
         $this->assertTrue(ActivityReports::canAccess());
         $this->assertFalse(AccountSecurity::shouldRegisterNavigation());
         $this->assertTrue(StudentResource::shouldRegisterNavigation());
@@ -119,6 +123,8 @@ class RolePageAccessAuditTest extends TestCase
         $student = User::role('siswa')->firstOrFail();
         $this->actingAs($student);
         $this->assertFalse(TeacherAttendance::canAccess());
+        $this->assertFalse(DailySchoolActivities::canAccess());
+        $this->assertFalse(DailyHomeActivities::canAccess());
         $this->assertFalse(ActivityReports::canAccess());
         $this->assertFalse(AccountSecurity::shouldRegisterNavigation());
         $this->assertFalse(StudentResource::shouldRegisterNavigation());
@@ -126,6 +132,8 @@ class RolePageAccessAuditTest extends TestCase
         $parent = User::role('orang_tua')->firstOrFail();
         $this->actingAs($parent);
         $this->assertTrue(ActivityReports::canAccess());
+        $this->assertFalse(DailySchoolActivities::canAccess());
+        $this->assertTrue(DailyHomeActivities::canAccess());
         $this->assertFalse(AccountSecurity::shouldRegisterNavigation());
         $this->assertFalse(UserNotificationResource::shouldRegisterNavigation());
     }
