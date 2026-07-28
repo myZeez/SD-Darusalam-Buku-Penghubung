@@ -6,7 +6,8 @@ use Filament\Widgets\Widget;
 
 class PaletteSwitcher extends Widget
 {
-    protected static ?int $sort = -9;
+    // Theme preference is secondary to the day's information, so it belongs at the end of the dashboard.
+    protected static ?int $sort = 100;
 
     protected static bool $isLazy = false;
 
