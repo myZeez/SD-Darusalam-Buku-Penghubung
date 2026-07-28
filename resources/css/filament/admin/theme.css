@@ -84,6 +84,11 @@ html[data-simpati-palette='lembut'] {
     line-height: 1;
 }
 
+/* Dashboard memakai sambutan berbasis peran sebagai heading utamanya. */
+.fi-page:has(.fi-wi-dashboard-welcome) > .fi-page-header-main-ctn > .fi-header {
+    display: none;
+}
+
 .dashboard-welcome {
     display: grid;
     min-height: 14rem;

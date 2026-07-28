@@ -31,7 +31,7 @@ class DashboardWelcomeIllustration extends Widget
 
         if ($user?->isAdmin()) {
             return [
-                'eyebrow' => 'Beranda admin',
+                'eyebrow' => 'Beranda admin 🏫',
                 'heading' => 'Pantau kesiswaan dengan lebih dekat',
                 'description' => 'Lihat gambaran kehadiran dan aktivitas siswa untuk membantu sekolah mengambil langkah yang tepat.',
                 'image' => asset('images/dashboard/school-field.png'),
@@ -41,7 +41,7 @@ class DashboardWelcomeIllustration extends Widget
 
         if ($user?->hasRole('guru')) {
             return [
-                'eyebrow' => 'Beranda wali kelas',
+                'eyebrow' => 'Beranda wali kelas 👩‍🏫',
                 'heading' => 'Mari dampingi siswa hari ini',
                 'description' => 'Catat kehadiran dan aktivitas siswa agar perkembangan mereka selalu terpantau dengan baik.',
                 'image' => asset('images/dashboard/teacher-students.png'),
@@ -50,7 +50,7 @@ class DashboardWelcomeIllustration extends Widget
         }
 
         return [
-            'eyebrow' => 'Beranda orang tua',
+            'eyebrow' => 'Beranda orang tua 👨‍👩‍👧',
             'heading' => 'Tumbuh bersama, setiap hari',
             'description' => 'Ikuti kabar sekolah dan aktivitas anak untuk mendukung perkembangan mereka dari rumah.',
             'image' => asset('images/dashboard/parent-child.png'),

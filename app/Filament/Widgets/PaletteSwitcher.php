@@ -6,7 +6,7 @@ use Filament\Widgets\Widget;
 
 class PaletteSwitcher extends Widget
 {
-    protected static ?int $sort = -100;
+    protected static ?int $sort = -9;
 
     protected static bool $isLazy = false;
 
