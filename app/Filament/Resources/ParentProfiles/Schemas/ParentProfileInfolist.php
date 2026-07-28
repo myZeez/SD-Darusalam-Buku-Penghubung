@@ -2,10 +2,14 @@
 
 namespace App\Filament\Resources\ParentProfiles\Schemas;
 
+use App\Filament\Resources\ParentProfiles\ParentProfileResource;
+use App\Models\ParentProfile;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
 use Filament\Support\Icons\Heroicon;
 
 class ParentProfileInfolist
@@ -71,7 +75,15 @@ class ParentProfileInfolist
                         TextEntry::make('updated_at')
                             ->label('Terakhir Diperbarui')
                             ->dateTime('d M Y, H:i'),
-                    ]),
+                    ])
+                    ->footerActions([
+                        Action::make('editProfile')
+                            ->label('Ubah Profil')
+                            ->icon(Heroicon::OutlinedPencilSquare)
+                            ->url(fn (ParentProfile $record): string => ParentProfileResource::getUrl('edit', ['record' => $record]))
+                            ->visible(fn (): bool => auth()->user()?->hasRole('orang_tua') ?? false),
+                    ])
+                    ->footerActionsAlignment(Alignment::End),
             ]);
     }
 }

@@ -61,7 +61,12 @@ class ParentWorkspaceTest extends TestCase
             ->assertSee('Navigasi utama ponsel')
             ->assertSee('Profil Orang Tua')
             ->assertSee($parentUser->name)
-            ->assertSee($profile->father_name);
+            ->assertSee($profile->father_name)
+            ->assertSeeInOrder([
+                'Informasi Sistem',
+                'Terakhir Diperbarui',
+                'Ubah Profil',
+            ]);
 
         Livewire::test(EditParentProfile::class, ['record' => $profile->getRouteKey()])
             ->fillForm([

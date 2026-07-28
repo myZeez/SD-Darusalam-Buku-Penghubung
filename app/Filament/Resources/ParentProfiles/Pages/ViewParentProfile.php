@@ -17,6 +17,10 @@ class ViewParentProfile extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        if (auth()->user()?->hasRole('orang_tua')) {
+            return [];
+        }
+
         return [
             EditAction::make()
                 ->visible(fn (): bool => ParentProfileResource::canEdit($this->record)),

@@ -2870,6 +2870,25 @@ html[data-simpati-palette='lembut'] {
         display: none !important;
     }
 
+    /* Saat sidebar keluarga disembunyikan, brand tetap menjadi penanda yang jelas di header ponsel. */
+    body:has(.family-mobile-nav) .fi-topbar-start {
+        display: flex;
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-inline-end: 0.75rem;
+    }
+
+    body:has(.family-mobile-nav) .fi-topbar-start .fi-logo {
+        margin-inline-start: 0;
+        color: var(--primary-950);
+        font-size: 1.125rem;
+        line-height: 1.5rem;
+    }
+
+    .dark body:has(.family-mobile-nav) .fi-topbar-start .fi-logo {
+        color: white;
+    }
+
     body:has(.family-mobile-nav) .fi-main {
         padding-right: 0.875rem;
         padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
