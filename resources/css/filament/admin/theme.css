@@ -2757,6 +2757,15 @@ html[data-simpati-palette='lembut'] {
 }
 
 @media (max-width: 639px) {
+    /* Akun keluarga menggunakan bottom navigation; jangan tampilkan navigasi Filament yang sama. */
+    body:has(.family-mobile-nav) .fi-sidebar,
+    body:has(.family-mobile-nav) .fi-sidebar-close-overlay,
+    body:has(.family-mobile-nav) .fi-topbar-open-sidebar-btn,
+    body:has(.family-mobile-nav) .fi-topbar-close-sidebar-btn,
+    body:has(.family-mobile-nav) .fi-topbar-collapse-sidebar-btn-ctn {
+        display: none !important;
+    }
+
     body:has(.family-mobile-nav) .fi-main {
         padding-right: 0.875rem;
         padding-bottom: calc(5.75rem + env(safe-area-inset-bottom));
