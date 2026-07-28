@@ -12,3 +12,9 @@ Route::middleware('auth')->get('/reports/activity-summary', [ReportController::c
 
 Route::middleware('auth')->get('/reports/class-attendance', [ReportController::class, 'classAttendance'])
     ->name('reports.class-attendance');
+
+Route::middleware('auth')->get('/reports/daily-school-activities', [ReportController::class, 'dailySchoolActivities'])
+    ->name('reports.daily-school-activities');
+
+Route::middleware('auth')->get('/reports/daily-home-activities', [ReportController::class, 'dailyHomeActivities'])
+    ->name('reports.daily-home-activities');

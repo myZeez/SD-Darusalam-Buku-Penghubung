@@ -33,6 +33,17 @@
             </div>
 
             <x-filament::button
+                tag="a"
+                :href="$this->dailyReportUrl()"
+                target="_blank"
+                color="gray"
+                icon="gmdi-picture-as-pdf-o"
+                :disabled="empty($students)"
+            >
+                Export PDF
+            </x-filament::button>
+
+            <x-filament::button
                 type="button"
                 icon="gmdi-save-o"
                 wire:click="saveChecklist"

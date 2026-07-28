@@ -297,6 +297,14 @@ class DailySchoolActivities extends Page
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d F Y');
     }
 
+    public function dailyReportUrl(): string
+    {
+        return route('reports.daily-school-activities', [
+            'class_id' => $this->selectedClassId,
+            'date' => $this->selectedDate,
+        ]);
+    }
+
     public function isSchoolDay(): bool
     {
         $dayName = strtolower(CarbonImmutable::parse($this->selectedDate)->format('l'));

@@ -245,6 +245,102 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         ]))->assertForbidden();
     }
 
+    public function test_teacher_can_export_the_daily_school_checklist_as_pdf(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $schoolClass = $teacher->managedClasses()->with('students')->firstOrFail();
+        $student = $schoolClass->students()->where('status', 'active')->firstOrFail();
+
+        $schoolActivity = SchoolActivity::query()
+            ->where('student_id', $student->id)
+            ->whereDate('activity_date', today())
+            ->first();
+
+        if ($schoolActivity) {
+            $schoolActivity->update([
+                'teacher_id' => $teacher->teacher->id,
+                'attendance' => 'present',
+                'activity_groups' => $this->schoolGroups(),
+            ]);
+        } else {
+            SchoolActivity::query()->create([
+                'student_id' => $student->id,
+                'teacher_id' => $teacher->teacher->id,
+                'activity_date' => today()->toDateString(),
+                'attendance' => 'present',
+                'activity_groups' => $this->schoolGroups(),
+            ]);
+        }
+
+        $this->actingAs($teacher)
+            ->get(route('reports.daily-school-activities', [
+                'class_id' => $schoolClass->id,
+                'date' => today()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_parent_can_export_only_their_childs_daily_home_activity_as_pdf(): void
+    {
+        $parent = User::role('orang_tua')->firstOrFail();
+        $student = $parent->accessibleStudents()->with('class')->firstOrFail();
+        $otherStudent = Student::query()
+            ->where('id', '!=', $student->id)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        $homeActivity = HomeActivity::query()
+            ->where('student_id', $student->id)
+            ->whereDate('activity_date', today())
+            ->first();
+
+        if ($homeActivity) {
+            $homeActivity->update([
+                'parent_id' => $student->parent_id,
+                'activity_groups' => $this->homeGroups(),
+                'submitted_at' => now(),
+                'submitted_by' => $parent->id,
+            ]);
+        } else {
+            HomeActivity::query()->create([
+                'student_id' => $student->id,
+                'parent_id' => $student->parent_id,
+                'activity_date' => today()->toDateString(),
+                'activity_groups' => $this->homeGroups(),
+                'submitted_at' => now(),
+                'submitted_by' => $parent->id,
+            ]);
+        }
+
+        $this->actingAs($parent)
+            ->get(route('reports.daily-home-activities', [
+                'student_id' => $student->id,
+                'date' => today()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->get(route('reports.daily-home-activities', [
+            'student_id' => $otherStudent->id,
+            'date' => today()->toDateString(),
+        ]))->assertNotFound();
+    }
+
+    public function test_teacher_can_export_the_daily_home_activity_recap_for_a_managed_class_as_pdf(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $schoolClass = $teacher->managedClasses()->firstOrFail();
+
+        $this->actingAs($teacher)
+            ->get(route('reports.daily-home-activities', [
+                'class_id' => $schoolClass->id,
+                'date' => today()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
     /** @return array<int, array<string, mixed>> */
     private function schoolGroups(): array
     {

@@ -52,6 +52,17 @@
                 @endif
             </div>
 
+            <x-filament::button
+                tag="a"
+                :href="$this->dailyReportUrl()"
+                target="_blank"
+                color="gray"
+                icon="gmdi-picture-as-pdf-o"
+                :disabled="$this->isParent() ? ! $selectedStudentId : ! $selectedClassId"
+            >
+                Export PDF
+            </x-filament::button>
+
             @if ($this->isParent())
                 <x-filament::button
                     type="button"
