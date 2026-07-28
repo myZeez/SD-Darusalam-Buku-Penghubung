@@ -244,25 +244,22 @@ class DailyHomeActivities extends Page
     /** @return array<int, array<string, mixed>> */
     public function monthlyScores(): array
     {
-        if (! $this->canViewScores() || ! $this->selectedClassId) {
+        if (! $this->canViewScores() || ! $this->selectedClassId || ! $this->selectedStudentId) {
             return [];
         }
 
         $date = CarbonImmutable::parse($this->selectedDate);
         $from = $date->startOfMonth()->toDateString();
         $to = $date->toDateString();
-        $query = HomeActivity::query()->whereBetween('activity_date', [$from, $to]);
-        $studentCount = 1;
-
-        if ($this->isParent()) {
-            $query->where('student_id', (int) $this->selectedStudentId);
-        } else {
-            $classId = $this->authorizedClass()->id;
-            $query->whereHas('student', fn ($studentQuery) => $studentQuery
-                ->where('class_id', $classId)
-                ->where('status', 'active'));
-            $studentCount = max(1, count($this->monitoring));
-        }
+        $classId = $this->authorizedClass()->id;
+        $student = Student::query()
+            ->where('class_id', $classId)
+            ->where('status', 'active')
+            ->whereKey((int) $this->selectedStudentId)
+            ->firstOrFail();
+        $query = HomeActivity::query()
+            ->where('student_id', $student->id)
+            ->whereBetween('activity_date', [$from, $to]);
 
         return app(ActivityScoreService::class)->summarize(
             $query->get(),
@@ -270,7 +267,7 @@ class DailyHomeActivities extends Page
             $from,
             $to,
             'home',
-            $studentCount,
+            1,
         );
     }
 
@@ -380,6 +377,15 @@ class DailyHomeActivities extends Page
                 ];
             })
             ->all();
+
+        $studentIds = collect($this->monitoring)
+            ->pluck('student_id')
+            ->map(fn ($studentId): int => (int) $studentId)
+            ->all();
+
+        if (! in_array((int) $this->selectedStudentId, $studentIds, true)) {
+            $this->selectedStudentId = $studentIds[0] ?? null;
+        }
     }
 
     private function authorizedClass(): SchoolClass

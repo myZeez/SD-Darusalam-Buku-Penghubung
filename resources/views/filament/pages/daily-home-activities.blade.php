@@ -36,6 +36,19 @@
                             @endforelse
                         </select>
                     </label>
+
+                    @if ($canViewScores)
+                        <label class="daily-activity__field">
+                            <span>Nilai untuk siswa</span>
+                            <select wire:model.live="selectedStudentId" @disabled(empty($monitoring))>
+                                @forelse ($monitoring as $student)
+                                    <option value="{{ $student['student_id'] }}">{{ $student['name'] }}</option>
+                                @empty
+                                    <option value="">Belum ada siswa aktif</option>
+                                @endforelse
+                            </select>
+                        </label>
+                    @endif
                 @endif
 
                 <label class="daily-activity__field">

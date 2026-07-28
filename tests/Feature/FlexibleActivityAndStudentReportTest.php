@@ -117,6 +117,86 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         $this->assertTrue($upperGradeLabels->contains('Melaksanakan salat Tahajud'));
     }
 
+    public function test_teacher_home_scores_are_calculated_for_the_selected_student_only(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $schoolClass = $teacher->managedClasses()->with('students.parent')->firstOrFail();
+        $students = $schoolClass->students()->where('status', 'active')->take(2)->get();
+        $completedStudent = $students->firstOrFail();
+        $uncompletedStudent = $students->last();
+        $this->assertNotNull($uncompletedStudent);
+        $template = HomeActivity::defaultActivityGroupsForGrade($schoolClass->grade_level);
+        $completedGroups = collect($template)
+            ->map(function (array $group): array {
+                $group['items'] = collect($group['items'])
+                    ->map(fn (array $item): array => [...$item, 'checked' => true])
+                    ->all();
+
+                return $group;
+            })
+            ->all();
+
+        $completedActivity = HomeActivity::query()
+            ->where('student_id', $completedStudent->id)
+            ->whereDate('activity_date', today())
+            ->firstOrNew();
+        $completedActivity->fill([
+            'student_id' => $completedStudent->id,
+            'activity_date' => today(),
+            'parent_id' => $completedStudent->parent_id,
+            'activity_groups' => $completedGroups,
+        ])->save();
+
+        $uncompletedActivity = HomeActivity::query()
+            ->where('student_id', $uncompletedStudent->id)
+            ->whereDate('activity_date', today())
+            ->firstOrNew();
+        $uncompletedActivity->fill([
+            'student_id' => $uncompletedStudent->id,
+            'activity_date' => today(),
+            'parent_id' => $uncompletedStudent->parent_id,
+            'activity_groups' => $template,
+        ])->save();
+
+        $from = today()->startOfMonth()->toDateString();
+        $to = today()->toDateString();
+        $scoreService = app(ActivityScoreService::class);
+        $completedScores = $scoreService->summarize(
+            HomeActivity::query()
+                ->where('student_id', $completedStudent->id)
+                ->whereBetween('activity_date', [$from, $to])
+                ->get(),
+            $template,
+            $from,
+            $to,
+            'home',
+        );
+        $uncompletedScores = $scoreService->summarize(
+            HomeActivity::query()
+                ->where('student_id', $uncompletedStudent->id)
+                ->whereBetween('activity_date', [$from, $to])
+                ->get(),
+            $template,
+            $from,
+            $to,
+            'home',
+        );
+        $completedScore = $completedScores[0];
+        $uncompletedScore = $uncompletedScores[0];
+
+        $this->assertNotSame($completedScore['score'], $uncompletedScore['score']);
+
+        $this->actingAs($teacher);
+
+        Livewire::test(DailyHomeActivities::class)
+            ->set('selectedClassId', $schoolClass->id)
+            ->set('selectedStudentId', $completedStudent->id)
+            ->assertSee('Nilai untuk siswa')
+            ->assertSee("skor {$completedScore['score']}/{$completedScore['maximum_score']}")
+            ->set('selectedStudentId', $uncompletedStudent->id)
+            ->assertSee("skor {$uncompletedScore['score']}/{$uncompletedScore['maximum_score']}");
+    }
+
     public function test_school_weekly_score_uses_the_admin_school_days_setting(): void
     {
         SchoolSetting::current()->update([
