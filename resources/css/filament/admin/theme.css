@@ -5991,6 +5991,138 @@ html[data-simpati-palette='lembut'] {
     gap: 0.375rem;
 }
 
+.daily-activity__student-overview {
+    overflow: hidden;
+    border: 1px solid var(--simpati-border);
+    border-radius: 14px;
+    background: var(--simpati-surface);
+}
+
+.daily-activity__student-overview > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.125rem;
+    border-bottom: 1px solid var(--simpati-border);
+}
+
+.daily-activity__student-overview h2 {
+    color: var(--gray-950);
+    font-size: 1rem;
+    font-weight: 750;
+}
+
+.daily-activity__student-overview header p,
+.daily-activity__student-overview > header > span,
+.daily-activity__student-overview-name small,
+.daily-activity__student-overview-progress span {
+    color: var(--gray-500);
+    font-size: 0.75rem;
+}
+
+.daily-activity__student-overview header p {
+    margin-top: 0.1875rem;
+}
+
+.daily-activity__student-overview > header > span {
+    font-weight: 700;
+}
+
+.daily-activity__student-overview article {
+    display: grid;
+    min-height: 4.5rem;
+    grid-template-columns: 2.5rem minmax(10rem, 1fr) minmax(10rem, 18rem) auto auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1.125rem;
+}
+
+.daily-activity__student-overview article + article {
+    border-top: 1px solid var(--gray-200);
+}
+
+.daily-activity__student-overview-name {
+    min-width: 0;
+}
+
+.daily-activity__student-overview-name strong,
+.daily-activity__student-overview-name small {
+    display: block;
+}
+
+.daily-activity__student-overview-name strong {
+    color: var(--gray-950);
+    font-size: 0.8125rem;
+}
+
+.daily-activity__student-overview-progress {
+    display: grid;
+    gap: 0.375rem;
+}
+
+.daily-activity__student-overview-progress > i {
+    display: block;
+    height: 0.375rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--gray-200);
+}
+
+.daily-activity__student-overview-progress b {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--primary-500);
+}
+
+.daily-activity__student-overview-status {
+    display: inline-flex;
+    min-height: 1.75rem;
+    align-items: center;
+    padding: 0 0.5rem;
+    border-radius: 999px;
+    color: var(--warning-800);
+    background: var(--warning-50);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.daily-activity__student-overview-status.is-saved {
+    color: var(--success-800);
+    background: var(--success-50);
+}
+
+.dark .daily-activity__student-overview {
+    border-color: var(--gray-700);
+    background: var(--gray-900);
+}
+
+.dark .daily-activity__student-overview > header {
+    border-bottom-color: var(--gray-700);
+}
+
+.dark .daily-activity__student-overview h2,
+.dark .daily-activity__student-overview-name strong {
+    color: var(--gray-100);
+}
+
+.dark .daily-activity__student-overview header p,
+.dark .daily-activity__student-overview > header > span,
+.dark .daily-activity__student-overview-name small,
+.dark .daily-activity__student-overview-progress span {
+    color: var(--gray-400);
+}
+
+.dark .daily-activity__student-overview article + article {
+    border-top-color: var(--gray-800);
+}
+
+.dark .daily-activity__student-overview-progress > i {
+    background: var(--gray-700);
+}
+
 .daily-activity__empty {
     display: grid;
     min-height: 14rem;
@@ -6038,12 +6170,16 @@ html[data-simpati-palette='lembut'] {
     }
 
     .daily-activity__monitoring article {
-        grid-template-columns: 2.5rem minmax(10rem, 1fr) minmax(9rem, 14rem) auto;
+        grid-template-columns: 2.5rem minmax(9rem, 1fr) minmax(8rem, 14rem) auto auto;
     }
 
     .daily-activity__monitoring article .fi-btn {
-        grid-column: 2 / -1;
-        justify-self: start;
+        grid-column: auto;
+        justify-self: end;
+    }
+
+    .daily-activity__student-overview article {
+        grid-template-columns: 2.5rem minmax(9rem, 1fr) minmax(8rem, 14rem) auto auto;
     }
 }
 
@@ -6079,6 +6215,10 @@ html[data-simpati-palette='lembut'] {
         grid-template-columns: 2.5rem minmax(0, 1fr) auto;
     }
 
+    .daily-activity__student-overview article {
+        grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    }
+
     .daily-activity__monitoring-progress {
         grid-column: 2 / -1;
     }
@@ -6088,6 +6228,19 @@ html[data-simpati-palette='lembut'] {
     }
 
     .daily-activity__monitoring article .fi-btn {
+        grid-column: 3 / 4;
+        grid-row: 3;
+    }
+
+    .daily-activity__student-overview-progress {
+        grid-column: 2 / -1;
+    }
+
+    .daily-activity__student-overview-status {
+        grid-column: 2 / 3;
+    }
+
+    .daily-activity__student-overview article .fi-btn {
         grid-column: 3 / 4;
         grid-row: 3;
     }
@@ -6140,8 +6293,24 @@ html[data-simpati-palette='lembut'] {
         grid-template-columns: 2.5rem minmax(0, 1fr);
     }
 
+    .daily-activity__student-overview > header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .daily-activity__student-overview article {
+        grid-template-columns: 2.5rem minmax(0, 1fr);
+    }
+
     .daily-activity__submission-status,
     .daily-activity__monitoring article .fi-btn {
+        grid-column: 2 / -1;
+        grid-row: auto;
+    }
+
+    .daily-activity__student-overview-progress,
+    .daily-activity__student-overview-status,
+    .daily-activity__student-overview article .fi-btn {
         grid-column: 2 / -1;
         grid-row: auto;
     }

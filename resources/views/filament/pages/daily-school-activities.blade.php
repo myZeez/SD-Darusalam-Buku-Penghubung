@@ -1,7 +1,6 @@
 <x-filament-panels::page>
     @php
         $template = $this->template();
-        $monthlyScores = $this->monthlyScores();
         $selectedStudent = $this->selectedStudent();
     @endphp
 
@@ -32,16 +31,28 @@
                 <strong>{{ count($students) }} siswa aktif</strong>
             </div>
 
-            <x-filament::button
-                tag="a"
-                :href="$this->dailyReportUrl()"
-                target="_blank"
-                color="gray"
-                icon="gmdi-picture-as-pdf-o"
-                :disabled="empty($students)"
-            >
-                Export PDF
-            </x-filament::button>
+            <div class="daily-activity__export-actions" aria-label="Pilihan export PDF">
+                <x-filament::button
+                    tag="a"
+                    :href="$this->dailyReportUrl($selectedStudentId)"
+                    target="_blank"
+                    color="gray"
+                    icon="gmdi-person-o"
+                    :disabled="! $selectedStudentId"
+                >
+                    Export Siswa Ini
+                </x-filament::button>
+
+                <x-filament::button
+                    tag="a"
+                    :href="$this->dailyReportUrl()"
+                    target="_blank"
+                    icon="gmdi-picture-as-pdf-o"
+                    :disabled="empty($students)"
+                >
+                    Export Semua Siswa
+                </x-filament::button>
+            </div>
 
             <x-filament::button
                 type="button"
@@ -64,26 +75,57 @@
             </section>
         @endif
 
-        <section class="daily-activity__scores" aria-label="Rekap nilai aktivitas bulan ini">
-            @foreach ($monthlyScores as $score)
-                <div class="daily-activity__score daily-activity__score--{{ $score['color'] }}">
-                    <div>
-                        <span>{{ $score['category'] }}</span>
-                        <strong>Nilai {{ $score['rating'] }}</strong>
-                    </div>
-                    <div class="daily-activity__progress" aria-label="{{ $score['percentage'] }} persen">
-                        <i style="width: {{ $score['percentage'] }}%"></i>
-                    </div>
-                    <small>{{ $this->monthlyScorePeriod() }} · {{ $score['rating_label'] }} · {{ $score['percentage'] }}% · skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
+        <section class="daily-activity__student-overview" aria-label="Progres aktivitas tiap siswa">
+            <header>
+                <div>
+                    <h2>Progres Siswa Hari Ini</h2>
+                    <p>Progres dihitung per siswa, bukan gabungan satu kelas.</p>
                 </div>
-            @endforeach
+                <span>{{ count($students) }} siswa aktif</span>
+            </header>
+
+            <div>
+                @forelse ($students as $student)
+                    @php($studentProgress = $this->studentCompletion($student['id']))
+                    @php($progress = $studentProgress['total'] ? round(($studentProgress['checked'] / $studentProgress['total']) * 100) : 0)
+                    <article>
+                        <span class="daily-activity__avatar">{{ $student['initials'] }}</span>
+                        <div class="daily-activity__student-overview-name">
+                            <strong>{{ $student['name'] }}</strong>
+                            <small>{{ $student['nis'] }} · {{ $student['attendance_label'] }}</small>
+                        </div>
+                        <div class="daily-activity__student-overview-progress">
+                            <span>{{ $studentProgress['checked'] }}/{{ $studentProgress['total'] }} aktivitas · {{ $progress }}%</span>
+                            <i><b style="width: {{ $progress }}%"></b></i>
+                        </div>
+                        <span @class(['daily-activity__student-overview-status', 'is-saved' => $student['is_saved']])>
+                            {{ $student['is_saved'] ? 'Sudah diisi' : 'Belum diisi' }}
+                        </span>
+                        <x-filament::button
+                            type="button"
+                            color="gray"
+                            size="sm"
+                            icon="gmdi-edit-note-o"
+                            wire:click="editStudent({{ $student['id'] }})"
+                        >
+                            Isi siswa
+                        </x-filament::button>
+                    </article>
+                @empty
+                    <div class="daily-activity__empty">
+                        <x-filament::icon icon="gmdi-group-off-o" />
+                        <h3>Belum ada siswa aktif</h3>
+                        <p>Tambahkan siswa aktif ke kelas ini sebelum mengisi aktivitas harian.</p>
+                    </div>
+                @endforelse
+            </div>
         </section>
 
         <section class="daily-activity__workspace">
             <header class="daily-activity__workspace-header">
                 <div>
-                    <h2>Checklist Aktivitas Sekolah</h2>
-                    <p>Daftar aktivitas bersifat tetap. Gunakan tampilan massal atau per siswa sesuai kebutuhan.</p>
+                    <h2>Isi Aktivitas Sekolah</h2>
+                    <p>Pilih cara mengisi data yang paling sesuai untuk kelas hari ini.</p>
                 </div>
 
                 <div class="daily-activity__mode" role="group" aria-label="Cara mengisi checklist">
@@ -93,7 +135,7 @@
                         wire:click="setMode('activity')"
                     >
                         <x-filament::icon icon="gmdi-checklist-o" />
-                        Per Aktivitas
+                        Isi Semua Siswa
                     </button>
                     <button
                         type="button"
@@ -101,7 +143,7 @@
                         wire:click="setMode('student')"
                     >
                         <x-filament::icon icon="gmdi-person-o" />
-                        Per Siswa
+                        Isi Per Siswa
                     </button>
                 </div>
             </header>

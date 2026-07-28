@@ -118,6 +118,7 @@ class ReportController extends Controller
 
         $validated = $request->validate([
             'class_id' => ['required', 'integer', 'exists:classes,id'],
+            'student_id' => ['nullable', 'integer', 'exists:students,id'],
             'date' => ['required', 'date'],
         ]);
 
@@ -126,11 +127,23 @@ class ReportController extends Controller
             ->whereKey((int) $validated['class_id'])
             ->firstOrFail();
         $date = CarbonImmutable::parse($validated['date'])->toDateString();
-        $students = Student::query()
-            ->where('class_id', $schoolClass->id)
-            ->where('status', 'active')
-            ->orderBy('name')
-            ->get();
+        $isIndividualReport = filled($validated['student_id'] ?? null);
+        $student = null;
+
+        if ($isIndividualReport) {
+            $student = Student::query()
+                ->where('class_id', $schoolClass->id)
+                ->where('status', 'active')
+                ->whereKey((int) $validated['student_id'])
+                ->firstOrFail();
+            $students = collect([$student]);
+        } else {
+            $students = Student::query()
+                ->where('class_id', $schoolClass->id)
+                ->where('status', 'active')
+                ->orderBy('name')
+                ->get();
+        }
         $template = SchoolActivityTemplate::forGrade($schoolClass->grade_level);
         $records = SchoolActivity::query()
             ->whereIn('student_id', $students->pluck('id'))
@@ -165,13 +178,17 @@ class ReportController extends Controller
 
         return Pdf::loadView('reports.daily-school-activities', [
             'date' => $date,
+            'isIndividualReport' => $isIndividualReport,
             'rows' => $rows,
             'schoolClass' => $schoolClass,
             'settings' => SchoolSetting::current(),
+            'student' => $student,
             'template' => $template,
         ])
             ->setPaper('a4')
-            ->download('laporan-sekolah-'.Str::slug($schoolClass->name).'-'.$date.'.pdf');
+            ->download($isIndividualReport
+                ? 'laporan-sekolah-'.Str::slug($student->name).'-'.$date.'.pdf'
+                : 'laporan-sekolah-'.Str::slug($schoolClass->name).'-'.$date.'.pdf');
     }
 
     public function dailyHomeActivities(Request $request)

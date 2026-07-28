@@ -7,7 +7,6 @@ use App\Models\SchoolActivity;
 use App\Models\SchoolClass;
 use App\Models\SchoolSetting;
 use App\Models\Student;
-use App\Services\ActivityScoreService;
 use App\Support\FixedActivityChecklist;
 use App\Support\SchoolActivityTemplate;
 use BackedEnum;
@@ -122,6 +121,14 @@ class DailySchoolActivities extends Page
     {
         abort_unless(in_array($mode, ['activity', 'student'], true), 422);
         $this->mode = $mode;
+    }
+
+    public function editStudent(int $studentId): void
+    {
+        abort_unless(collect($this->students)->contains('id', $studentId), 422);
+
+        $this->selectedStudentId = $studentId;
+        $this->mode = 'student';
     }
 
     public function markActivityForAll(string $activityKey, bool $checked): void
@@ -264,50 +271,23 @@ class DailySchoolActivities extends Page
         return collect($this->students)->firstWhere('id', (int) $this->selectedStudentId);
     }
 
-    /** @return array<int, array<string, mixed>> */
-    public function monthlyScores(): array
-    {
-        if (! $this->selectedClassId) {
-            return [];
-        }
-
-        $class = $this->authorizedClass();
-        $selectedDate = CarbonImmutable::parse($this->selectedDate);
-        $from = $selectedDate->startOfMonth()->toDateString();
-        $to = $selectedDate->toDateString();
-        $records = SchoolActivity::query()
-            ->whereHas('student', fn ($query) => $query
-                ->where('class_id', $class->id)
-                ->where('status', 'active'))
-            ->whereBetween('activity_date', [$from, $to])
-            ->get();
-
-        return app(ActivityScoreService::class)->summarize(
-            $records,
-            SchoolActivityTemplate::forGrade($class->grade_level),
-            $from,
-            $to,
-            'school',
-            count($this->students),
-        );
-    }
-
     public function formattedDate(): string
     {
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d F Y');
     }
 
-    public function monthlyScorePeriod(): string
+    public function dailyReportUrl(?int $studentId = null): string
     {
-        return CarbonImmutable::parse($this->selectedDate)->translatedFormat('F Y');
-    }
-
-    public function dailyReportUrl(): string
-    {
-        return route('reports.daily-school-activities', [
+        $parameters = [
             'class_id' => $this->selectedClassId,
             'date' => $this->selectedDate,
-        ]);
+        ];
+
+        if ($studentId) {
+            $parameters['student_id'] = $studentId;
+        }
+
+        return route('reports.daily-school-activities', $parameters);
     }
 
     public function isSchoolDay(): bool
@@ -371,6 +351,7 @@ class DailySchoolActivities extends Page
                     'absent' => 'Alpa',
                     default => 'Presensi belum diisi',
                 },
+                'is_saved' => (bool) $record,
             ];
             $this->checks[$student->id] = $checks;
             $this->notes[$student->id] = $record?->note ?? '';

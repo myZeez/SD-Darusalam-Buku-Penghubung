@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Laporan Sekolah {{ $schoolClass->name }}</title>
+    <title>Laporan Sekolah {{ $isIndividualReport ? $student->name : $schoolClass->name }}</title>
     <style>
         @page { margin: 14mm 12mm 15mm; }
         * { box-sizing: border-box; }
@@ -44,16 +44,23 @@
 
     <header class="header">
         <h1>{{ $settings->school_name }}</h1>
-        <h2>Laporan Sekolah Harian</h2>
+        <h2>{{ $isIndividualReport ? 'Laporan Sekolah Siswa' : 'Laporan Sekolah Harian' }}</h2>
         <p>{{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}</p>
     </header>
 
     <table class="identity">
         <tr>
-            <td><strong>KELAS</strong>{{ $schoolClass->name }}</td>
-            <td><strong>WALI KELAS</strong>{{ $schoolClass->teacher?->user?->name ?? 'Belum ditentukan' }}</td>
-            <td><strong>JUMLAH SISWA</strong>{{ count($rows) }} siswa aktif</td>
-            <td><strong>TANGGAL CETAK</strong>{{ now()->translatedFormat('d F Y H:i') }}</td>
+            @if ($isIndividualReport)
+                <td><strong>NAMA SISWA</strong>{{ $student->name }}</td>
+                <td><strong>NIS</strong>{{ $student->nis }}</td>
+                <td><strong>KELAS</strong>{{ $schoolClass->name }}</td>
+                <td><strong>TANGGAL CETAK</strong>{{ now()->translatedFormat('d F Y H:i') }}</td>
+            @else
+                <td><strong>KELAS</strong>{{ $schoolClass->name }}</td>
+                <td><strong>WALI KELAS</strong>{{ $schoolClass->teacher?->user?->name ?? 'Belum ditentukan' }}</td>
+                <td><strong>JUMLAH SISWA</strong>{{ count($rows) }} siswa aktif</td>
+                <td><strong>TANGGAL CETAK</strong>{{ now()->translatedFormat('d F Y H:i') }}</td>
+            @endif
         </tr>
     </table>
 

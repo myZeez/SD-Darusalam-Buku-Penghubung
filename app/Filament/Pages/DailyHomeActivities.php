@@ -6,7 +6,6 @@ use App\Filament\Resources\HomeActivities\HomeActivityResource;
 use App\Models\HomeActivity;
 use App\Models\SchoolClass;
 use App\Models\Student;
-use App\Services\ActivityScoreService;
 use App\Support\FixedActivityChecklist;
 use App\Support\HomeActivityTemplate;
 use BackedEnum;
@@ -193,14 +192,9 @@ class DailyHomeActivities extends Page
         return auth()->user()?->hasRole('orang_tua') ?? false;
     }
 
-    public function canViewScores(): bool
-    {
-        return auth()->user()?->hasRole('guru') ?? false;
-    }
-
     public function canExportPdf(): bool
     {
-        return $this->canViewScores();
+        return auth()->user()?->hasRole('guru') ?? false;
     }
 
     /** @return array<int, array<string, mixed>> */
@@ -241,44 +235,9 @@ class DailyHomeActivities extends Page
         ];
     }
 
-    /** @return array<int, array<string, mixed>> */
-    public function monthlyScores(): array
-    {
-        if (! $this->canViewScores() || ! $this->selectedClassId || ! $this->selectedStudentId) {
-            return [];
-        }
-
-        $date = CarbonImmutable::parse($this->selectedDate);
-        $from = $date->startOfMonth()->toDateString();
-        $to = $date->toDateString();
-        $classId = $this->authorizedClass()->id;
-        $student = Student::query()
-            ->where('class_id', $classId)
-            ->where('status', 'active')
-            ->whereKey((int) $this->selectedStudentId)
-            ->firstOrFail();
-        $query = HomeActivity::query()
-            ->where('student_id', $student->id)
-            ->whereBetween('activity_date', [$from, $to]);
-
-        return app(ActivityScoreService::class)->summarize(
-            $query->get(),
-            $this->template(),
-            $from,
-            $to,
-            'home',
-            1,
-        );
-    }
-
     public function formattedDate(): string
     {
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d F Y');
-    }
-
-    public function monthlyScorePeriod(): string
-    {
-        return CarbonImmutable::parse($this->selectedDate)->translatedFormat('F Y');
     }
 
     public function dailyReportUrl(?int $studentId = null): string

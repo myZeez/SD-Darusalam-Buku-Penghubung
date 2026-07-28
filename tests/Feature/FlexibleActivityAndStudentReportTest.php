@@ -117,86 +117,45 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         $this->assertTrue($upperGradeLabels->contains('Melaksanakan salat Tahajud'));
     }
 
-    public function test_teacher_home_scores_are_calculated_for_the_selected_student_only(): void
+    public function test_teacher_can_monitor_home_activity_progress_for_each_student_without_class_scores(): void
     {
         $teacher = User::role('guru')->firstOrFail();
-        $schoolClass = $teacher->managedClasses()->with('students.parent')->firstOrFail();
-        $students = $schoolClass->students()->where('status', 'active')->take(2)->get();
-        $completedStudent = $students->firstOrFail();
-        $uncompletedStudent = $students->last();
-        $this->assertNotNull($uncompletedStudent);
-        $template = HomeActivity::defaultActivityGroupsForGrade($schoolClass->grade_level);
-        $completedGroups = collect($template)
-            ->map(function (array $group): array {
-                $group['items'] = collect($group['items'])
-                    ->map(fn (array $item): array => [...$item, 'checked' => true])
-                    ->all();
-
-                return $group;
-            })
-            ->all();
-
-        $completedActivity = HomeActivity::query()
-            ->where('student_id', $completedStudent->id)
-            ->whereDate('activity_date', today())
-            ->firstOrNew();
-        $completedActivity->fill([
-            'student_id' => $completedStudent->id,
-            'activity_date' => today(),
-            'parent_id' => $completedStudent->parent_id,
-            'activity_groups' => $completedGroups,
-        ])->save();
-
-        $uncompletedActivity = HomeActivity::query()
-            ->where('student_id', $uncompletedStudent->id)
-            ->whereDate('activity_date', today())
-            ->firstOrNew();
-        $uncompletedActivity->fill([
-            'student_id' => $uncompletedStudent->id,
-            'activity_date' => today(),
-            'parent_id' => $uncompletedStudent->parent_id,
-            'activity_groups' => $template,
-        ])->save();
-
-        $from = today()->startOfMonth()->toDateString();
-        $to = today()->toDateString();
-        $scoreService = app(ActivityScoreService::class);
-        $completedScores = $scoreService->summarize(
-            HomeActivity::query()
-                ->where('student_id', $completedStudent->id)
-                ->whereBetween('activity_date', [$from, $to])
-                ->get(),
-            $template,
-            $from,
-            $to,
-            'home',
-        );
-        $uncompletedScores = $scoreService->summarize(
-            HomeActivity::query()
-                ->where('student_id', $uncompletedStudent->id)
-                ->whereBetween('activity_date', [$from, $to])
-                ->get(),
-            $template,
-            $from,
-            $to,
-            'home',
-        );
-        $completedScore = $completedScores[0];
-        $uncompletedScore = $uncompletedScores[0];
-
-        $this->assertNotSame($completedScore['score'], $uncompletedScore['score']);
+        $schoolClass = $teacher->managedClasses()->with('students')->firstOrFail();
+        $student = $schoolClass->students()->where('status', 'active')->firstOrFail();
 
         $this->actingAs($teacher);
 
         Livewire::test(DailyHomeActivities::class)
             ->set('selectedClassId', $schoolClass->id)
-            ->set('selectedStudentId', $completedStudent->id)
-            ->assertSee('Nilai untuk siswa')
+            ->set('selectedStudentId', $student->id)
+            ->assertSee('Pilih siswa')
+            ->assertSee($student->name)
+            ->assertSee('aktivitas')
+            ->assertSee('Lihat Detail')
             ->assertSee('Export Siswa Ini')
             ->assertSee('Export Semua Siswa')
-            ->assertSee("skor {$completedScore['score']}/{$completedScore['maximum_score']}")
-            ->set('selectedStudentId', $uncompletedStudent->id)
-            ->assertSee("skor {$uncompletedScore['score']}/{$uncompletedScore['maximum_score']}");
+            ->assertDontSee('Rekap nilai aktivitas rumah bulan ini');
+    }
+
+    public function test_teacher_can_open_school_activity_input_for_an_individual_student(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $schoolClass = $teacher->managedClasses()->with('students')->firstOrFail();
+        $student = $schoolClass->students()->where('status', 'active')->firstOrFail();
+
+        $this->actingAs($teacher);
+
+        Livewire::test(DailySchoolActivities::class)
+            ->set('selectedClassId', $schoolClass->id)
+            ->assertSee('Progres Siswa Hari Ini')
+            ->assertSee($student->name)
+            ->assertSee('Isi Semua Siswa')
+            ->assertSee('Isi Per Siswa')
+            ->assertSee('Export Siswa Ini')
+            ->assertSee('Export Semua Siswa')
+            ->call('editStudent', $student->id)
+            ->assertSet('mode', 'student')
+            ->assertSet('selectedStudentId', $student->id);
     }
 
     public function test_school_weekly_score_uses_the_admin_school_days_setting(): void
@@ -367,6 +326,22 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         $this->actingAs($teacher)
             ->get(route('reports.daily-school-activities', [
                 'class_id' => $schoolClass->id,
+                'date' => today()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_teacher_can_export_the_daily_school_checklist_for_one_student_as_pdf(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $schoolClass = $teacher->managedClasses()->with('students')->firstOrFail();
+        $student = $schoolClass->students()->where('status', 'active')->firstOrFail();
+
+        $this->actingAs($teacher)
+            ->get(route('reports.daily-school-activities', [
+                'class_id' => $schoolClass->id,
+                'student_id' => $student->id,
                 'date' => today()->toDateString(),
             ]))
             ->assertOk()

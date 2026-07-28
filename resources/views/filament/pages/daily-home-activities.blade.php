@@ -1,8 +1,6 @@
 <x-filament-panels::page>
     @php
         $template = $this->template();
-        $canViewScores = $this->canViewScores();
-        $monthlyScores = $canViewScores ? $this->monthlyScores() : [];
         $completion = $this->completion();
         $monitoringSummary = $this->monitoringSummary();
     @endphp
@@ -37,18 +35,16 @@
                         </select>
                     </label>
 
-                    @if ($canViewScores)
-                        <label class="daily-activity__field">
-                            <span>Nilai untuk siswa</span>
-                            <select wire:model.live="selectedStudentId" @disabled(empty($monitoring))>
-                                @forelse ($monitoring as $student)
-                                    <option value="{{ $student['student_id'] }}">{{ $student['name'] }}</option>
-                                @empty
-                                    <option value="">Belum ada siswa aktif</option>
-                                @endforelse
-                            </select>
-                        </label>
-                    @endif
+                    <label class="daily-activity__field">
+                        <span>Pilih siswa</span>
+                        <select wire:model.live="selectedStudentId" @disabled(empty($monitoring))>
+                            @forelse ($monitoring as $student)
+                                <option value="{{ $student['student_id'] }}">{{ $student['name'] }}</option>
+                            @empty
+                                <option value="">Belum ada siswa aktif</option>
+                            @endforelse
+                        </select>
+                    </label>
                 @endif
 
                 <label class="daily-activity__field">
@@ -59,9 +55,7 @@
 
             <div class="daily-activity__toolbar-copy">
                 <span>{{ $this->formattedDate() }}</span>
-                @if ($canViewScores)
-                    <strong>{{ $monitoringSummary['submitted'] }} dari {{ $monitoringSummary['total'] }} sudah mengisi</strong>
-                @endif
+                <strong>{{ $monitoringSummary['submitted'] }} dari {{ $monitoringSummary['total'] }} sudah mengisi</strong>
             </div>
 
             @if ($this->canExportPdf())
@@ -101,23 +95,6 @@
                 </x-filament::button>
             @endif
         </section>
-
-        @if ($canViewScores)
-            <section class="daily-activity__scores" aria-label="Rekap nilai aktivitas rumah bulan ini">
-                @foreach ($monthlyScores as $score)
-                    <div class="daily-activity__score daily-activity__score--{{ $score['color'] }}">
-                        <div>
-                            <span>{{ $score['category'] }}</span>
-                            <strong>Nilai {{ $score['rating'] }}</strong>
-                        </div>
-                        <div class="daily-activity__progress" aria-label="{{ $score['percentage'] }} persen">
-                            <i style="width: {{ $score['percentage'] }}%"></i>
-                        </div>
-                        <small>{{ $this->monthlyScorePeriod() }} · {{ $score['rating_label'] }} · {{ $score['percentage'] }}% · skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
-                    </div>
-                @endforeach
-            </section>
-        @endif
 
         @if ($this->isParent())
             <section class="daily-activity__workspace">
@@ -186,6 +163,7 @@
 
                 <div class="daily-activity__monitoring">
                     @forelse ($monitoring as $student)
+                        @php($progress = $student['total'] ? round(($student['checked'] / $student['total']) * 100) : 0)
                         <article @class(['is-submitted' => $student['submitted']])>
                             <span class="daily-activity__avatar">{{ $student['initials'] }}</span>
                             <div>
@@ -193,8 +171,8 @@
                                 <small>{{ $student['nis'] }}</small>
                             </div>
                             <div class="daily-activity__monitoring-progress">
-                                <span>{{ $student['checked'] }}/{{ $student['total'] }} aktivitas</span>
-                                <i><b style="width: {{ $student['total'] ? round(($student['checked'] / $student['total']) * 100) : 0 }}%"></b></i>
+                                <span>{{ $student['checked'] }}/{{ $student['total'] }} aktivitas · {{ $progress }}%</span>
+                                <i><b style="width: {{ $progress }}%"></b></i>
                             </div>
                             <div class="daily-activity__submission-status">
                                 @if ($student['submitted'])
@@ -217,7 +195,7 @@
                                     size="sm"
                                     icon="gmdi-visibility-o"
                                 >
-                                    Lihat
+                                    Lihat Detail
                                 </x-filament::button>
                             @endif
                         </article>
