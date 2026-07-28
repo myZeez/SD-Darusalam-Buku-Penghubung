@@ -18,10 +18,7 @@
             <span class="palette-switcher__icon" aria-hidden="true">
                 <x-filament::icon icon="gmdi-palette-o" />
             </span>
-            <div>
-                <h2 id="palette-switcher-heading">Suasana dashboard</h2>
-                <p>Pilih warna yang paling nyaman. Pilihan tersimpan otomatis di perangkat ini.</p>
-            </div>
+            <h2 id="palette-switcher-heading">Tema warna</h2>
         </div>
 
         <div class="palette-switcher__options" role="group" aria-label="Pilihan palet warna">
@@ -35,7 +32,7 @@
                 <span class="palette-option__swatches" aria-hidden="true">
                     <i></i><i></i><i></i><i></i>
                 </span>
-                <span><strong>Ceria</strong><small>Penuh warna</small></span>
+                <strong>Ceria</strong>
                 <x-filament::icon icon="gmdi-check-circle-o" class="palette-option__check" />
             </button>
 
@@ -49,7 +46,7 @@
                 <span class="palette-option__swatches" aria-hidden="true">
                     <i></i><i></i><i></i><i></i>
                 </span>
-                <span><strong>Ungu Lembut</strong><small>Hangat dan ramah</small></span>
+                <strong>Lembut</strong>
                 <x-filament::icon icon="gmdi-check-circle-o" class="palette-option__check" />
             </button>
 
@@ -63,7 +60,7 @@
                 <span class="palette-option__swatches" aria-hidden="true">
                     <i></i><i></i><i></i><i></i>
                 </span>
-                <span><strong>Tenang</strong><small>Netral dan nyaman</small></span>
+                <strong>Tenang</strong>
                 <x-filament::icon icon="gmdi-check-circle-o" class="palette-option__check" />
             </button>
         </div>
