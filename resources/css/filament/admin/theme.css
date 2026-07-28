@@ -69,6 +69,21 @@ html[data-simpati-palette='lembut'] {
     background: var(--simpati-page-bg);
 }
 
+/* Aksen kecil yang membuat setiap halaman terasa ramah untuk siswa SD, tanpa mengubah hierarki judul. */
+.fi-header-heading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fi-header-heading::before {
+    flex: 0 0 auto;
+    color: var(--primary-600);
+    content: '✨';
+    font-size: 0.72em;
+    line-height: 1;
+}
+
 .fi-sidebar,
 .fi-sidebar-header,
 .fi-topbar {

@@ -1,11 +1,12 @@
 @php
     use App\Filament\Resources\Students\StudentResource;
-    use Illuminate\Support\Facades\Storage;
+    use App\Support\StoredFileUrl;
     use Illuminate\Support\Str;
 
     $record = $getRecord();
     $isStudentSelf = auth()->user()?->hasRole('siswa') ?? false;
     $photo = $record->photo ?: $record->user?->avatar;
+    $photoUrl = StoredFileUrl::for($photo);
     $initials = Str::of($record->name)
         ->explode(' ')
         ->filter()
@@ -248,8 +249,8 @@
 <article class="student-family-card">
     <header class="student-family-card__header">
         <div class="student-family-card__avatar" aria-hidden="true">
-            @if ($photo)
-                <img src="{{ Storage::url($photo) }}" alt="">
+            @if ($photoUrl)
+                <img src="{{ $photoUrl }}" alt="">
             @else
                 {{ $initials ?: 'S' }}
             @endif

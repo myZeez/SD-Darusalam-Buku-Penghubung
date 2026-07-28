@@ -16,8 +16,11 @@ use App\Models\AttendanceRecord;
 use App\Models\Extracurricular;
 use App\Models\ExtracurricularEnrollment;
 use App\Models\User;
+use App\Support\StoredFileUrl;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
@@ -70,6 +73,29 @@ class StudentWorkspaceTest extends TestCase
 
     }
 
+    public function test_parent_child_card_uses_a_temporary_url_for_private_student_photo(): void
+    {
+        Carbon::setTestNow('2026-07-28 10:00:00');
+
+        try {
+            $parent = User::role('orang_tua')->firstOrFail();
+            $student = $parent->accessibleStudents()->firstOrFail();
+            $photoPath = 'students/anak-saya.png';
+
+            Storage::disk('local')->put($photoPath, 'photo');
+            $student->update(['photo' => $photoPath]);
+
+            $expectedUrl = StoredFileUrl::for($photoPath);
+
+            $this->actingAs($parent)
+                ->get(StudentResource::getNavigationUrl())
+                ->assertOk()
+                ->assertSee(e($expectedUrl), false);
+        } finally {
+            Carbon::setTestNow();
+        }
+    }
+
     public function test_student_cannot_open_removed_operational_pages_directly(): void
     {
         $studentUser = User::role('siswa')->firstOrFail();
@@ -96,20 +122,28 @@ class StudentWorkspaceTest extends TestCase
     {
         $studentUser = User::role('siswa')->firstOrFail();
         $student = $studentUser->student;
+        $activeExtracurricularCount = ExtracurricularEnrollment::query()
+            ->where('student_id', $student->id)
+            ->where('status', 'active')
+            ->count();
         $extracurricular = Extracurricular::create([
             'teacher_id' => $student->class->teacher_id,
-            'name' => 'Pramuka',
+            'name' => 'Pramuka Uji Dashboard',
             'capacity' => 30,
             'status' => 'active',
         ]);
 
-        AttendanceRecord::create([
-            'student_id' => $student->id,
-            'class_id' => $student->class_id,
-            'attendance_date' => today(),
-            'status' => 'present',
-            'source' => 'teacher',
-        ]);
+        AttendanceRecord::updateOrCreate(
+            [
+                'student_id' => $student->id,
+                'attendance_date' => today(),
+            ],
+            [
+                'class_id' => $student->class_id,
+                'status' => 'present',
+                'source' => 'teacher',
+            ],
+        );
         ExtracurricularEnrollment::create([
             'extracurricular_id' => $extracurricular->id,
             'student_id' => $student->id,
@@ -131,6 +165,6 @@ class StudentWorkspaceTest extends TestCase
 
         $this->assertSame(['Presensi Hari Ini', 'Ekstrakurikuler Diikuti'], $stats->keys()->all());
         $this->assertSame('Hadir', $stats->get('Presensi Hari Ini'));
-        $this->assertSame(1, $stats->get('Ekstrakurikuler Diikuti'));
+        $this->assertSame($activeExtracurricularCount + 1, $stats->get('Ekstrakurikuler Diikuti'));
     }
 }
