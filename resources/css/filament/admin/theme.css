@@ -158,30 +158,42 @@ html[data-simpati-palette='lembut'] {
 
 @media (max-width: 40rem) {
     .dashboard-welcome {
-        min-height: 11.5rem;
-        grid-template-columns: minmax(0, 1fr) 8.5rem;
-        gap: 0.5rem;
+        min-height: 0;
+        grid-template-areas:
+            'image'
+            'copy';
+        grid-template-columns: minmax(0, 1fr);
+        gap: 1rem;
         padding: 1rem;
     }
 
+    .dashboard-welcome__copy {
+        grid-area: copy;
+        max-width: 30rem;
+        justify-self: center;
+        text-align: center;
+    }
+
     .dashboard-welcome__copy h2 {
-        font-size: 1.5rem;
-        line-height: 1.875rem;
+        font-size: 1.625rem;
+        line-height: 2rem;
     }
 
     .dashboard-welcome__copy span {
-        font-size: 0.8125rem;
-        line-height: 1.25rem;
+        font-size: 0.9375rem;
+        line-height: 1.5rem;
     }
 
     .dashboard-welcome__copy p {
-        font-size: 0.8125rem;
-        line-height: 1.125rem;
+        font-size: 0.875rem;
+        line-height: 1.25rem;
     }
 
     .dashboard-welcome__image {
-        width: 8.5rem;
-        max-height: 10rem;
+        grid-area: image;
+        width: min(13.5rem, 72vw);
+        max-height: 13rem;
+        justify-self: center;
     }
 }
 
