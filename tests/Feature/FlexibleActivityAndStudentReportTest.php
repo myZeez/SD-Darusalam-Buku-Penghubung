@@ -192,6 +192,8 @@ class FlexibleActivityAndStudentReportTest extends TestCase
             ->set('selectedClassId', $schoolClass->id)
             ->set('selectedStudentId', $completedStudent->id)
             ->assertSee('Nilai untuk siswa')
+            ->assertSee('Export Siswa Ini')
+            ->assertSee('Export Semua Siswa')
             ->assertSee("skor {$completedScore['score']}/{$completedScore['maximum_score']}")
             ->set('selectedStudentId', $uncompletedStudent->id)
             ->assertSee("skor {$uncompletedScore['score']}/{$uncompletedScore['maximum_score']}");
@@ -424,6 +426,22 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         $this->actingAs($teacher)
             ->get(route('reports.daily-home-activities', [
                 'class_id' => $schoolClass->id,
+                'date' => today()->toDateString(),
+            ]))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+    }
+
+    public function test_teacher_can_export_the_daily_home_activity_recap_for_one_student_as_pdf(): void
+    {
+        $teacher = User::role('guru')->firstOrFail();
+        $schoolClass = $teacher->managedClasses()->with('students')->firstOrFail();
+        $student = $schoolClass->students()->where('status', 'active')->firstOrFail();
+
+        $this->actingAs($teacher)
+            ->get(route('reports.daily-home-activities', [
+                'class_id' => $schoolClass->id,
+                'student_id' => $student->id,
                 'date' => today()->toDateString(),
             ]))
             ->assertOk()

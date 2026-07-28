@@ -65,16 +65,28 @@
             </div>
 
             @if ($this->canExportPdf())
-                <x-filament::button
-                    tag="a"
-                    :href="$this->dailyReportUrl()"
-                    target="_blank"
-                    color="gray"
-                    icon="gmdi-picture-as-pdf-o"
-                    :disabled="! $selectedClassId"
-                >
-                    Export PDF
-                </x-filament::button>
+                <div class="daily-activity__export-actions" aria-label="Pilihan export PDF">
+                    <x-filament::button
+                        tag="a"
+                        :href="$this->dailyReportUrl($selectedStudentId)"
+                        target="_blank"
+                        color="gray"
+                        icon="gmdi-person-o"
+                        :disabled="! $selectedStudentId"
+                    >
+                        Export Siswa Ini
+                    </x-filament::button>
+
+                    <x-filament::button
+                        tag="a"
+                        :href="$this->dailyReportUrl()"
+                        target="_blank"
+                        icon="gmdi-picture-as-pdf-o"
+                        :disabled="! $selectedClassId"
+                    >
+                        Export Semua Siswa
+                    </x-filament::button>
+                </div>
             @endif
 
             @if ($this->isParent())

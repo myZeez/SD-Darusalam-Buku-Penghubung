@@ -281,14 +281,20 @@ class DailyHomeActivities extends Page
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('F Y');
     }
 
-    public function dailyReportUrl(): string
+    public function dailyReportUrl(?int $studentId = null): string
     {
         abort_unless($this->canExportPdf(), 403);
 
-        return route('reports.daily-home-activities', [
+        $parameters = [
             'class_id' => $this->selectedClassId,
             'date' => $this->selectedDate,
-        ]);
+        ];
+
+        if ($studentId) {
+            $parameters['student_id'] = $studentId;
+        }
+
+        return route('reports.daily-home-activities', $parameters);
     }
 
     private function loadData(): void

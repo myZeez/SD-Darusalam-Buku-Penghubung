@@ -5233,6 +5233,12 @@ html[data-simpati-palette='lembut'] {
     font-size: 0.875rem;
 }
 
+.daily-activity__export-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 .dark .daily-activity__toolbar,
 .dark .daily-activity__workspace,
 .dark .daily-activity__notice {
@@ -6096,9 +6102,15 @@ html[data-simpati-palette='lembut'] {
 
     .daily-activity__field,
     .daily-activity__toolbar-copy,
-    .daily-activity__toolbar .fi-btn {
+    .daily-activity__toolbar .fi-btn,
+    .daily-activity__export-actions {
         width: 100%;
         min-width: 0;
+    }
+
+    .daily-activity__export-actions {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .daily-activity__toolbar-copy {

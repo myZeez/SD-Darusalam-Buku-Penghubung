@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Aktivitas Rumah {{ $isParent ? $student->name : $schoolClass->name }}</title>
+    <title>Aktivitas Rumah {{ $isIndividualReport ? $student->name : $schoolClass->name }}</title>
     <style>
         @page { margin: 14mm 12mm 15mm; }
         * { box-sizing: border-box; }
@@ -45,13 +45,13 @@
 
     <header class="header">
         <h1>{{ $settings->school_name }}</h1>
-        <h2>{{ $isParent ? 'Laporan Aktivitas Rumah Siswa' : 'Rekap Aktivitas Rumah Kelas' }}</h2>
+        <h2>{{ $isIndividualReport ? 'Laporan Aktivitas Rumah Siswa' : 'Rekap Aktivitas Rumah Kelas' }}</h2>
         <p>{{ \Carbon\Carbon::parse($date)->translatedFormat('l, d F Y') }}</p>
     </header>
 
     <table class="identity">
         <tr>
-            @if ($isParent)
+            @if ($isIndividualReport)
                 <td><strong>NAMA SISWA</strong>{{ $student->name }}</td>
                 <td><strong>NIS</strong>{{ $student->nis }}</td>
                 <td><strong>KELAS</strong>{{ $schoolClass?->name ?? 'Belum ada kelas' }}</td>

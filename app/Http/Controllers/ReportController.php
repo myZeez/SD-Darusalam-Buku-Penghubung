@@ -191,24 +191,21 @@ class ReportController extends Controller
             'date' => ['required', 'date', 'before_or_equal:today'],
         ]);
         $date = CarbonImmutable::parse($validated['date'])->toDateString();
-        $isParent = $user->hasRole('orang_tua');
+        abort_unless(filled($validated['class_id'] ?? null), 422);
 
-        if ($isParent) {
-            abort_unless(filled($validated['student_id'] ?? null), 422);
+        $schoolClass = $user->managedClasses()
+            ->whereKey((int) $validated['class_id'])
+            ->firstOrFail();
+        $isIndividualReport = filled($validated['student_id'] ?? null);
 
-            $student = $user->accessibleStudents()
-                ->with('class')
-                ->whereKey((int) $validated['student_id'])
+        if ($isIndividualReport) {
+            $student = Student::query()
+                ->where('class_id', $schoolClass->id)
                 ->where('status', 'active')
+                ->whereKey((int) $validated['student_id'])
                 ->firstOrFail();
-            $schoolClass = $student->class;
             $students = collect([$student]);
         } else {
-            abort_unless(filled($validated['class_id'] ?? null), 422);
-
-            $schoolClass = $user->managedClasses()
-                ->whereKey((int) $validated['class_id'])
-                ->firstOrFail();
             $students = Student::query()
                 ->where('class_id', $schoolClass->id)
                 ->where('status', 'active')
@@ -234,13 +231,13 @@ class ReportController extends Controller
             ];
         });
 
-        $filename = $isParent
+        $filename = $isIndividualReport
             ? 'aktivitas-rumah-'.Str::slug($student->name).'-'.$date.'.pdf'
             : 'aktivitas-rumah-'.Str::slug($schoolClass->name).'-'.$date.'.pdf';
 
         return Pdf::loadView('reports.daily-home-activities', [
             'date' => $date,
-            'isParent' => $isParent,
+            'isIndividualReport' => $isIndividualReport,
             'rows' => $rows,
             'schoolClass' => $schoolClass,
             'settings' => SchoolSetting::current(),
