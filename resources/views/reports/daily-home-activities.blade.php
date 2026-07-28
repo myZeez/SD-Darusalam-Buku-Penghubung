@@ -4,24 +4,24 @@
     <meta charset="utf-8">
     <title>Aktivitas Rumah {{ $isParent ? $student->name : $schoolClass->name }}</title>
     <style>
-        @page { margin: 14mm 10mm 15mm; }
+        @page { margin: 14mm 12mm 15mm; }
         * { box-sizing: border-box; }
         body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: 8px; line-height: 1.35; }
         h1, h2, h3, p { margin: 0; }
-        .header { border-bottom: 2px solid #7c3aed; margin-bottom: 9px; padding-bottom: 7px; text-align: center; }
+        .header { border-bottom: 2px solid #2563eb; margin-bottom: 9px; padding-bottom: 7px; text-align: center; }
         .header h1 { font-size: 16px; }
-        .header h2 { color: #6d28d9; font-size: 11px; margin-top: 2px; }
+        .header h2 { color: #2563eb; font-size: 11px; margin-top: 2px; }
         .header p { color: #667085; margin-top: 2px; }
         .identity, .summary, .data, .notes { border-collapse: collapse; width: 100%; }
         .identity { margin-bottom: 9px; }
         .identity td { border: 1px solid #d7deea; padding: 4px 6px; width: 25%; }
         .identity strong { color: #475467; display: block; font-size: 7px; margin-bottom: 1px; }
         .summary { margin-bottom: 10px; table-layout: fixed; }
-        .summary td { background: #f5f3ff; border: 1px solid #ddd6fe; padding: 5px; text-align: center; }
+        .summary td { background: #eff6ff; border: 1px solid #cfe0ff; padding: 5px; text-align: center; }
         .summary span { color: #667085; display: block; font-size: 7px; }
-        .summary strong { color: #6d28d9; display: block; font-size: 12px; }
+        .summary strong { color: #1d4ed8; display: block; font-size: 12px; }
         .section { margin-top: 11px; page-break-inside: avoid; }
-        .section h3 { color: #6d28d9; font-size: 10px; margin-bottom: 4px; }
+        .section h3 { color: #1d4ed8; font-size: 10px; margin-bottom: 4px; }
         .data { table-layout: fixed; }
         .data th, .data td, .notes th, .notes td { border: 1px solid #d7deea; padding: 4px; text-align: center; vertical-align: middle; }
         .data th, .notes th { background: #f2f4f7; color: #344054; font-size: 7px; }
@@ -74,37 +74,39 @@
     </table>
 
     @foreach ($template as $group)
-        <section class="section">
-            <h3>{{ $group['category'] }}</h3>
-            <table class="data">
-                <thead>
-                    <tr>
-                        <th style="width: 24px;">No.</th>
-                        <th style="width: 105px;">Siswa</th>
-                        <th style="width: 62px;">Status Isi</th>
-                        @foreach ($group['items'] as $item)
-                            <th>{{ $item['label'] }}</th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($rows as $row)
+        @foreach (collect($group['items'])->chunk(3) as $items)
+            <section class="section">
+                <h3>{{ $group['category'] }}{{ $loop->first ? '' : ' - lanjutan' }}</h3>
+                <table class="data">
+                    <thead>
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td class="student"><strong>{{ $row['student']->name }}</strong><br><span class="muted">{{ $row['student']->nis }}</span></td>
-                            <td class="{{ $row['submitted_at'] ? 'submitted' : 'not-submitted' }}">
-                                {{ $row['submitted_at'] ? 'Diisi '.$row['submitted_at']->format('H:i') : 'Belum diisi' }}
-                            </td>
-                            @foreach ($group['items'] as $item)
-                                <td class="{{ $row['checks'][$item['key']] ?? false ? 'done' : 'pending' }}">
-                                    {{ $row['checks'][$item['key']] ?? false ? 'Ya' : '-' }}
-                                </td>
+                            <th style="width: 22px;">No.</th>
+                            <th style="width: 108px;">Siswa</th>
+                            <th style="width: 68px;">Status Isi</th>
+                            @foreach ($items as $item)
+                                <th>{{ $item['label'] }}</th>
                             @endforeach
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </section>
+                    </thead>
+                    <tbody>
+                        @foreach ($rows as $row)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td class="student"><strong>{{ $row['student']->name }}</strong><br><span class="muted">{{ $row['student']->nis }}</span></td>
+                                <td class="{{ $row['submitted_at'] ? 'submitted' : 'not-submitted' }}">
+                                    {{ $row['submitted_at'] ? 'Diisi '.$row['submitted_at']->format('H:i') : 'Belum diisi' }}
+                                </td>
+                                @foreach ($items as $item)
+                                    <td class="{{ $row['checks'][$item['key']] ?? false ? 'done' : 'pending' }}">
+                                        {{ $row['checks'][$item['key']] ?? false ? 'Ya' : '-' }}
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </section>
+        @endforeach
     @endforeach
 
     <section class="section">

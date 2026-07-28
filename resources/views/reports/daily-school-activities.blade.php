@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <title>Laporan Sekolah {{ $schoolClass->name }}</title>
     <style>
-        @page { margin: 14mm 10mm 15mm; }
+        @page { margin: 14mm 12mm 15mm; }
         * { box-sizing: border-box; }
         body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: 8px; line-height: 1.35; }
         h1, h2, h3, p { margin: 0; }
@@ -68,35 +68,37 @@
     </table>
 
     @foreach ($template as $group)
-        <section class="section">
-            <h3>{{ $group['category'] }}</h3>
-            <table class="data">
-                <thead>
-                    <tr>
-                        <th style="width: 24px;">No.</th>
-                        <th style="width: 92px;">Siswa</th>
-                        <th style="width: 56px;">Presensi</th>
-                        @foreach ($group['items'] as $item)
-                            <th>{{ $item['label'] }}</th>
-                        @endforeach
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($rows as $row)
+        @foreach (collect($group['items'])->chunk(3) as $items)
+            <section class="section">
+                <h3>{{ $group['category'] }}{{ $loop->first ? '' : ' - lanjutan' }}</h3>
+                <table class="data">
+                    <thead>
                         <tr>
-                            <td>{{ $loop->iteration }}</td>
-                            <td class="student"><strong>{{ $row['student']->name }}</strong><br><span class="muted">{{ $row['student']->nis }}</span></td>
-                            <td class="status">{{ $row['attendance'] }}@if ($row['is_late'])<span class="late">Terlambat</span>@endif</td>
-                            @foreach ($group['items'] as $item)
-                                <td class="{{ $row['checks'][$item['key']] ?? false ? 'done' : 'pending' }}">
-                                    {{ $row['checks'][$item['key']] ?? false ? 'Ya' : '-' }}
-                                </td>
+                            <th style="width: 22px;">No.</th>
+                            <th style="width: 108px;">Siswa</th>
+                            <th style="width: 64px;">Presensi</th>
+                            @foreach ($items as $item)
+                                <th>{{ $item['label'] }}</th>
                             @endforeach
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </section>
+                    </thead>
+                    <tbody>
+                        @foreach ($rows as $row)
+                            <tr>
+                                <td>{{ $loop->iteration }}</td>
+                                <td class="student"><strong>{{ $row['student']->name }}</strong><br><span class="muted">{{ $row['student']->nis }}</span></td>
+                                <td class="status">{{ $row['attendance'] }}@if ($row['is_late'])<span class="late">Terlambat</span>@endif</td>
+                                @foreach ($items as $item)
+                                    <td class="{{ $row['checks'][$item['key']] ?? false ? 'done' : 'pending' }}">
+                                        {{ $row['checks'][$item['key']] ?? false ? 'Ya' : '-' }}
+                                    </td>
+                                @endforeach
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </section>
+        @endforeach
     @endforeach
 
     <section class="section">

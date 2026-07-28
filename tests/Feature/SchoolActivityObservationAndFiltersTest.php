@@ -108,4 +108,26 @@ class SchoolActivityObservationAndFiltersTest extends TestCase
             ->assertTableFilterVisible('class_id')
             ->assertTableFilterExists('activity_date');
     }
+
+    public function test_parent_school_reports_show_a_child_picker_only_for_multiple_children(): void
+    {
+        $parent = User::role('orang_tua')->firstOrFail();
+
+        $this->actingAs($parent);
+
+        $singleChildTable = Livewire::test(ListSchoolActivities::class)->instance()->getTable();
+        $this->assertCount(0, $singleChildTable->getFilters());
+
+        $firstChild = $parent->accessibleStudents()->with('class')->firstOrFail();
+        Student::create([
+            'class_id' => $firstChild->class_id,
+            'parent_id' => $firstChild->parent_id,
+            'nis' => 'SDD-FILTER-ANAK-KEDUA-001',
+            'name' => 'Anak Kedua Untuk Pilihan Laporan',
+            'status' => 'active',
+        ]);
+
+        $multipleChildrenTable = Livewire::test(ListSchoolActivities::class)->instance()->getTable();
+        $this->assertSame(['student_id'], array_keys($multipleChildrenTable->getFilters()));
+    }
 }

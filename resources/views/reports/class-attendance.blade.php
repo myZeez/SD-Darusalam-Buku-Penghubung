@@ -4,33 +4,32 @@
     <meta charset="utf-8">
     <title>Presensi {{ $schoolClass->name }}</title>
     <style>
-        @page { margin: 18mm 14mm 16mm; }
+        @page { margin: 14mm 12mm 15mm; }
         * { box-sizing: border-box; }
-        body { color: #111827; font-family: DejaVu Sans, sans-serif; font-size: 9px; line-height: 1.4; }
+        body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: 8px; line-height: 1.35; }
         h1, h2, p { margin: 0; }
-        .header { border-bottom: 2px solid #111827; margin-bottom: 10px; padding-bottom: 7px; text-align: center; }
+        .header { border-bottom: 2px solid #2563eb; margin-bottom: 9px; padding-bottom: 7px; text-align: center; }
         .header h1 { font-size: 16px; }
-        .header h2 { font-size: 11px; margin-top: 2px; }
-        .header p { color: #4b5563; margin-top: 2px; }
-        .identity { border: 1px solid #d1d5db; border-collapse: collapse; margin-bottom: 9px; width: 100%; }
-        .identity td { padding: 4px 6px; width: 33.333%; }
-        .identity strong { display: inline-block; min-width: 76px; }
-        .summary { border: 1px solid #d1d5db; border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; width: 100%; }
-        .summary td { border-right: 1px solid #d1d5db; padding: 5px; text-align: center; }
-        .summary td:last-child { border-right: 0; }
+        .header h2 { color: #2563eb; font-size: 11px; margin-top: 2px; }
+        .header p { color: #667085; margin-top: 2px; }
+        .identity { border-collapse: collapse; margin-bottom: 9px; width: 100%; }
+        .identity td { border: 1px solid #d7deea; padding: 4px 6px; width: 50%; }
+        .identity strong { color: #475467; display: block; font-size: 7px; margin-bottom: 1px; }
+        .summary { border-collapse: collapse; margin-bottom: 10px; table-layout: fixed; width: 100%; }
+        .summary td { background: #eff6ff; border: 1px solid #cfe0ff; padding: 5px; text-align: center; }
         .summary span { color: #6b7280; display: block; font-size: 7px; }
-        .summary strong { display: block; font-size: 12px; }
-        .data { border-collapse: collapse; width: 100%; }
-        .data th, .data td { border: 1px solid #d1d5db; padding: 4px 5px; text-align: left; vertical-align: top; }
-        .data th { background: #f3f4f6; font-size: 8px; }
+        .summary strong { color: #1d4ed8; display: block; font-size: 12px; }
+        .data { border-collapse: collapse; table-layout: fixed; width: 100%; }
+        .data th, .data td { border: 1px solid #d7deea; padding: 4px; text-align: left; vertical-align: top; }
+        .data th { background: #f2f4f7; color: #344054; font-size: 7px; }
         .center { text-align: center !important; }
         .status { font-family: DejaVu Sans Mono, monospace; font-weight: bold; }
-        .muted { color: #6b7280; }
+        .muted { color: #667085; }
         .signatures { border-collapse: collapse; margin-top: 22px; page-break-inside: avoid; table-layout: fixed; width: 100%; }
         .signatures td { padding: 0 16px; text-align: center; width: 50%; }
         .signature-space { height: 42px; }
-        .signature-name { border-bottom: 1px solid #111827; display: inline-block; font-weight: bold; min-width: 160px; padding-bottom: 2px; }
-        .footer { bottom: -10mm; color: #6b7280; font-size: 7px; left: 0; position: fixed; right: 0; text-align: center; }
+        .signature-name { border-bottom: 1px solid #172033; display: inline-block; font-weight: bold; min-width: 160px; padding-bottom: 2px; }
+        .footer { bottom: -10mm; color: #667085; font-size: 7px; left: 0; position: fixed; right: 0; text-align: center; }
     </style>
 </head>
 <body>
@@ -59,10 +58,12 @@
 
     <table class="identity">
         <tr>
-            <td><strong>Kelas</strong> {{ $schoolClass->name }}</td>
-            <td><strong>Wali Kelas</strong> {{ $schoolClass->teacher?->user?->name ?? '-' }}</td>
-            <td><strong>Ruang</strong> {{ $schoolClass->room ?: '-' }}</td>
-            <td><strong>Jumlah Siswa</strong> {{ $schoolClass->students->count() }}</td>
+            <td><strong>KELAS</strong>{{ $schoolClass->name }}</td>
+            <td><strong>WALI KELAS</strong>{{ $schoolClass->teacher?->user?->name ?? 'Belum ditentukan' }}</td>
+        </tr>
+        <tr>
+            <td><strong>RUANG</strong>{{ $schoolClass->room ?: '-' }}</td>
+            <td><strong>JUMLAH SISWA</strong>{{ $schoolClass->students->count() }} siswa aktif</td>
         </tr>
     </table>
 
@@ -81,12 +82,9 @@
         <thead>
             <tr>
                 <th class="center" style="width: 28px;">No.</th>
-                <th style="width: 92px;">NIS</th>
-                <th>Nama Siswa</th>
-                <th class="center" style="width: 42px;">H/S/I/A</th>
-                <th style="width: 64px;">Jam Datang</th>
-                <th style="width: 68px;">Ketepatan</th>
-                <th style="width: 72px;">Sumber</th>
+                <th style="width: 120px;">Siswa</th>
+                <th class="center" style="width: 46px;">H/S/I/A</th>
+                <th style="width: 122px;">Rincian Kehadiran</th>
                 <th>Catatan</th>
             </tr>
         </thead>
@@ -95,11 +93,11 @@
                 @php($record = $records->get($student->id))
                 <tr>
                     <td class="center">{{ $loop->iteration }}</td>
-                    <td>{{ $student->nis }}</td>
-                    <td>{{ $student->name }}</td>
+                    <td><strong>{{ $student->name }}</strong><br><span class="muted">{{ $student->nis }}</span></td>
                     <td class="center status">{{ $record ? ($statusLabels[$record->status] ?? '-') : '-' }}</td>
-                    <td>{{ $record?->arrival?->arrival_time ? substr($record->arrival->arrival_time, 0, 5) : '-' }}</td>
                     <td>
+                        <strong>Jam:</strong> {{ $record?->arrival?->arrival_time ? substr($record->arrival->arrival_time, 0, 5) : '-' }}<br>
+                        <strong>Status:</strong>
                         @if ($record?->is_late)
                             Terlambat
                         @elseif ($record?->arrival)
@@ -107,8 +105,8 @@
                         @else
                             -
                         @endif
+                        <br><strong>Sumber:</strong> {{ $record ? ($sourceLabels[$record->source] ?? $record->source) : '-' }}
                     </td>
-                    <td>{{ $record ? ($sourceLabels[$record->source] ?? $record->source) : '-' }}</td>
                     <td>{{ $record?->notes ?: '-' }}</td>
                 </tr>
             @endforeach

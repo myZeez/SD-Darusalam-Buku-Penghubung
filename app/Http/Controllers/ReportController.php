@@ -102,7 +102,7 @@ class ReportController extends Controller
             'settings' => SchoolSetting::current(),
             'summary' => $summary,
         ])
-            ->setPaper('a4', 'landscape')
+            ->setPaper('a4')
             ->download('presensi-'.Str::slug($schoolClass->name).'-'.$validated['date'].'.pdf');
     }
 
@@ -170,7 +170,7 @@ class ReportController extends Controller
             'settings' => SchoolSetting::current(),
             'template' => $template,
         ])
-            ->setPaper('a4', 'landscape')
+            ->setPaper('a4')
             ->download('laporan-sekolah-'.Str::slug($schoolClass->name).'-'.$date.'.pdf');
     }
 
@@ -247,7 +247,7 @@ class ReportController extends Controller
             'student' => $student,
             'template' => $template,
         ])
-            ->setPaper('a4', 'landscape')
+            ->setPaper('a4')
             ->download($filename);
     }
 }

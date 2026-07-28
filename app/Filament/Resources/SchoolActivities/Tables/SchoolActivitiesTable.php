@@ -20,6 +20,12 @@ class SchoolActivitiesTable
 {
     public static function configure(Table $table): Table
     {
+        $user = auth()->user();
+        $isParent = $user?->hasRole('orang_tua') ?? false;
+        $filters = $isParent
+            ? self::parentFilters($user?->accessibleStudents()->count() ?? 0)
+            : self::staffFilters();
+
         return $table
             ->stackedOnMobile(fn (): bool => auth()->user()?->hasAnyRole(['orang_tua', 'siswa']) ?? false)
             ->columns([
@@ -60,48 +66,7 @@ class SchoolActivitiesTable
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->filters([
-                SelectFilter::make('student_id')
-                    ->label('Siswa')
-                    ->options(fn (): array => auth()->user()?->accessibleStudents()
-                        ->orderBy('name')
-                        ->pluck('name', 'id')
-                        ->all() ?? [])
-                    ->searchable()
-                    ->preload(),
-                Filter::make('class_id')
-                    ->label('Kelas')
-                    ->form([
-                        Select::make('class_id')
-                            ->label('Kelas')
-                            ->options(fn (): array => auth()->user()?->accessibleClasses()
-                                ->orderBy('name')
-                                ->pluck('name', 'id')
-                                ->all() ?? [])
-                            ->searchable()
-                            ->preload(),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['class_id'] ?? null, fn (Builder $query, int $classId): Builder => $query
-                            ->whereHas('student', fn (Builder $studentQuery): Builder => $studentQuery->where('class_id', $classId)))),
-                SelectFilter::make('attendance')
-                    ->label('Kehadiran')
-                    ->options([
-                        'present' => 'Hadir',
-                        'sick' => 'Sakit',
-                        'permission' => 'Izin',
-                        'absent' => 'Alpa',
-                    ]),
-                Filter::make('activity_date')
-                    ->label('Rentang Tanggal')
-                    ->form([
-                        DatePicker::make('from')->label('Dari Tanggal'),
-                        DatePicker::make('until')->label('Sampai Tanggal'),
-                    ])
-                    ->query(fn (Builder $query, array $data): Builder => $query
-                        ->when($data['from'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('activity_date', '>=', $date))
-                        ->when($data['until'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('activity_date', '<=', $date))),
-            ])
+            ->filters($filters)
             ->defaultSort('activity_date', 'desc')
             ->recordActions([
                 ViewAction::make(),
@@ -115,6 +80,72 @@ class SchoolActivitiesTable
                 ]),
             ])
             ->emptyStateHeading('Belum ada laporan sekolah')
-            ->emptyStateDescription('Gunakan tombol Buat Laporan Harian untuk mencatat perkembangan siswa.');
+            ->emptyStateDescription('Laporan sekolah terbaru akan muncul di halaman ini.');
+    }
+
+    /** @return array<int, SelectFilter> */
+    private static function parentFilters(int $studentCount): array
+    {
+        if ($studentCount <= 1) {
+            return [];
+        }
+
+        return [
+            SelectFilter::make('student_id')
+                ->label('Anak')
+                ->options(fn (): array => auth()->user()?->accessibleStudents()
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
+                    ->all() ?? [])
+                ->searchable()
+                ->preload(),
+        ];
+    }
+
+    /** @return array<int, Filter|SelectFilter> */
+    private static function staffFilters(): array
+    {
+        return [
+            SelectFilter::make('student_id')
+                ->label('Siswa')
+                ->options(fn (): array => auth()->user()?->accessibleStudents()
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
+                    ->all() ?? [])
+                ->searchable()
+                ->preload(),
+            Filter::make('class_id')
+                ->label('Kelas')
+                ->form([
+                    Select::make('class_id')
+                        ->label('Kelas')
+                        ->options(fn (): array => auth()->user()?->accessibleClasses()
+                            ->orderBy('name')
+                            ->pluck('name', 'id')
+                            ->all() ?? [])
+                        ->searchable()
+                        ->preload(),
+                ])
+                ->query(fn (Builder $query, array $data): Builder => $query
+                    ->when($data['class_id'] ?? null, fn (Builder $query, int $classId): Builder => $query
+                        ->whereHas('student', fn (Builder $studentQuery): Builder => $studentQuery->where('class_id', $classId)))),
+            SelectFilter::make('attendance')
+                ->label('Kehadiran')
+                ->options([
+                    'present' => 'Hadir',
+                    'sick' => 'Sakit',
+                    'permission' => 'Izin',
+                    'absent' => 'Alpa',
+                ]),
+            Filter::make('activity_date')
+                ->label('Rentang Tanggal')
+                ->form([
+                    DatePicker::make('from')->label('Dari Tanggal'),
+                    DatePicker::make('until')->label('Sampai Tanggal'),
+                ])
+                ->query(fn (Builder $query, array $data): Builder => $query
+                    ->when($data['from'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('activity_date', '>=', $date))
+                    ->when($data['until'] ?? null, fn (Builder $query, string $date): Builder => $query->whereDate('activity_date', '<=', $date))),
+        ];
     }
 }

@@ -4,23 +4,22 @@
     <meta charset="utf-8">
     <title>Laporan Siswa</title>
     <style>
-        @page { margin: 18mm 15mm 16mm; }
+        @page { margin: 14mm 12mm 15mm; }
         * { box-sizing: border-box; }
-        body { color: #111827; font-family: DejaVu Sans, sans-serif; font-size: 9px; line-height: 1.45; }
+        body { color: #172033; font-family: DejaVu Sans, sans-serif; font-size: 8px; line-height: 1.4; }
         h1, h2, h3, p { margin: 0; }
         .page-break { page-break-before: always; }
-        .document-header { border-bottom: 2px solid #111827; margin-bottom: 12px; padding-bottom: 8px; text-align: center; }
+        .document-header { border-bottom: 2px solid #2563eb; margin-bottom: 10px; padding-bottom: 7px; text-align: center; }
         .document-header h1 { font-size: 16px; letter-spacing: 0; }
-        .document-header h2 { font-size: 11px; margin-top: 2px; }
-        .document-header p { color: #4b5563; margin-top: 2px; }
-        .identity { border: 1px solid #d1d5db; border-collapse: collapse; margin-bottom: 10px; width: 100%; }
-        .identity td { padding: 5px 7px; vertical-align: top; width: 50%; }
-        .identity strong { display: inline-block; min-width: 78px; }
-        .summary { border: 1px solid #d1d5db; border-collapse: collapse; margin-bottom: 14px; table-layout: fixed; width: 100%; }
-        .summary td { border-right: 1px solid #d1d5db; padding: 6px; text-align: center; }
-        .summary td:last-child { border-right: 0; }
+        .document-header h2 { color: #2563eb; font-size: 11px; margin-top: 2px; }
+        .document-header p { color: #667085; margin-top: 2px; }
+        .identity { border-collapse: collapse; margin-bottom: 10px; width: 100%; }
+        .identity td { border: 1px solid #d7deea; padding: 5px 7px; vertical-align: top; width: 50%; }
+        .identity strong { color: #475467; display: inline-block; min-width: 78px; }
+        .summary { border-collapse: collapse; margin-bottom: 12px; table-layout: fixed; width: 100%; }
+        .summary td { background: #eff6ff; border: 1px solid #cfe0ff; padding: 6px; text-align: center; }
         .summary span { color: #6b7280; display: block; font-size: 7px; }
-        .summary strong { display: block; font-size: 12px; margin-top: 1px; }
+        .summary strong { color: #1d4ed8; display: block; font-size: 12px; margin-top: 1px; }
         .aspects { border: 1px solid #d1d5db; border-collapse: collapse; table-layout: fixed; width: 100%; }
         .aspects td { border-right: 1px solid #d1d5db; padding: 5px; vertical-align: top; width: 25%; }
         .aspects td:last-child { border-right: 0; }
