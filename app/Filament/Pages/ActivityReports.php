@@ -53,6 +53,16 @@ class ActivityReports extends Page
         return static::getNavigationLabel();
     }
 
+    public function canViewScores(): bool
+    {
+        return ! (auth()->user()?->hasRole('orang_tua') ?? false);
+    }
+
+    public function canExportPdf(): bool
+    {
+        return ! (auth()->user()?->hasRole('orang_tua') ?? false);
+    }
+
     public function mount(): void
     {
         $user = auth()->user();

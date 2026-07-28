@@ -25,7 +25,7 @@ class ReportController extends Controller
 
         abort_unless(
             ($user?->can('export reports') ?? false)
-            && (($user?->isAdmin() ?? false) || $user?->hasAnyRole(['guru', 'orang_tua'])),
+            && (($user?->isAdmin() ?? false) || $user?->hasRole('guru')),
             403,
         );
 
@@ -181,7 +181,7 @@ class ReportController extends Controller
         abort_unless(
             ($user?->can('view home activities') ?? false)
             && ($user?->can('export reports') ?? false)
-            && ($user?->hasAnyRole(['admin', 'guru', 'orang_tua']) ?? false),
+            && (($user?->isAdmin() ?? false) || $user?->hasRole('guru')),
             403,
         );
 

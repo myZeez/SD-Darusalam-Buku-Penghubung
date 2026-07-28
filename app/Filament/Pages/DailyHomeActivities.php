@@ -193,6 +193,16 @@ class DailyHomeActivities extends Page
         return auth()->user()?->hasRole('orang_tua') ?? false;
     }
 
+    public function canViewScores(): bool
+    {
+        return auth()->user()?->hasRole('guru') ?? false;
+    }
+
+    public function canExportPdf(): bool
+    {
+        return $this->canViewScores();
+    }
+
     /** @return array<int, array<string, mixed>> */
     public function template(): array
     {
@@ -234,11 +244,7 @@ class DailyHomeActivities extends Page
     /** @return array<int, array<string, mixed>> */
     public function monthlyScores(): array
     {
-        if ($this->isParent() && ! $this->selectedStudentId) {
-            return [];
-        }
-
-        if (! $this->isParent() && ! $this->selectedClassId) {
+        if (! $this->canViewScores() || ! $this->selectedClassId) {
             return [];
         }
 
@@ -280,9 +286,10 @@ class DailyHomeActivities extends Page
 
     public function dailyReportUrl(): string
     {
+        abort_unless($this->canExportPdf(), 403);
+
         return route('reports.daily-home-activities', [
-            'class_id' => $this->isParent() ? null : $this->selectedClassId,
-            'student_id' => $this->isParent() ? $this->selectedStudentId : null,
+            'class_id' => $this->selectedClassId,
             'date' => $this->selectedDate,
         ]);
     }

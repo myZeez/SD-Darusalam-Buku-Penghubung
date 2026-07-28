@@ -1,6 +1,7 @@
 <x-filament-panels::page>
     @php
         $report = $this->reportData();
+        $canViewScores = $this->canViewScores();
         $attendanceLabels = [
             'present' => 'Hadir',
             'sick' => 'Sakit',
@@ -12,21 +13,23 @@
     <div class="activity-report-page">
         {{ $this->form }}
 
-        <section class="activity-report-page__download" aria-labelledby="activity-report-download-title">
-            <x-filament::icon icon="gmdi-picture-as-pdf-o" />
-            <div>
-                <h2 id="activity-report-download-title">Unduh Laporan PDF</h2>
-                <p>PDF memuat presensi, aktivitas sekolah–rumah, empat aspek perkembangan, serta kolom tanda tangan guru dan orang tua.</p>
-            </div>
-            <x-filament::button
-                tag="a"
-                :href="$this->reportUrl()"
-                target="_blank"
-                icon="gmdi-download-o"
-            >
-                Unduh PDF
-            </x-filament::button>
-        </section>
+        @if ($this->canExportPdf())
+            <section class="activity-report-page__download" aria-labelledby="activity-report-download-title">
+                <x-filament::icon icon="gmdi-picture-as-pdf-o" />
+                <div>
+                    <h2 id="activity-report-download-title">Unduh Laporan PDF</h2>
+                    <p>PDF memuat presensi, aktivitas sekolah–rumah, empat aspek perkembangan, serta kolom tanda tangan guru dan orang tua.</p>
+                </div>
+                <x-filament::button
+                    tag="a"
+                    :href="$this->reportUrl()"
+                    target="_blank"
+                    icon="gmdi-download-o"
+                >
+                    Unduh PDF
+                </x-filament::button>
+            </section>
+        @endif
 
         <section class="student-report-summary" aria-label="Ringkasan laporan">
             @foreach ([
@@ -66,36 +69,38 @@
                         <span>{{ $studentReport['summary']['attendance'] }} hari tercatat</span>
                     </header>
 
-                    <section class="student-report__section">
-                        <div class="student-report__section-heading">
-                            <x-filament::icon icon="gmdi-assessment-o" />
-                            <div>
-                                <h3>Penilaian Buku Penghubung</h3>
-                                <p>Setiap checklist bernilai 5 poin. Nilai A-D dihitung dari akumulasi periode yang dipilih; gunakan satu bulan untuk nilai bulanan final.</p>
+                    @if ($canViewScores)
+                        <section class="student-report__section">
+                            <div class="student-report__section-heading">
+                                <x-filament::icon icon="gmdi-assessment-o" />
+                                <div>
+                                    <h3>Penilaian Buku Penghubung</h3>
+                                    <p>Setiap checklist bernilai 5 poin. Nilai A-D dihitung dari akumulasi periode yang dipilih; gunakan satu bulan untuk nilai bulanan final.</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="student-report__score-groups">
-                            @foreach ([
-                                ['label' => 'Aktivitas Sekolah', 'scores' => $studentReport['summary']['school_activity_scores']],
-                                ['label' => 'Aktivitas Rumah', 'scores' => $studentReport['summary']['home_activity_scores']],
-                            ] as $scoreGroup)
-                                <section>
-                                    <h4>{{ $scoreGroup['label'] }}</h4>
-                                    @foreach ($scoreGroup['scores'] as $score)
-                                        <div class="student-report__score">
-                                            <div>
-                                                <strong>{{ $score['category'] }}</strong>
-                                                <span>Nilai {{ $score['rating'] }} - {{ $score['rating_label'] }}</span>
-                                                <em>{{ $score['percentage'] }}%</em>
+                            <div class="student-report__score-groups">
+                                @foreach ([
+                                    ['label' => 'Aktivitas Sekolah', 'scores' => $studentReport['summary']['school_activity_scores']],
+                                    ['label' => 'Aktivitas Rumah', 'scores' => $studentReport['summary']['home_activity_scores']],
+                                ] as $scoreGroup)
+                                    <section>
+                                        <h4>{{ $scoreGroup['label'] }}</h4>
+                                        @foreach ($scoreGroup['scores'] as $score)
+                                            <div class="student-report__score">
+                                                <div>
+                                                    <strong>{{ $score['category'] }}</strong>
+                                                    <span>Nilai {{ $score['rating'] }} - {{ $score['rating_label'] }}</span>
+                                                    <em>{{ $score['percentage'] }}%</em>
+                                                </div>
+                                                <i><b style="width: {{ $score['percentage'] }}%"></b></i>
+                                                <small>Skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
                                             </div>
-                                            <i><b style="width: {{ $score['percentage'] }}%"></b></i>
-                                            <small>Skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
-                                        </div>
-                                    @endforeach
-                                </section>
-                            @endforeach
-                        </div>
-                    </section>
+                                        @endforeach
+                                    </section>
+                                @endforeach
+                            </div>
+                        </section>
+                    @endif
 
                     <section class="student-report__section">
                         <div class="student-report__section-heading">

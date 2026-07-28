@@ -291,7 +291,7 @@ class FlexibleActivityAndStudentReportTest extends TestCase
             ->assertHeader('content-type', 'application/pdf');
     }
 
-    public function test_parent_can_export_only_their_childs_daily_home_activity_as_pdf(): void
+    public function test_parent_cannot_export_daily_home_activity_as_pdf(): void
     {
         $parent = User::role('orang_tua')->firstOrFail();
         $student = $parent->accessibleStudents()->with('class')->firstOrFail();
@@ -328,13 +328,12 @@ class FlexibleActivityAndStudentReportTest extends TestCase
                 'student_id' => $student->id,
                 'date' => today()->toDateString(),
             ]))
-            ->assertOk()
-            ->assertHeader('content-type', 'application/pdf');
+            ->assertForbidden();
 
         $this->get(route('reports.daily-home-activities', [
             'student_id' => $otherStudent->id,
             'date' => today()->toDateString(),
-        ]))->assertNotFound();
+        ]))->assertForbidden();
     }
 
     public function test_teacher_can_export_the_daily_home_activity_recap_for_a_managed_class_as_pdf(): void

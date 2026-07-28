@@ -6,9 +6,6 @@
                 <h2 id="parent-overview-heading">Ringkasan keluarga</h2>
             </div>
 
-            <x-filament::button tag="a" :href="$reportUrl" icon="gmdi-picture-as-pdf-o" size="sm">
-                Laporan PDF
-            </x-filament::button>
         </header>
 
         <div class="parent-overview__body">

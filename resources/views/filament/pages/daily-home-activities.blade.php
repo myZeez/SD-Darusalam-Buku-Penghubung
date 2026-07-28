@@ -1,7 +1,8 @@
 <x-filament-panels::page>
     @php
         $template = $this->template();
-        $monthlyScores = $this->monthlyScores();
+        $canViewScores = $this->canViewScores();
+        $monthlyScores = $canViewScores ? $this->monthlyScores() : [];
         $completion = $this->completion();
         $monitoringSummary = $this->monitoringSummary();
     @endphp
@@ -45,23 +46,23 @@
 
             <div class="daily-activity__toolbar-copy">
                 <span>{{ $this->formattedDate() }}</span>
-                @if ($this->isParent())
-                    <strong>{{ $completion['checked'] }} dari {{ $completion['total'] }} dilakukan</strong>
-                @else
+                @if ($canViewScores)
                     <strong>{{ $monitoringSummary['submitted'] }} dari {{ $monitoringSummary['total'] }} sudah mengisi</strong>
                 @endif
             </div>
 
-            <x-filament::button
-                tag="a"
-                :href="$this->dailyReportUrl()"
-                target="_blank"
-                color="gray"
-                icon="gmdi-picture-as-pdf-o"
-                :disabled="$this->isParent() ? ! $selectedStudentId : ! $selectedClassId"
-            >
-                Export PDF
-            </x-filament::button>
+            @if ($this->canExportPdf())
+                <x-filament::button
+                    tag="a"
+                    :href="$this->dailyReportUrl()"
+                    target="_blank"
+                    color="gray"
+                    icon="gmdi-picture-as-pdf-o"
+                    :disabled="! $selectedClassId"
+                >
+                    Export PDF
+                </x-filament::button>
+            @endif
 
             @if ($this->isParent())
                 <x-filament::button
@@ -76,20 +77,22 @@
             @endif
         </section>
 
-        <section class="daily-activity__scores" aria-label="Rekap nilai aktivitas rumah bulan ini">
-            @foreach ($monthlyScores as $score)
-                <div class="daily-activity__score daily-activity__score--{{ $score['color'] }}">
-                    <div>
-                        <span>{{ $score['category'] }}</span>
-                        <strong>Nilai {{ $score['rating'] }}</strong>
+        @if ($canViewScores)
+            <section class="daily-activity__scores" aria-label="Rekap nilai aktivitas rumah bulan ini">
+                @foreach ($monthlyScores as $score)
+                    <div class="daily-activity__score daily-activity__score--{{ $score['color'] }}">
+                        <div>
+                            <span>{{ $score['category'] }}</span>
+                            <strong>Nilai {{ $score['rating'] }}</strong>
+                        </div>
+                        <div class="daily-activity__progress" aria-label="{{ $score['percentage'] }} persen">
+                            <i style="width: {{ $score['percentage'] }}%"></i>
+                        </div>
+                        <small>{{ $this->monthlyScorePeriod() }} · {{ $score['rating_label'] }} · {{ $score['percentage'] }}% · skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
                     </div>
-                    <div class="daily-activity__progress" aria-label="{{ $score['percentage'] }} persen">
-                        <i style="width: {{ $score['percentage'] }}%"></i>
-                    </div>
-                    <small>{{ $this->monthlyScorePeriod() }} · {{ $score['rating_label'] }} · {{ $score['percentage'] }}% · skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
-                </div>
-            @endforeach
-        </section>
+                @endforeach
+            </section>
+        @endif
 
         @if ($this->isParent())
             <section class="daily-activity__workspace">
@@ -116,7 +119,6 @@
                             <fieldset>
                                 <legend>
                                     <span>{{ $group['category'] }}</span>
-                                    <small>{{ collect($group['items'])->filter(fn (array $item): bool => $checks[$item['key']] ?? false)->count() }}/{{ count($group['items']) }}</small>
                                 </legend>
 
                                 <div>

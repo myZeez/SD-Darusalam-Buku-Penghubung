@@ -2,7 +2,6 @@
 
 namespace App\Filament\Widgets;
 
-use App\Filament\Pages\ActivityReports;
 use App\Filament\Resources\ParentProfiles\ParentProfileResource;
 use App\Models\HomeActivity;
 use App\Models\SchoolActivity;
@@ -58,7 +57,6 @@ class ParentDashboardOverview extends Widget
             'profileName' => $user?->name ?? 'Orang Tua/Wali',
             'profilePhone' => $profile?->phone ?: $user?->phone,
             'profileUrl' => ParentProfileResource::getNavigationUrl(),
-            'reportUrl' => ActivityReports::getUrl(),
             'schoolActivityCount' => $schoolActivities->count(),
             'homeActivityCount' => $homeActivities->count(),
             'developmentAspects' => app(DevelopmentAspectService::class)->summarize($schoolActivities, $homeActivities),

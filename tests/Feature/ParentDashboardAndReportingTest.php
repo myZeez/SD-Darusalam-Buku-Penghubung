@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Filament\Pages\ActivityReports;
+use App\Filament\Pages\DailyHomeActivities;
 use App\Models\Schedule;
 use App\Models\Student;
 use App\Models\User;
@@ -43,12 +44,12 @@ class ParentDashboardAndReportingTest extends TestCase
             ->assertSee('Kognitif dan Akademik')
             ->assertSee('Sosial Emosional dan Karakter')
             ->assertSee('Fisik Motorik dan Kemandirian')
-            ->assertSee('Laporan PDF')
+            ->assertDontSee('Laporan PDF')
             ->assertSee('Profil')
             ->assertSee('Laporan');
     }
 
-    public function test_parent_can_download_only_their_own_childs_pdf_report(): void
+    public function test_parent_can_view_reports_without_scores_or_pdf_downloads(): void
     {
         $parent = User::role('orang_tua')->firstOrFail();
         $student = $parent->accessibleStudents()->firstOrFail();
@@ -65,10 +66,14 @@ class ParentDashboardAndReportingTest extends TestCase
         $this->get(ActivityReports::getUrl())
             ->assertOk()
             ->assertSee('Laporan Anak')
-            ->assertSee('Unduh PDF');
-        $this->get(route('reports.activity-summary', ['student_id' => $student->id]))
+            ->assertDontSee('Unduh PDF')
+            ->assertDontSee('Penilaian Buku Penghubung');
+        $this->get(DailyHomeActivities::getUrl())
             ->assertOk()
-            ->assertHeader('content-type', 'application/pdf');
+            ->assertDontSee('Export PDF')
+            ->assertDontSee('Rekap nilai aktivitas rumah');
+        $this->get(route('reports.activity-summary', ['student_id' => $student->id]))
+            ->assertForbidden();
         $this->get(route('reports.activity-summary', ['student_id' => $otherStudent->id]))
             ->assertForbidden();
     }
