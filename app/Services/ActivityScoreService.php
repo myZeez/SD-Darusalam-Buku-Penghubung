@@ -11,10 +11,12 @@ use Illuminate\Support\Collection;
 
 class ActivityScoreService
 {
+    public const POINTS_PER_ACTIVITY = 5;
+
     /**
      * @param  Collection<int, SchoolActivity|HomeActivity>  $records
      * @param  array<int, array<string, mixed>>  $template
-     * @return array<int, array{category: string, checked: int, possible: int, score: int, maximum_score: int, percentage: int, rating: string, color: string}>
+     * @return array<int, array{category: string, checked: int, possible: int, score: int, maximum_score: int, percentage: int, rating: string, rating_label: string, color: string}>
      */
     public function summarize(
         Collection $records,
@@ -39,8 +41,8 @@ class ActivityScoreService
             ->map(function (array $group) use ($checkedByCategory, $eligibleDays, $studentCount): array {
                 $checked = (int) ($checkedByCategory[$group['category']] ?? 0);
                 $possible = count($group['items']) * $eligibleDays * $studentCount;
-                $score = $checked * 5;
-                $maximumScore = $possible * 5;
+                $score = $checked * self::POINTS_PER_ACTIVITY;
+                $maximumScore = $possible * self::POINTS_PER_ACTIVITY;
                 $percentage = $maximumScore > 0
                     ? (int) round(($score / $maximumScore) * 100)
                     : 0;
@@ -53,6 +55,7 @@ class ActivityScoreService
                     'maximum_score' => $maximumScore,
                     'percentage' => min(100, $percentage),
                     'rating' => self::rating($percentage),
+                    'rating_label' => self::ratingLabel($percentage),
                     'color' => self::color($percentage),
                 ];
             })
@@ -63,8 +66,19 @@ class ActivityScoreService
     public static function rating(int $percentage): string
     {
         return match (true) {
-            $percentage >= 85 => 'Baik',
-            $percentage >= 70 => 'Cukup Baik',
+            $percentage >= 85 => 'A',
+            $percentage >= 70 => 'B',
+            $percentage >= 55 => 'C',
+            default => 'D',
+        };
+    }
+
+    public static function ratingLabel(int $percentage): string
+    {
+        return match (self::rating($percentage)) {
+            'A' => 'Sangat Baik',
+            'B' => 'Baik',
+            'C' => 'Cukup',
             default => 'Perlu Bimbingan',
         };
     }
@@ -73,7 +87,8 @@ class ActivityScoreService
     {
         return match (true) {
             $percentage >= 85 => 'success',
-            $percentage >= 70 => 'warning',
+            $percentage >= 70 => 'primary',
+            $percentage >= 55 => 'warning',
             default => 'danger',
         };
     }

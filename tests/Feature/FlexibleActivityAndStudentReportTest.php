@@ -137,6 +137,16 @@ class FlexibleActivityAndStudentReportTest extends TestCase
         $this->assertSame($itemCount * 6 * 5, collect($scores)->sum('maximum_score'));
     }
 
+    public function test_activity_score_converts_monthly_percentages_to_a_through_d(): void
+    {
+        $this->assertSame('A', ActivityScoreService::rating(85));
+        $this->assertSame('B', ActivityScoreService::rating(84));
+        $this->assertSame('C', ActivityScoreService::rating(69));
+        $this->assertSame('D', ActivityScoreService::rating(54));
+        $this->assertSame('Sangat Baik', ActivityScoreService::ratingLabel(100));
+        $this->assertSame('Perlu Bimbingan', ActivityScoreService::ratingLabel(0));
+    }
+
     public function test_admin_report_combines_attendance_arrival_and_both_activity_sources_in_pdf(): void
     {
         $admin = User::role('admin')->firstOrFail();

@@ -148,7 +148,7 @@
                                 <th class="number">Skor</th>
                                 <th class="number">Maksimum</th>
                                 <th class="number">Persentase</th>
-                                <th class="number">Predikat</th>
+                                <th class="number">Nilai</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -158,7 +158,7 @@
                                     <td class="number">{{ $score['score'] }}</td>
                                     <td class="number">{{ $score['maximum_score'] }}</td>
                                     <td class="number">{{ $score['percentage'] }}%</td>
-                                    <td class="number">{{ $score['rating'] }}</td>
+                                    <td class="number">{{ $score['rating'] }} - {{ $score['rating_label'] }}</td>
                                 </tr>
                             @endforeach
                         </tbody>

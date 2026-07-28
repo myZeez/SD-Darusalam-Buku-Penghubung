@@ -232,7 +232,7 @@ class DailyHomeActivities extends Page
     }
 
     /** @return array<int, array<string, mixed>> */
-    public function weeklyScores(): array
+    public function monthlyScores(): array
     {
         if ($this->isParent() && ! $this->selectedStudentId) {
             return [];
@@ -243,8 +243,8 @@ class DailyHomeActivities extends Page
         }
 
         $date = CarbonImmutable::parse($this->selectedDate);
-        $from = $date->startOfWeek()->toDateString();
-        $to = $date->endOfWeek()->toDateString();
+        $from = $date->startOfMonth()->toDateString();
+        $to = $date->toDateString();
         $query = HomeActivity::query()->whereBetween('activity_date', [$from, $to]);
         $studentCount = 1;
 
@@ -271,6 +271,11 @@ class DailyHomeActivities extends Page
     public function formattedDate(): string
     {
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d F Y');
+    }
+
+    public function monthlyScorePeriod(): string
+    {
+        return CarbonImmutable::parse($this->selectedDate)->translatedFormat('F Y');
     }
 
     public function dailyReportUrl(): string

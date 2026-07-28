@@ -1,7 +1,7 @@
 <x-filament-panels::page>
     @php
         $template = $this->template();
-        $weeklyScores = $this->weeklyScores();
+        $monthlyScores = $this->monthlyScores();
         $completion = $this->completion();
         $monitoringSummary = $this->monitoringSummary();
     @endphp
@@ -76,17 +76,17 @@
             @endif
         </section>
 
-        <section class="daily-activity__scores" aria-label="Rekap aktivitas rumah minggu ini">
-            @foreach ($weeklyScores as $score)
+        <section class="daily-activity__scores" aria-label="Rekap nilai aktivitas rumah bulan ini">
+            @foreach ($monthlyScores as $score)
                 <div class="daily-activity__score daily-activity__score--{{ $score['color'] }}">
                     <div>
                         <span>{{ $score['category'] }}</span>
-                        <strong>{{ $score['percentage'] }}%</strong>
+                        <strong>Nilai {{ $score['rating'] }}</strong>
                     </div>
                     <div class="daily-activity__progress" aria-label="{{ $score['percentage'] }} persen">
                         <i style="width: {{ $score['percentage'] }}%"></i>
                     </div>
-                    <small>{{ $score['rating'] }} · skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
+                    <small>{{ $this->monthlyScorePeriod() }} · {{ $score['rating_label'] }} · {{ $score['percentage'] }}% · skor {{ $score['score'] }}/{{ $score['maximum_score'] }}</small>
                 </div>
             @endforeach
         </section>

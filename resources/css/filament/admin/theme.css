@@ -5212,6 +5212,7 @@ html[data-simpati-palette='lembut'] {
 }
 
 .daily-activity__score--success .daily-activity__progress i { background: var(--success-600); }
+.daily-activity__score--primary .daily-activity__progress i { background: var(--primary-500); }
 .daily-activity__score--warning .daily-activity__progress i { background: var(--warning-500); }
 .daily-activity__score--danger .daily-activity__progress i { background: var(--danger-500); }
 

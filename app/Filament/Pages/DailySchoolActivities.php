@@ -265,7 +265,7 @@ class DailySchoolActivities extends Page
     }
 
     /** @return array<int, array<string, mixed>> */
-    public function weeklyScores(): array
+    public function monthlyScores(): array
     {
         if (! $this->selectedClassId) {
             return [];
@@ -273,8 +273,8 @@ class DailySchoolActivities extends Page
 
         $class = $this->authorizedClass();
         $selectedDate = CarbonImmutable::parse($this->selectedDate);
-        $from = $selectedDate->startOfWeek()->toDateString();
-        $to = $selectedDate->endOfWeek()->toDateString();
+        $from = $selectedDate->startOfMonth()->toDateString();
+        $to = $selectedDate->toDateString();
         $records = SchoolActivity::query()
             ->whereHas('student', fn ($query) => $query
                 ->where('class_id', $class->id)
@@ -295,6 +295,11 @@ class DailySchoolActivities extends Page
     public function formattedDate(): string
     {
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d F Y');
+    }
+
+    public function monthlyScorePeriod(): string
+    {
+        return CarbonImmutable::parse($this->selectedDate)->translatedFormat('F Y');
     }
 
     public function dailyReportUrl(): string

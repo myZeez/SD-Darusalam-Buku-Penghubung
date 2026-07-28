@@ -70,8 +70,8 @@
                         <div class="student-report__section-heading">
                             <x-filament::icon icon="gmdi-assessment-o" />
                             <div>
-                                <h3>Rekap Buku Penghubung</h3>
-                                <p>Persentase berdasarkan aktivitas tetap dan skor 5 untuk setiap checklist yang dilakukan.</p>
+                                <h3>Penilaian Buku Penghubung</h3>
+                                <p>Setiap checklist bernilai 5 poin. Nilai A-D dihitung dari akumulasi periode yang dipilih; gunakan satu bulan untuk nilai bulanan final.</p>
                             </div>
                         </div>
                         <div class="student-report__score-groups">
@@ -85,7 +85,7 @@
                                         <div class="student-report__score">
                                             <div>
                                                 <strong>{{ $score['category'] }}</strong>
-                                                <span>{{ $score['rating'] }}</span>
+                                                <span>Nilai {{ $score['rating'] }} - {{ $score['rating_label'] }}</span>
                                                 <em>{{ $score['percentage'] }}%</em>
                                             </div>
                                             <i><b style="width: {{ $score['percentage'] }}%"></b></i>
