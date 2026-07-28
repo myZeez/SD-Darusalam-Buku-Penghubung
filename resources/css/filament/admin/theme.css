@@ -158,19 +158,22 @@ html[data-simpati-palette='lembut'] {
 
 @media (max-width: 40rem) {
     .dashboard-welcome {
-        min-height: 0;
-        grid-template-areas:
-            'image'
-            'copy';
+        position: relative;
+        min-height: 30rem;
+        grid-template-areas: 'hero';
         grid-template-columns: minmax(0, 1fr);
-        gap: 1rem;
         padding: 1rem;
+        isolation: isolate;
     }
 
     .dashboard-welcome__copy {
-        grid-area: copy;
+        position: relative;
+        z-index: 1;
+        grid-area: hero;
         max-width: 30rem;
+        align-self: end;
         justify-self: center;
+        padding-bottom: 0.5rem;
         text-align: center;
     }
 
@@ -190,10 +193,14 @@ html[data-simpati-palette='lembut'] {
     }
 
     .dashboard-welcome__image {
-        grid-area: image;
-        width: min(13.5rem, 72vw);
-        max-height: 13rem;
+        z-index: 0;
+        grid-area: hero;
+        width: min(22rem, 96vw);
+        max-height: 22rem;
+        align-self: start;
         justify-self: center;
+        -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 55%, rgb(0 0 0 / 0.65) 72%, transparent 100%);
+        mask-image: linear-gradient(to bottom, #000 0%, #000 55%, rgb(0 0 0 / 0.65) 72%, transparent 100%);
     }
 }
 
