@@ -37,18 +37,18 @@
                 icon="gmdi-save-o"
                 wire:click="saveChecklist"
                 wire:loading.attr="disabled"
-                :disabled="empty($students) || $this->isWeekend()"
+                :disabled="empty($students) || ! $this->isSchoolDay()"
             >
                 Simpan Checklist
             </x-filament::button>
         </section>
 
-        @if ($this->isWeekend())
+        @if (! $this->isSchoolDay())
             <section class="daily-activity__notice daily-activity__notice--warning">
                 <x-filament::icon icon="gmdi-event-busy-o" />
                 <div>
-                    <strong>Aktivitas sekolah tidak dijadwalkan pada akhir pekan.</strong>
-                    <span>Pilih hari Senin sampai Jumat. Aktivitas rumah tetap tersedia setiap hari.</span>
+                    <strong>Aktivitas sekolah tidak dijadwalkan pada hari ini.</strong>
+                    <span>Pilih hari aktif sesuai Pengaturan Sekolah. Aktivitas rumah tetap tersedia setiap hari.</span>
                 </div>
             </section>
         @endif

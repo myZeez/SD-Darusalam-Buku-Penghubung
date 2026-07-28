@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\AttendanceRecord;
 use App\Models\SchoolActivity;
 use App\Models\SchoolClass;
+use App\Models\SchoolSetting;
 use App\Models\Student;
 use App\Services\ActivityScoreService;
 use App\Support\FixedActivityChecklist;
@@ -150,10 +151,10 @@ class DailySchoolActivities extends Page
 
     public function saveChecklist(): void
     {
-        if ($this->isWeekend()) {
+        if (! $this->isSchoolDay()) {
             Notification::make()
-                ->title('Aktivitas sekolah hanya untuk Senin sampai Jumat')
-                ->body('Pilih tanggal sekolah sebelum menyimpan checklist.')
+                ->title('Tanggal ini bukan hari sekolah aktif')
+                ->body('Pilih hari yang sudah diaktifkan Admin pada Pengaturan Sekolah.')
                 ->warning()
                 ->send();
 
@@ -296,9 +297,11 @@ class DailySchoolActivities extends Page
         return CarbonImmutable::parse($this->selectedDate)->translatedFormat('l, d F Y');
     }
 
-    public function isWeekend(): bool
+    public function isSchoolDay(): bool
     {
-        return CarbonImmutable::parse($this->selectedDate)->isWeekend();
+        $dayName = strtolower(CarbonImmutable::parse($this->selectedDate)->format('l'));
+
+        return in_array($dayName, SchoolSetting::current()->school_days ?? [], true);
     }
 
     private function loadChecklist(): void

@@ -14,6 +14,7 @@ use App\Models\SchoolSetting;
 use App\Models\Student;
 use App\Models\StudentArrival;
 use App\Models\User;
+use App\Services\ActivityScoreService;
 use App\Services\StudentReportService;
 use App\Support\SchoolActivityTemplate;
 use Database\Seeders\DatabaseSeeder;
@@ -114,6 +115,26 @@ class FlexibleActivityAndStudentReportTest extends TestCase
 
         $this->assertFalse($lowerGradeLabels->contains('Melaksanakan salat Tahajud'));
         $this->assertTrue($upperGradeLabels->contains('Melaksanakan salat Tahajud'));
+    }
+
+    public function test_school_weekly_score_uses_the_admin_school_days_setting(): void
+    {
+        SchoolSetting::current()->update([
+            'school_days' => ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'],
+        ]);
+
+        $scores = app(ActivityScoreService::class)->summarize(
+            collect(),
+            SchoolActivityTemplate::forGrade(1),
+            '2026-07-27',
+            '2026-08-02',
+            'school',
+        );
+
+        $itemCount = collect(SchoolActivityTemplate::forGrade(1))
+            ->sum(fn (array $group): int => count($group['items']));
+
+        $this->assertSame($itemCount * 6 * 5, collect($scores)->sum('maximum_score'));
     }
 
     public function test_admin_report_combines_attendance_arrival_and_both_activity_sources_in_pdf(): void

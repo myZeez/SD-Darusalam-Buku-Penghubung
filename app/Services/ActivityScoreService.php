@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\HomeActivity;
 use App\Models\SchoolActivity;
+use App\Models\SchoolSetting;
 use App\Support\ActivityGroups;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -81,10 +82,15 @@ class ActivityScoreService
     {
         $start = CarbonImmutable::parse($from)->startOfDay();
         $end = CarbonImmutable::parse($to)->startOfDay();
+        $schoolDays = collect(SchoolSetting::current()->school_days ?? [])
+            ->map(fn (mixed $day): string => strtolower((string) $day))
+            ->all();
         $count = 0;
 
         for ($date = $start; $date->lte($end); $date = $date->addDay()) {
-            if ($scope === 'home' || $date->isWeekday()) {
+            $dayName = strtolower($date->format('l'));
+
+            if ($scope === 'home' || in_array($dayName, $schoolDays, true)) {
                 $count++;
             }
         }
