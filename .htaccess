@@ -1,0 +1,18 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Keep Let's Encrypt / SSL verification files reachable.
+    RewriteRule ^\.well-known(?:/|$) - [L]
+
+    # Never expose hidden files such as .env or .git.
+    RewriteRule (^|/)\.(?!well-known(?:/|$)) - [F,L]
+
+    # The repository is deployed to public_html, while Laravel's web root is
+    # the public directory. Keep the browser URL unchanged and let the
+    # public/.htaccess file handle Laravel's front-controller routing.
+    RewriteCond %{REQUEST_URI} !^/public(?:/|$)
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+# Do not show directory listings if mod_rewrite is unavailable.
+Options -Indexes
